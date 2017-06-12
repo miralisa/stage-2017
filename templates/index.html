@@ -29,26 +29,26 @@
 		<div class="panel panel-info">
 			<div class="panel-heading">
 				<h3 class="panel-title">
-					<a data-toggle="collapse" href="#collapse1">Filtres</a>
+					<a data-toggle="collapse" id="showFiltres" href="#filtres">Filtres</a>
 
 				</h3>
 			</div>
-			<div id="collapse1" class="panel-collapse collapse">
+			<div id="filtres" class="panel-collapse collapse">
 
 				<div class="panel-body">
 
 					<ul class="nav nav-tabs">
-						<li class="active"><a data-toggle="tab" href="#home">Catégories</a></li>
-						<li><a data-toggle="tab" href="#menu1">Villes</a></li>
-						<li><a data-toggle="tab" href="#menu2">Quantum demandé</a></li>
-						<li><a data-toggle="tab" href="#menu3">Quantum resultat</a></li>
-						<li><a data-toggle="tab" href="#menu4">Resultats</a></li>
+						<li class="active"><a data-toggle="tab" id="categories" href="#tabCategories">Catégories</a></li>
+						<li><a data-toggle="tab" id="villes" href="#tabVilles">Villes</a></li>
+						<li><a data-toggle="tab" id="quantumDemande" href="#tabQuantumDemande">Quantum demandé</a></li>
+						<li><a data-toggle="tab" id="quantumResultat" href="#tabQuantumResultat">Quantum resultat</a></li>
+						<li><a data-toggle="tab" id="resultats" href="#tabResultats">Resultats</a></li>
 
 					</ul>
 
 					<div class="tab-content">
-						<div id="home" class="tab-pane fade in active">
-							<div class="btn-group">
+						<div id="tabCategories" class="tab-pane fade in active">
+							<div class="btn-group selection">
 								<button id="selectAll" type="button" class="btn btn-sm btn-info">Tout sélectionner</button>
 								<button  id="deselectAll" type="button" class="btn btn-sm btn-info">Tout désélectionner</button>
 							</div>
@@ -62,8 +62,8 @@
 							</div>
 							<button type="button" id="searchByCategory" class="btn btn-primary search">Rechercher</button>	
 						</div>
-						<div id="menu1" class="tab-pane fade">
-							<div class="btn-group">
+						<div id="tabVilles" class="tab-pane fade">
+							<div class="btn-group selection">
 								<button id="selectAllV" type="button" class="btn btn-sm btn-info">Tout sélectionner</button>
 								<button  id="deselectAllV" type="button" class="btn btn-sm btn-info">Tout désélectionner</button>
 							</div>
@@ -78,7 +78,7 @@
 							<button id="searchByCity" type="button" class="btn btn-primary search">Rechercher</button>
 
 						</div>
-						<div id="menu2" class="tab-pane fade">
+						<div id="tabQuantumDemande" class="tab-pane fade">
 							<br>
 							<form class="form-inline">
 								<div class="form-group">
@@ -102,7 +102,7 @@
 
 						</div>
 
-						<div id="menu3" class="tab-pane fade">
+						<div id="tabQuantumResultat" class="tab-pane fade">
 							<br>
 							<form class="form-inline">
 								<div class="form-group">
@@ -124,14 +124,14 @@
 								<button type="submit" class="btn btn-primary">Rechercher</button>
 							</form>
 						</div>	
-						<div id="menu4" class="tab-pane fade">
+						<div id="tabResultats" class="tab-pane fade">
 							<br>
 							<div class="resultats">
 								<div class="resultats checkbox">
-									<label><input type="checkbox" value="accepte">accepte</label>
+									<label><input type="checkbox" value="accepte">accepté</label>
 								</div>
 								<div class="resultats checkbox">
-									<label><input type="checkbox" value="rejette">rejette</label>
+									<label><input type="checkbox" value="rejette">rejetté</label>
 								</div>
 							</div>
 							<button id="searchByResultat" type="button" class="btn btn-primary">Rechercher</button>
@@ -143,10 +143,49 @@
 		</div>
 	</div>
 
-	<br>
-	<p></p>
+	
+	<div class="btn-group" id="fltrCategories" style="display:none;">
+							
+	<button id="showCategories" class="btn btn-primary" >Categories</button> <!-- style="display:none;" -->
+	<button id="editCategories"  title="Modifier" class="btn btn-info"> <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span> </button> 
+	<button id="removeCategories" title="Supprimer" class="btn  btn-info"> <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> </button>
+	
+	</div>
+	<div class="btn-group" id="fltrVilles" style="display:none;">
+							
+	<button id="showVilles" class="btn btn-primary" >Villes</button> <!-- style="display:none;" -->
+	<button id="editVilles"  title="Modifier" class="btn btn-info"> <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span> </button> 
+	<button id="removeVilles" title="Supprimer" class="btn  btn-info"> <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> </button>
+	
+	</div>
+	<div class="btn-group" id="fltrQuantumD" style="display:none;">
+							
+	<button id="showQuantumD" class="btn btn-primary" >Quantum demandé</button> <!-- style="display:none;" -->
+	<button id="editQuantumD" title="Modifier" class="btn btn-info"> <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span> </button> 
+	<button id="removeQuantumD" title="Supprimer" class="btn  btn-info"> <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> </button>
+	
+	</div>
 
-	<br>
+	<div class="btn-group" id="filtrQuantumR" style="display:none;">						
+	<button id="showQuantumR" class="btn btn-primary">Quantum resultat</button> <!-- style="display:none;" -->
+	<button id="editQuantumR"  title="Modifier" class="btn btn-info"> <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span> </button> 
+	<button id="removeQuantumR" title="Supprimer" class="btn  btn-info"> <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> </button>
+	
+	</div>
+
+	<div class="btn-group" id="fltrResultats" style="display:none;">
+	<button id="showResultats" class="btn btn-primary" >Resultats</button> <!-- style="display:none;" -->
+	<button id="editResultats"  title="Modifier" class="btn btn-info"> <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span> </button> 
+	<button id="removeResultats" title="Supprimer" class="btn  btn-info"> <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> </button>
+	
+	</div>
+						
+	<button id="clearAll" class="btn btn-primary" style="display:none;">Tout effacer</button> <!-- style="display:none;" -->
+
+	<br><br>
+
+	<div class="alert alert-info" id="resultat" style="display: none;" role="alert"></div>
+
 
 	<table class="table table-condensed text-center ">
 		<thead>
@@ -193,6 +232,48 @@
 	document.getElementById("deselectAllV").onclick = function() {deselectAll("villes")};
 	document.getElementById("selectAllV").onclick = function() {selectAll("villes")};
 
+	document.getElementById("removeCategories").onclick = function() {
+		deselectAll("categories");
+		document.getElementById("searchByCategory").click();
+
+	};
+
+	document.getElementById("editCategories").onclick = function() {
+		editFilters("categories");
+	};
+
+	document.getElementById("removeVilles").onclick = function() {
+		deselectAll("villes");
+		document.getElementById("searchByCity").click();
+
+	};
+
+	document.getElementById("editVilles").onclick = function() {
+		editFilters("villes");	
+	};
+
+	document.getElementById("removeResultats").onclick = function() {
+		deselectAll("resultats");
+		document.getElementById("searchByResultat").click();
+
+	};
+
+	document.getElementById("editResultats").onclick = function() {
+		editFilters("resultats");
+		
+	};
+
+	function editFilters(type){
+		var isExpanded = $("#filtres").attr("aria-expanded");
+	
+		if(isExpanded == 'false')
+		{
+		  document.getElementById("showFiltres").click();
+		}
+		document.getElementById(type).click();
+
+	}
+
 	function deselectAll(type) {
 		$('input:checkbox', "."+type).prop('checked', false);
 	}
@@ -206,27 +287,42 @@
 	villes = [];
 	quantumD = [];
 	quantumR = [];
-	resultat = [];
+	resultats = [];
 	
 	$('#searchByResultat').click(function(){
-		resultat = [];
+		resultats = [];
 		$("input[type=checkbox]:checked", ".resultats").each ( function() {
 		       console.log($(this).val());
-		       resultat.push($(this).val());
+		       resultats.push($(this).val());
 
 		   });
 
+		if(resultats.length == 0){
+			document.getElementById("fltrResultats").style = "display:none";
+		}else{
+			document.getElementById("fltrResultats").style = "display:";
+	
+		}
 		search();
 
 	});
 
 	$("#searchByCategory").click(function() {
 		categories=[];
+				
 		$("input[type=checkbox]:checked", ".categories").each ( function() {
 		       console.log($(this).val());
 		       categories.push($(this).val());
 
 		   });
+		console.log("categories.length "+categories.length);
+
+		if(categories.length == 0){
+			document.getElementById("fltrCategories").style = "display:none";
+		}else{
+			document.getElementById("fltrCategories").style = "display:";
+	
+		}
 
 		search();
 
@@ -238,8 +334,18 @@
 		        villes: JSON.stringify(villes),
 		        quantumD: JSON.stringify(quantumD),
 		        quantumR: JSON.stringify(quantumR),
-		        resultat: JSON.stringify(resultat)
+		        resultat: JSON.stringify(resultats)
 		    }, function(data){
+		    	var showRes = document.getElementById("resultat");
+		    		
+		    	if(data.result.length == 0){
+		    		showRes.style="display: ;"
+		    		showRes.innerHTML = "Désolé, aucun résultat ne correspond pas à votre recherche."
+		    	}else{
+		    		showRes.style="display: ;"
+		    		showRes.innerHTML = "Voici <strong>"+ data.result.length+ "</strong> résultat(s) correspondant à votre recherche. "
+		   
+		    	}
 		    	updateTabel(data.result);
 		    	console.log(data.result);
 		        // $( "table" ).text(data.result);
@@ -255,6 +361,13 @@
 		       villes.push($(this).val());
 
 		   });
+
+		if(villes.length == 0){
+			document.getElementById("fltrVilles").style = "display:none";
+		}else{
+			document.getElementById("fltrVilles").style = "display:";
+	
+		}
 		search();
 /*
 		$.getJSON($SCRIPT_ROOT + '/searchByCity/', {

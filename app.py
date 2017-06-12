@@ -73,7 +73,7 @@ def get_results():
 			query2+="("
 			for v in villes[:-1]:
 				query2+= "ville='"+v+ "' OR "
-			if 	len(filters) == 0:
+			if 	len(filters) == 1:
 				query2+="ville='"+villes[-1]+"')"
 			else:
 				query2+="ville='"+villes[-1]+"') AND "	
@@ -97,10 +97,13 @@ def get_results():
 	
 			#else:
 	query = '''SELECT * FROM decision JOIN demande ON decision.id_decision = demande.id_decision WHERE '''+query2+''
+	query0 = '''SELECT * FROM decision JOIN demande ON decision.id_decision = demande.id_decision'''
 	print filters
 	print query2
-	
-	cur.execute(query)
+	if len(filters) == 0:
+		cur.execute(query0)
+	else:	
+		cur.execute(query)
 	data = cur.fetchall()
 	query2=''
 	
