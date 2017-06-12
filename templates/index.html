@@ -55,12 +55,12 @@
 							<div class="categories">
 								{% for c in categories %}
 								<div class="categories checkbox">
-									<label><input type="checkbox" value="">{{c[0]}}</label>
+									<label><input type="checkbox" value="{{c[0]}}">{{c[0]}}</label>
 								</div>
 								{% endfor %}
 
 							</div>
-							<button type="button" class="btn btn-primary search">Rechercher</button>	
+							<button type="button" id="searchByCategory" class="btn btn-primary search">Rechercher</button>	
 						</div>
 						<div id="menu1" class="tab-pane fade">
 							<div class="btn-group">
@@ -70,12 +70,13 @@
 							<div class="villes">
 								{% for v in villes %}
 								<div class="villes checkbox">
-									<label><input type="checkbox" value="">{{v[0]}}</label>
+									<label><input type="checkbox" name="ville" value="{{v[0]}}">{{v[0]}}</label>
 								</div>
 								{% endfor %}
 
 							</div>
 							<button id="searchByCity" type="button" class="btn btn-primary search">Rechercher</button>
+
 						</div>
 						<div id="menu2" class="tab-pane fade">
 							<br>
@@ -127,13 +128,13 @@
 							<br>
 							<div class="resultats">
 								<div class="resultats checkbox">
-									<label><input type="checkbox" value="">accepte</label>
+									<label><input type="checkbox" value="accepte">accepte</label>
 								</div>
 								<div class="resultats checkbox">
-									<label><input type="checkbox" value="">rejette</label>
+									<label><input type="checkbox" value="rejette">rejette</label>
 								</div>
 							</div>
-							<button type="button" class="btn btn-primary">Rechercher</button>
+							<button id="searchByResultat" type="button" class="btn btn-primary">Rechercher</button>
 						</div>
 
 					</div>
@@ -142,7 +143,10 @@
 		</div>
 	</div>
 
-	<br><br>
+	<br>
+	<p></p>
+
+	<br>
 
 	<table class="table table-condensed text-center ">
 		<thead>
@@ -156,8 +160,8 @@
 			<td>Resultat</td>
 
 		</thead>
-		{% for d in data %}
-
+		<tbody id="tbody">
+		{% for d in data %} 
 		<tr>
 			<td>{{d[1]}}</td>
 			<td>{{d[2]}}</td>
@@ -169,6 +173,7 @@
 			<td>{{d[9]}}</td>
 		</tr>
 		{% endfor %}
+		</tbody>
 	</table>
 
 
@@ -196,19 +201,91 @@
 	function selectAll(type) {
 		$('input:checkbox', "."+type).prop('checked', true);
 	}
-  		/*
-         $.ajax({
-            type: "GET",
-            url: $SCRIPT_ROOT + "/test/",
-            contentType: "application/json; charset=utf-8",
-            data: $("#result").text(data.result),
-            success: function(data) {
-                $('#echoResult').text(data.value);
-            }
-        }); 
-        */    
-    //});
-  //});
+
+	categories = [];
+	villes = [];
+	quantumD = [];
+	quantumR = [];
+	resultat = [];
+	
+	$('#searchByResultat').click(function(){
+		resultat = [];
+		$("input[type=checkbox]:checked", ".resultats").each ( function() {
+		       console.log($(this).val());
+		       resultat.push($(this).val());
+
+		   });
+
+		search();
+
+	});
+
+	$("#searchByCategory").click(function() {
+		categories=[];
+		$("input[type=checkbox]:checked", ".categories").each ( function() {
+		       console.log($(this).val());
+		       categories.push($(this).val());
+
+		   });
+
+		search();
+
+	});
+
+	function search(){
+		$.getJSON($SCRIPT_ROOT + '/search/', {
+		        categories: JSON.stringify(categories),
+		        villes: JSON.stringify(villes),
+		        quantumD: JSON.stringify(quantumD),
+		        quantumR: JSON.stringify(quantumR),
+		        resultat: JSON.stringify(resultat)
+		    }, function(data){
+		    	updateTabel(data.result);
+		    	console.log(data.result);
+		        // $( "table" ).text(data.result);
+		    });
+
+	}
+
+	$("#searchByCity").click(function() {
+		villes=[];
+
+		$("input[type=checkbox]:checked", ".villes").each ( function() {
+		       console.log($(this).val());
+		       villes.push($(this).val());
+
+		   });
+		search();
+/*
+		$.getJSON($SCRIPT_ROOT + '/searchByCity/', {
+		        villes: JSON.stringify(villes)
+		    }, function(data){
+		    	updateTabel(data.result);
+		        // $( "table" ).text(data.result);
+		    });
+
+*/
+
+});
+
+	function updateTabel(data){
+		var tbody = $('#tbody');
+		tbody.empty();
+		console.log("updateTabel"); 	
+		data.forEach(function(decision) {
+	 	var tr = $('<tr/>').appendTo(tbody);
+		         tr.append('<td>' + decision[1] + '</td>');
+		    		tr.append('<td>' + decision[2] + '</td>');
+		    		tr.append('<td>' + decision[3] + '</td>');
+		    		tr.append('<td>' + decision[4] + '</td>');
+		    		tr.append('<td>' + decision[6] + '</td>');
+		    		tr.append('<td>' + decision[7] + '</td>');
+		    		tr.append('<td>' + decision[8] + '</td>');
+		    		tr.append('<td>' + decision[9] + '</td>');
+		 });
+
+	}
+
 </script>
 
 
