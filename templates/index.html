@@ -1,29 +1,5 @@
 {% extends "layout.html" %}
 {% block content %}
-<nav class="navbar navbar-inverse">
-	<div class="container-fluid">
-		<div class="navbar-header">
-			<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
-				<span class="icon-bar"></span>
-				<span class="icon-bar"></span>
-				<span class="icon-bar"></span>                        
-			</button>
-			<a class="navbar-brand" href="#">Logo</a>
-		</div>
-		<div class="collapse navbar-collapse" id="myNavbar">
-			<ul class="nav navbar-nav">
-				<li class="active"><a href="#">Home</a></li>
-				<li><a href="#">About</a></li>
-				<li><a href="#">Projects</a></li>
-				<li><a href="#">Contact</a></li>
-			</ul>
-			<ul class="nav navbar-nav navbar-right">
-			</ul>
-		</div>
-	</div>
-</nav>
-
-<div class="container theme-showcase" role="main">
 
 	<div class="panel-group">  
 		<div class="panel panel-info">
@@ -216,13 +192,8 @@
 	</table>
 
 
-</div>
-</div>
 
 
-<footer class="container-fluid text-center">
-	<p>2017</p>
-</footer>
 
 
 <script type=text/javascript>
@@ -384,9 +355,9 @@
 	function updateTabel(data){
 		var tbody = $('#tbody');
 		tbody.empty();
-		console.log("updateTabel"); 	
+		console.log("updateTabel");
 		data.forEach(function(decision) {
-	 	var tr = $('<tr/>').appendTo(tbody);
+				var tr = $('<tr/>').appendTo(tbody);
 		         tr.append('<td>' + decision[1] + '</td>');
 		    		tr.append('<td>' + decision[2] + '</td>');
 		    		tr.append('<td>' + decision[3] + '</td>');
@@ -395,7 +366,11 @@
 		    		tr.append('<td>' + decision[7] + '</td>');
 		    		tr.append('<td>' + decision[8] + '</td>');
 		    		tr.append('<td>' + decision[9] + '</td>');
+		 	
+		    	}
 		 });
+
+
 
 	}
 

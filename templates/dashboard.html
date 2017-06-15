@@ -1,0 +1,177 @@
+{% extends "layout.html" %}
+{% block content %}
+<br>
+<div class="panel-group">
+	<div class="panel panel-info">
+		<div class="panel-heading">
+			<h4 class="panel-title">
+				<a data-toggle="collapse" href="#collapse1">Statistiques</a> <a class='réinitialiser'  href='javascript:dc.filterAll(); dc.redrawAll();'> réinitialiser <span class="glyphicon glyphicon-remove-circle" aria-hidden="true"></span></a>
+			</h4>
+		</div>
+		<div id="collapse1" class="panel-collapse collapse">
+			<div class="panel-body">
+				<div id="chart-row-categorie">
+					<h5 class='filter-count'>Categorie  <a class='réinitialiser'  href='javascript:categoriesRowChart.filterAll(); dc.redrawAll();'> réinitialiser <span class="glyphicon glyphicon-remove-circle" aria-hidden="true"></span></a></h5> 
+				</div>
+				
+				<div id="chart-row-ville"> 
+					<h5 >Villes  <a class='réinitialiser'  href='javascript:villeRowChart.filterAll(); dc.redrawAll();'> réinitialiser <span class="glyphicon glyphicon-remove-circle" aria-hidden="true"></span></a></h5>
+				</div>
+				<div id="chart-ring-result">  
+					<h5 >Resultats  <a class='réinitialiser'  href='javascript:resultRingChart.filterAll(); dc.redrawAll();'> réinitialiser <span class="glyphicon glyphicon-remove-circle" aria-hidden="true"></span></a></h5>
+
+				</div>                	     
+			</div>
+		</div>
+	</div>
+</div>
+
+<!--
+<div id="table">
+	 <div class='header'>
+          <span>Categorie</span>
+          <span>Ville</span>
+          <span>Resultat</span>
+       </div>
+</div>
+-->
+<div class='dc-data-count'>
+	<div class="alert alert-info" role="alert">
+		<span class='filter-count'></span>
+		decisions sélectionnés parmi <span class='total-count'></span>
+	</div>
+</div>
+
+<table class='table table-hover dc-data-table' id='table'>
+	<thead>
+		<tr class='header'>
+			<th>id</th>
+			<th>RG</th>
+			<th>Ville</th>
+			<th>Juridiction</th>
+			<th>Description</th>
+			<th>Quantum demandé</th>
+			<th>Quantum resultat</th>
+			<th>Catégorie</th>
+			<th>Resultat</th>
+		</tr>
+	</thead>
+</table>
+<!--{% for d in data %} 	
+{% endfor %}
+-->
+<p id="test" style="display: none"></p>
+
+<script type="text/javascript">
+
+	queue()
+	.defer(d3.json, "/all_decisions/")
+	.await(makeGraphs);
+
+/*
+$.getJSON($SCRIPT_ROOT + '/all_decisions/', {
+		        data: JSON.stringify([]),
+			    }, function(data){
+		    	//console.log(data.result);
+		    	//makeGraphs(data.result);
+		    });
+		    */
+
+
+		    function makeGraphs(error,recordsJson) {
+
+		    	if(error) console.log(error);
+
+		    	console.log(recordsJson.result);
+
+		    	var records = jQuery.extend(true, {}, recordsJson).result;
+	//console.log(JSON.stringify(records));
+	/*
+	records.forEach(function(d) {
+		//d["categorie"]= +d["categorie"];
+		//d["quantum_demande"] = +d["quantum_demande"];
+		//d["quantum_resultat"] = +d["quantum_resultat"];
+		d["resultat"] = +d["resultat"];
+		d["ville"] = +d["ville"];
+	});	
+	*/
+	
+
+	var ndx = crossfilter(records);
+	
+	var categoriesDim = ndx.dimension(function(d) { return d["categorie"]; }),
+	villesDim = ndx.dimension(function(d) { return d["ville"]; }),
+	resultatsDim = ndx.dimension(function(d) { return d["resultat"]; });
+	
+
+	var categoriesGroup = categoriesDim.group(),
+	villesGroup = villesDim.group();
+	resultatsGroup = resultatsDim.group();
+	
+	var allDim = ndx.dimension(function(d) {return d;});
+	var all = ndx.groupAll();
+	
+	resultRingChart   = dc.pieChart("#chart-ring-result");
+	categoriesRowChart = dc.rowChart("#chart-row-categorie");
+	villeRowChart =  dc.rowChart("#chart-row-ville");
+
+	var table = dc.dataTable('#table');
+	var nasdaqCount = dc.dataCount('.dc-data-count');
+
+
+	resultRingChart
+	.width(250).height(200)
+	.dimension(resultatsDim)
+	.group(resultatsGroup)
+	.innerRadius(50);
+
+
+	categoriesRowChart
+	.width(450).height(800)
+	.turnOnControls(true)
+	.dimension(categoriesDim)
+	.group(categoriesGroup)
+	.ordering(function(d) { return -d.value })
+	.elasticX(true);
+
+	villeRowChart
+	.width(350).height(800)
+	.dimension(villesDim)
+	.group(villesGroup)
+	.ordering(function(d) { return -d.value })
+	.elasticX(true);
+
+	table
+	.width(800)
+	.height(800)
+	.dimension(categoriesDim)
+	.size(700)
+	.group(function(d) {
+		return d.value;
+	})
+	.columns([
+		function(d) { return d.id; },
+		function(d) { return d.rg; },
+		function(d) { return d.ville; }, 
+		function(d) { return d.juridiction; },
+		function(d) { return d.description; },
+		function(d) { return d.quantum_demande; },
+		function(d) { return d.quantum_resultat; },
+		function(d) { return d.categorie; },
+		function(d) { return d.resultat; }
+		])
+	.sortBy(function(d) { return +d["id"]; });
+
+	nasdaqCount /* dc.dataCount('.dc-data-count', 'chartGroup'); */
+	.dimension(ndx)
+	.group(all);
+
+	dc.renderAll();
+
+};      
+
+
+
+</script>
+
+{% endblock %}

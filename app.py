@@ -82,7 +82,7 @@ def get_results():
 			query2+="("
 			for c in categories[:-1]:
 				query2+= "categorie=\""+c+ "\" OR "
-			if ('quantumD' or 'quantumR' or 'resultat') in filters:
+			if ('quantumD' or 'quantumR') in filters:
 				query2+= "categorie=\""+categories[-1]+ "\" AND "
 			else:
 				query2+="categorie=\""+categories[-1]+"\")"
@@ -91,8 +91,13 @@ def get_results():
 			query2+="("
 			for r in resultat[:-1]:
 				query2+= "resultat=\""+r+ "\" OR "
+			if ('categories') in filters:
+				query2+= "resultat=\""+resultat[-1]+ "\") AND "
+			else:
+				query2+="resultat=\""+resultat[-1]+"\")"
+			
 			#if 	len(filters) == 0:
-			query2+="resultat=\""+resultat[-1]+"\")"
+			#query2+="resultat=\""+resultat[-1]+"\")"
 			
 	
 			#else:
@@ -110,7 +115,11 @@ def get_results():
 	return jsonify(result=data)
 
 	
-#@app.route('/test/')
+@app.route('/dashboard/')
+def dashboard():
+	return render_template('dashboard.html')
+
+@app.route('/all_decisions/')
 def all_decisions():
 	cur = conn.cursor()
 	cur.execute('''SELECT * FROM decision JOIN demande ON decision.id_decision = demande.id_decision''')
@@ -121,7 +130,7 @@ def all_decisions():
 		#print result[2] 
 		d = {'id': result[0], 'rg': result[1], 'ville': result[2], 'juridiction': result[3], 'description': result[4], 'quantum_demande': result[6],'quantum_resultat': result[7],'categorie': result[8],'resultat': result[9]}
 		json_results.append(d)
-	return data#jsonify(decisions=json_results)
-
+	return jsonify(result=json_results)
+	
 if __name__ == '__main__':
 	app.run(debug=True)

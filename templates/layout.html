@@ -1,75 +1,144 @@
 <!doctype html>
 <html lang="fr">
-    <head>
-        <title>Decisions de justice</title>
-        <meta http-equiv="content-type" content="text/html; charset=utf-8">
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-        <script type=text/javascript>
-          var $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
-        </script>        
-          <style>
+<head>
+    <title>Decisions de justice</title>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="http://dc-js.github.io/dc.js/css/dc.css"/>
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+    <script type=text/javascript>
+      var $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+    </script>
+  
+   <script src="../static/lib/js/crossfilter.js"></script>
+   <script src="../static/lib/js/d3.min.js"></script>   
+   <script src="../static/lib/js/dc.min.js"></script> 
+   <script src="../static/lib/js/queue.js"></script>
+
+   <!-- 
+   <script src="http://dc-js.github.io/dc.js/js/crossfilter.js"></script>
+   <script src="http://dc-js.github.io/dc.js/js/d3.js"></script>   
+   <script src="http://dc-js.github.io/dc.js/js/dc.js"></script>
+    -->
+
+
+  <style>
     /* Remove the navbar's default margin-bottom and rounded borders */ 
     .navbar {
       margin-bottom: 0;
       border-radius: 0;
-    }
-    body{
-        background-color: #eee;
-    }
+  }
+  html {
+      position: relative;
+      min-height: 100%;
+  }
+  body {
+      /* Margin bottom by footer height */
+      margin-bottom: 60px;
+  }
 
-    .search{
-        position: relative;
-        left: 45%;
-    }
-    thead{
-        background-color: #eee;
-    }
+  body{
+    background-color: #eee;
+}
 
-    .container{
-        background-color: #fff;
-   
-    }
-    .buttons-filters{
-        display: inline;
+.search{
+    position: relative;
+    left: 45%;
+}
+thead{
+    background-color: #eee;
+}
+
+.container{
+    background-color: #fff;
+
+}
+.buttons-filters{
+    display: inline;
     
-    }
-    .selection{
-        left: 76%;
-        top:5px;
-    }
+}
+.selection{
+    left: 76%;
+    top:5px;
+}
 
-    .panel{
-        position: relative;
-        top: 10px;
-    }
-    .categories, .villes, .resultats{
-        display: inline-block;
-        margin-left: 15px;
-    }
+.panel{
+    position: relative;
+    top: 10px;
+}
+.categories, .villes, .resultats{
+    display: inline-block;
+    margin-left: 15px;
+}
 
-    footer {
-      background-color: #555;
-      color: white;
-      padding: 15px;
-    }
-    
-    /* On small screens, set height to 'auto' for sidenav and grid */
-    @media screen and (max-width: 767px) {
-      .sidenav {
-        height: auto;
-        padding: 15px;
-      }
-      .row.content {height:auto;} 
-    }
-  </style>
+footer {
+  background-color: #555;
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 35px;
+  color: white;
 
-    </head>
-    <body>
+}
+h5{
+    text-align: center;
+}
+
+text {
+    fill: #000 !important;
+    }
+ .dc-table-label{
+    display: none !important;
+ }    
+
+/* On small screens, set height to 'auto' for sidenav and grid */
+@media screen and (max-width: 767px) {
+  .sidenav {
+    height: auto;
+    padding: 15px;
+}
+.row.content {height:auto;} 
+}
+</style>
+
+</head>
+<body>
+    <nav class="navbar navbar-inverse">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>                        
+                </button>
+                <a class="navbar-brand" href="#">Logo</a>
+            </div>
+            <div class="collapse navbar-collapse" id="myNavbar">
+                <ul class="nav navbar-nav">
+                    <li class="active"><a href="#">Home</a></li>
+                    <li><a href="#">About</a></li>
+                    <li><a href="#">Projects</a></li>
+                    <li><a href="#">Contact</a></li>
+                </ul>
+                <ul class="nav navbar-nav navbar-right">
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container theme-showcase" role="main">
+
         {% block content %}{% endblock %}
-    </body>
+    </div>
+    <footer class="container-fluid text-center">
+        <p>2017</p>
+    </footer>
+    
+</body>
 </html>
 
