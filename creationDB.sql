@@ -17,7 +17,7 @@ create table demande (
 	quantum_demande VARCHAR(20),
 	quantum_resultat VARCHAR(20),
 	categorie  VARCHAR(100),
-	resultat ENUM('accepte','rejette', 'irrecevable', 'sursis à statuer'),
+	resultat ENUM('accepte','rejette'),#, 'irrecevable', 'sursis à statuer'
 	primary key (id_decision),
 	constraint fk_decision foreign key (id_decision) references decision(id_decision)
 

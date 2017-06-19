@@ -23,8 +23,13 @@ cr = csv.reader(open("decisions.csv","rb"))
 count = 1
 next(cr)
 for row in cr:
-	print count
-	cur.execute(insDecision, ((str(row[2])), (str(row[1])), (str(row[0]))))
-	cur.execute(insDemande, (count,(str(row[7])),(str(row[13])),(str(row[3])),(str(row[11]))))
-	count+=1
-	conn.commit()
+	if (str(row[3])=="x" or str(row[3])==" " or str(row[3])=="" or str(row[3])=="Faux positif DI" or str(row[3])=="error" or str(row[11])=="" or str(row[11])==" " or str(row[11])=="irrecevable" ):
+		#if (str(row[7]))!="-" or (str(row[7]))!="?" or (str(row[13]))!="-" or (str(row[13]))!="?":
+		print str(row[1]).lower().capitalize()
+	else:	
+		print count
+		cur.execute(insDecision, ((str(row[2])), str(row[1]).lower().capitalize(), (str(row[0]))))
+		cur.execute(insDemande, (count,(str(row[7])),(str(row[13])),(str(row[3])),(str(row[11]))))
+		count+=1
+		conn.commit()
+

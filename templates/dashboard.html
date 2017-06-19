@@ -20,7 +20,14 @@
 				<div id="chart-ring-result">  
 					<h5 >Resultats  <a class='réinitialiser'  href='javascript:resultRingChart.filterAll(); dc.redrawAll();'> réinitialiser <span class="glyphicon glyphicon-remove-circle" aria-hidden="true"></span></a></h5>
 
-				</div>                	     
+				</div> 
+				<!--
+				<div style=" width: 300px; height: 800px; position: relative; display: initial;">
+					<h5 >Carte  <a class='réinitialiser'  href='javascript:resultRingChart.filterAll(); dc.redrawAll();'> réinitialiser <span class="glyphicon glyphicon-remove-circle" aria-hidden="true"></span></a></h5>
+					<div id="map" style="width: 300px; height:350px;"></div>
+							</div>
+							-->
+				
 			</div>
 		</div>
 	</div>
@@ -29,16 +36,16 @@
 <!--
 <div id="table">
 	 <div class='header'>
-          <span>Categorie</span>
-          <span>Ville</span>
-          <span>Resultat</span>
-       </div>
+		  <span>Categorie</span>
+		  <span>Ville</span>
+		  <span>Resultat</span>
+	   </div>
 </div>
 -->
 <div class='dc-data-count'>
 	<div class="alert alert-info" role="alert">
 		<span class='filter-count'></span>
-		decisions sélectionnés parmi <span class='total-count'></span>
+		decisions sélectionnées parmi <span class='total-count'></span>
 	</div>
 </div>
 
@@ -57,7 +64,7 @@
 		</tr>
 	</thead>
 </table>
-<!--{% for d in data %} 	
+<!--{% for d in data %}     
 {% endfor %}
 -->
 <p id="test" style="display: none"></p>
@@ -70,21 +77,21 @@
 
 /*
 $.getJSON($SCRIPT_ROOT + '/all_decisions/', {
-		        data: JSON.stringify([]),
-			    }, function(data){
-		    	//console.log(data.result);
-		    	//makeGraphs(data.result);
-		    });
-		    */
+				data: JSON.stringify([]),
+				}, function(data){
+				//console.log(data.result);
+				//makeGraphs(data.result);
+			});
+			*/
 
 
-		    function makeGraphs(error,recordsJson) {
+			function makeGraphs(error,recordsJson) {
 
-		    	if(error) console.log(error);
+				if(error) console.log(error);
 
-		    	console.log(recordsJson.result);
+				console.log(recordsJson.result);
 
-		    	var records = jQuery.extend(true, {}, recordsJson).result;
+				var records = jQuery.extend(true, {}, recordsJson).result;
 	//console.log(JSON.stringify(records));
 	/*
 	records.forEach(function(d) {
@@ -93,7 +100,7 @@ $.getJSON($SCRIPT_ROOT + '/all_decisions/', {
 		//d["quantum_resultat"] = +d["quantum_resultat"];
 		d["resultat"] = +d["resultat"];
 		d["ville"] = +d["ville"];
-	});	
+	}); 
 	*/
 	
 
@@ -167,8 +174,16 @@ $.getJSON($SCRIPT_ROOT + '/all_decisions/', {
 	.group(all);
 
 	dc.renderAll();
-
-};      
+/*
+	var map = L.map('map').setView([47,2], 5);
+	mapLink = '<a href="http://openstreetmap.org">OpenStreetMap</a>';
+	L.tileLayer(
+		'http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
+			attribution: '&copy; ' + mapLink + ' Contributors',
+			maxZoom: 15,
+		}).addTo(map);
+		*/ 
+	};      
 
 
 

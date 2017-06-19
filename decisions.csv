@@ -40,9 +40,9 @@ CA,Aix,12/08039,déclaration de créance au passif de la procédure collective,,
 CA,Nîmes,10/04491,paiement,53,1134 code civil : paiement du prix prévu par le contrat,,"40 990,15 €",,,,accepte,"54,85","40 990,15 €",
 CA,Nîmes,10/04491,paiement,53,1134 code civil : paiement du prix prévu par le contrat,,"10 852,15 €",,,,accepte,"54,85","10 852,15 €",
 CA,Nîmes,09/02629,demande conjointe de retrait du rôle,43,382 et 383 Code de procédure civile,,-,,,,accepte,52,-,
-CA,Nîmes,12/00855,REQUÊTE EN RECTIFICATION D'ERREUR MATÉRIELLE,50,462 Code de procédure civile,,-,,,,accepte,64,-,
+CA,Nîmes,12/00855,error,50,462 Code de procédure civile,,-,,,,accepte,64,-,
 CA,Nîmes,10/04103,demande conjointe de retrait du rôle,47,382 et 383 Code de procédure civile,,-,,,,accepte,54,-,
-CA,Nîmes,12/00854,REQUÊTE EN RECTIFICATION D'ERREUR MATÉRIELLE,44,462 Code de procédure civile,,-,,,,accepte,59,-,
+CA,Nîmes,12/00854,error,44,462 Code de procédure civile,,-,,,,accepte,59,-,
 CA,Nîmes,10/02324,désistement,57,"396, 397, 399, 400 et suivants du code de procédure civile",,-,,,,accepte,82,-,
 CA,Nîmes,11/04430,désistement,49,"396, 397, 399, 400 et suivants du code de procédure civile",,-,,,,accepte,67,-,
 CA,Nîmes,11/01904,annulation pour excès de pouvoir,55,R1454-14 et R1454-16 Code du travail,,"-10 000,00 €",,,,accepte,115,"-10 000,00 €",
@@ -60,9 +60,9 @@ CA,Colmar,15/00285,dommages-intérêts,151,1382 code civil + 32-1 code de procé
 CA,Douai,15/07080,dommages-intérêts,"114,115,186",1382 code civil + 32-1 code de procédure civile : en procédure abusive,,"5 000,00 €",,,,accepte,"195,196","2 000,00 €",
 CA,Riom,14/02361,dommages-intérêts,"127,128,129",1382 code civil + 32-1 code de procédure civile : en procédure abusive,,"10 000,00 €",,,,rejette,"82,83,230","0,00 €",
 CA,Paris,14/11807,dommages-intérêts,"78,112",1382 code civil + 32-1 code de procédure civile : en procédure abusive,,"500,00 €",,,,accepte,"198,199,200,212","100,00 €",
-CA,Paris,14/12696,dommages-intérêts,"908,909",1382 code civil + 32-1 code de procédure civile : en procédure abusive,,"100 000,00 €",,,,sursis à statuer,"1606,1607",-,
-CA,Paris,14/12696,dommages-intérêts,"966,967",1382 code civil + 32-1 code de procédure civile : en procédure abusive,,"150 000,00 €",,,,sursis à statuer,"1606,1607",-,
-CA,Paris,14/12696,dommages-intérêts,"1011,1012,1013",1382 code civil + 32-1 code de procédure civile : en procédure abusive,,"30 000,00 €",,,,sursis à statuer,"1606,1607",-,
+CA,Paris,14/12696,dommages-intérêts,"908,909",1382 code civil + 32-1 code de procédure civile : en procédure abusive,,"100 000,00 €",,,,sursis a statuer,"1606,1607",-,
+CA,Paris,14/12696,dommages-intérêts,"966,967",1382 code civil + 32-1 code de procédure civile : en procédure abusive,,"150 000,00 €",,,,sursis a statuer,"1606,1607",-,
+CA,Paris,14/12696,dommages-intérêts,"1011,1012,1013",1382 code civil + 32-1 code de procédure civile : en procédure abusive,,"30 000,00 €",,,,sursis a statuer,"1606,1607",-,
 CA,Chambéry,14/02167,dommages-intérêts,"88,89",1382 code civil + 32-1 code de procédure civile : en procédure abusive,,"2 000,00 €",,,,rejette,"253,254","0,00 €",
 CA,Versailles,14/01023,dommages-intérêts,"244,245",1382 code civil + 32-1 code de procédure civile : en procédure abusive,,"200 000,00 €",,,,rejette,"155,456,457","0,00 €",
 CA,Saint Denis,14/01697,dommages-intérêts,78,1382 code civil + 32-1 code de procédure civile : en procédure abusive,,"3 000,00 €",,,,accepte,"170,171,172","1 000,00 €",
@@ -136,7 +136,7 @@ CA,Versailles,15/01683,dommages-intérêts,"235,236",1382 code civil + 32-1 code
 CA,Versailles,15/01683,amende civile,237,32-1 code de procédure civile + 559 code de procédure civile : pour procédure abusive,,"4 000,00 €",,,,rejette,"406,413,414,426","0,00 €",
 CA,Rouen,15/01728,amende civile,"117,118,119",32-1 code de procédure civile + 559 code de procédure civile : pour procédure abusive,,"1 000,00 €",,,,rejette,"185-190,209,210","0,00 €",
 CA,Paris,15/04427,dommages-intérêts,"124,125,129,130",1382 code civil + 32-1 code de procédure civile : en procédure abusive,,"3 000,00 €",,,,rejette,"212,213","0,00 €",
-CA,Bordeaux,14/00331,dommages-intérêts,"239,240",1382 code civil + 32-1 code de procédure civile : en procédure abusive,,-,,,,sursis à statuer,"288,289",-,
+CA,Bordeaux,14/00331,dommages-intérêts,"239,240",1382 code civil + 32-1 code de procédure civile : en procédure abusive,,-,,,,sursis a statuer,"288,289",-,
 CA,Paris,15/01521,dommages-intérêts,"151,152",1382 code civil + 32-1 code de procédure civile : en procédure abusive,,-,,,,rejette,343,"0,00 €",
 CA,Lyon,15/00013,dommages-intérêts,"68,69,",1382 code civil + 32-1 code de procédure civile : en procédure abusive,,"3 000,00 €",,,,accepte,"184,185,186,202,203","1 500,00 €",
 CA,Paris,14/22567,dommages-intérêts,"132,133",1382 code civil + 32-1 code de procédure civile : en procédure abusive,,"5 000,00 €",,,,rejette,"282-285,309","0,00 €",
@@ -208,8 +208,8 @@ CA,Nimes,16/01140,amende civile,102,32-1 code de procédure civile + 559 code de
 CA,Douai,15/01448,dommages-intérêts,154-156,1382 code civil + 32-1 code de procédure civile : en procédure abusive,,"3 000,00 €",,,,rejette,231-239;261-262,"0,00 €",
 CA,Lyon,14/00601,dommages-intérêts,99-100,1382 code civil + 32-1 code de procédure civile : en procédure abusive,,"5 000,00 €",,,,rejette,230-235,"0,00 €",
 CA,Versailles,15/00584,dommages-intérêts,207-208,1382 code civil + 32-1 code de procédure civile : en procédure abusive,,"20 000,00 €",,,,rejette,204-212,"0,00 €",
-CA,Montpellier,15/07717,dommages-intérêts,95-96,1382 code civil + 32-1 code de procédure civile : en procédure abusive,,"2 000,00 €",,,,sursis à statuer,161,sans objet,
-CA,Montpellier,15/07717,dommages-intérêts,98-99,1382 code civil + 32-1 code de procédure civile : en procédure abusive,,"2 000,00 €",,,,sursis à statuer,161,sans objet,
+CA,Montpellier,15/07717,dommages-intérêts,95-96,1382 code civil + 32-1 code de procédure civile : en procédure abusive,,"2 000,00 €",,,,sursis a statuer,161,sans objet,
+CA,Montpellier,15/07717,dommages-intérêts,98-99,1382 code civil + 32-1 code de procédure civile : en procédure abusive,,"2 000,00 €",,,,sursis a statuer,161,sans objet,
 CA,Rennes,13/00948,dommages-intérêts,161-162,1382 code civil + 32-1 code de procédure civile : en procédure abusive,,"25 000,00 €",,,,rejette,260-263,"0,00 €",
 CA,Bordeaux,15/01694,dommages-intérêts,125-126,1382 code civil + 32-1 code de procédure civile : en procédure abusive,,"5 000,00 €",,,,rejette,397-400,"0,00 €",
 CA,Aix,15/11164,dommages-intérêts,"106-107,197-198",1382 code civil + 32-1 code de procédure civile : en procédure abusive,,"2 000,00 €",,,,rejette,247-253,"0,00 €",
@@ -414,7 +414,7 @@ CA,Paris,14/22090,dommages-intérêts,383,principe de responsabilité pour troub
 CA,Paris,14/22090,dommages-intérêts,383,principe de responsabilité pour trouble anormal de voisinage,"235-236,306-310",x,x,Demandeur initial,129-130,accepte,"302-305,458-463","620,00 €",469
 CA,Paris,14/22090,dommages-intérêts,383,principe de responsabilité pour trouble anormal de voisinage,"235-236,306-310",x,x,Demandeur initial,129-130,accepte,"302-305,458-463","10 000,00 €",470
 CA,Caen,14/03255,injonction sous astreinte,49-52,principe de responsabilité pour trouble anormal de voisinage,209-210,x,x,Défendeur initial,173-179,rejette,209-215,"0,00 €",x
-CA,Aix,14/18361,x,x,principe de responsabilité pour trouble anormal de voisinage,95-97,x,x,Demandeur initial,x,sursis à statuer,95-97,x,x
+CA,Aix,14/18361,x,x,principe de responsabilité pour trouble anormal de voisinage,95-97,x,x,Demandeur initial,x,sursis a statuer,95-97,x,x
 CA,Versailles,13/03488,dommages-intérêts,"113-114,189-191",principe de responsabilité pour trouble anormal de voisinage,187-188,"45 000,00 €",190,Demandeur initial,104-114,accepte,429-431,"10 000,00 €",430
 CA,Douai,15/03260,x,x,Faux positif trouble anormal de voisinage,257-260,x,x,,x,,x,x,x
 CA,Aix,14/23996,injonction sous astreinte,164,principe de responsabilité pour trouble anormal de voisinage,164-165,x,x,Demandeur initial,164,accepte,241-243,x,x
@@ -561,7 +561,7 @@ CA,FORT DE France,14/00654,déclaration de créance au passif de la procédure c
 CA,Aix,14/08327,déclaration de créance au passif de la procédure collective,73,L622-24 code de commerce : déclaration de créance au passif de la procédure collective,73,"12 550,89 €",73,Demandeur initial,x,rejette,94,"0,00 €",x
 CA,Orléans,15/02708,déclaration de créance au passif de la procédure collective,55,L622-24 code de commerce : déclaration de créance au passif de la procédure collective,55,"20 578,00 €",55,Demandeur initial,x,accepte,68,"20 578,00 €",68
 CA,Orléans,15/02708,déclaration de créance au passif de la procédure collective,55,L622-24 code de commerce : déclaration de créance au passif de la procédure collective,55,"13 068,29 €",55,Demandeur initial,x,rejette,71,"0,00 €",71
-CA,Orléans,15/02708,déclaration de créance au passif de la procédure collective,55,L622-24 code de commerce : déclaration de créance au passif de la procédure collective,55,"8 537,10 €",55,Demandeur initial,x,sursis à statuer,72,-,72
+CA,Orléans,15/02708,déclaration de créance au passif de la procédure collective,55,L622-24 code de commerce : déclaration de créance au passif de la procédure collective,55,"8 537,10 €",55,Demandeur initial,x,sursis a statuer,72,-,72
 CA,Aix,13/23830,déclaration de créance au passif de la procédure collective,64,L622-24 code de commerce : déclaration de créance au passif de la procédure collective,64,"7 279,12 €",64,Demandeur initial,x,accepte,84,"0,00 €",84
 CA,Aix,13/23830,déclaration de créance au passif de la procédure collective,64,L622-24 code de commerce : déclaration de créance au passif de la procédure collective,64,"1 091,87 €",64,Demandeur initial,x,rejette,85,"0,00 €",85
 CA,Angers,15/00414,déclaration de créance au passif de la procédure collective,50,L622-24 code de commerce : déclaration de créance au passif de la procédure collective,50,"7 211,88 €",50,Demandeur initial,x,accepte,73,"6 811,88 €",73
@@ -655,7 +655,7 @@ CA,Riom,14/01932,Faux positif DI,77-98,faux positif 1382 code civil : concurrenc
 CA,Riom,14/02361,dommages-intérêts,104-105,1382 code civil : concurrence déloyale,85-92,"15 000,00 €",104,Demandeur initial,69-78,rejette,"151-155,224","0,00 €",x
 CA,Colmar,14/06211,dommages-intérêts,189-192,1382 code civil : concurrence déloyale,189-192,??,??,Demandeur initial,71-73,rejette,189-192,"0,00 €",x
 CA,Paris,15/09196,dommages-intérêts,117-119,1382 code civil : concurrence déloyale,110-112,"910 662,70 €",117-119,Demandeur initial,94-97,rejette,282-285,"0,00 €",x
-CA,Paris,14/12696,dommages-intérêts,363-369,1382 code civil : concurrence déloyale,369,"160 900 000,00 €",368,Défendeur initial,281-284,sursis à statuer,"1578-1579,1604-1609",x,x
+CA,Paris,14/12696,dommages-intérêts,363-369,1382 code civil : concurrence déloyale,369,"160 900 000,00 €",368,Défendeur initial,281-284,sursis a statuer,"1578-1579,1604-1609",x,x
 CA,Angers,14/00470,Faux positif DI,x,faux positif 1382 code civil : concurrence déloyale,x,x,x,,x,,x,x,x
 CA,Besançon,14/01574,dommages-intérêts,77-79,1382 code civil : concurrence déloyale,75,"75 000,00 €",78,Demandeur initial,60-61,rejette,186-193,"0,00 €",x
 CA,Besançon,14/01574,dommages-intérêts,77-79,1382 code civil : concurrence déloyale,75,"15 000,00 €",79,Demandeur initial,60-61,rejette,186-193,"0,00 €",x
