@@ -28,6 +28,22 @@ def index():
 	cur.execute('''SELECT distinct categorie from demande''')
 	categories = cur.fetchall()
 
+	#cur.execute('''SELECT distinct ville from decision''')
+	cur.execute('''SELECT count(*), ville from decision group by ville''')
+
+	villes = cur.fetchall()
+
+	return render_template('index_test.html', data=data,categories=categories, villes=villes )
+
+@app.route('/index')
+def mindex():
+	cur = conn.cursor()
+	cur.execute('''SELECT * FROM decision JOIN demande ON decision.id_decision = demande.id_decision''')
+	data = cur.fetchall()
+
+	cur.execute('''SELECT distinct categorie from demande''')
+	categories = cur.fetchall()
+
 	cur.execute('''SELECT distinct ville from decision''')
 	villes = cur.fetchall()
 
@@ -119,18 +135,28 @@ def get_results():
 def dashboard():
 	return render_template('dashboard.html')
 
+@app.route('/testd3/')
+def testd3():
+	file = open("./input/flare.json","r")
+	#print file.read()
+	return file.read()
+
+
 @app.route('/all_decisions/')
 def all_decisions():
 	cur = conn.cursor()
-	cur.execute('''SELECT * FROM decision JOIN demande ON decision.id_decision = demande.id_decision''')
+	#cur.execute('''SELECT * FROM decision JOIN demande ON decision.id_decision = demande.id_decision''')
+	cur.execute('''SELECT count(*), categorie from demande group by categorie''')
 	data = cur.fetchall()
 	
 	json_results = []
+	#d1 = { "name": "decisions"}
+	#json_results.append(d1)
 	for result in data:
 		#print result[2] 
-		d = {'id': result[0], 'rg': result[1], 'ville': result[2], 'juridiction': result[3], 'description': result[4], 'quantum_demande': result[6],'quantum_resultat': result[7],'categorie': result[8],'resultat': result[9]}
+		d = {'name': result[1], 'nb': result[0]}
 		json_results.append(d)
-	return jsonify(result=json_results)
+	return jsonify(children=json_results)
 	
 if __name__ == '__main__':
 	app.run(debug=True)

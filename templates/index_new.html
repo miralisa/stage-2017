@@ -1,0 +1,124 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<div id="cy"></div>
+
+
+
+<script type="text/javascript">
+
+$(function(){ // on dom ready
+
+	var cy = cytoscape({
+
+		container: document.getElementById('cy'),
+
+  // initial viewport state:
+  zoom: 1,
+  pan: { x: -100, y: 0 },
+  //boxSelectionEnabled: false,
+  //autounselectify: true,
+  maxZoom: 2,
+  minZoom: 0.5,
+
+  elements: {
+  	nodes: [
+  	{ data: { id: 'decision', label: 'Decisions', faveColor: '#11479e', faveShape: 'octagon' },
+  	position: {x: 10, y: 50 }, grabbable: false },	
+  	{ data: { id: 'ville', label: 'Villes', faveColor: '#86B342', faveShape: 'rectangle' } },
+  	{ data: { id: 'juridiction', label: 'Juridiction', faveColor: '#86B342', faveShape: 'rectangle' } },
+  	{ data: { id: 'date', label: 'Date', faveColor: '#86B342', faveShape: 'rectangle' } },
+  	{ data: { id: 'texte', label: 'Texte', faveColor: '#86B342', faveShape: 'rectangle' } },
+  	{% for d in villes %} 
+  	{ data: { id: '{{d[1]}}', label: '{{d[1]}}', faveColor: '#F5A45D', faveShape: 'rectangle' } },
+  	{% endfor %}
+
+  	],
+  	edges: [
+  	{ data: { source: 'decision', target: 'ville', faveColor: '#6FB1FC', strength: 50 } },
+  	{ data: { source: 'decision', target: 'juridiction', faveColor: '#6FB1FC', strength: 50 } },
+  	{ data: { source: 'decision', target: 'date', faveColor: '#6FB1FC', strength: 50 } },
+  	{ data: { source: 'decision', target: 'texte', faveColor: '#6FB1FC', strength: 50 } },
+  	{% for d in villes %} 
+  	{ data: { source: 'ville', target: '{{d[1]}}', faveColor: '#6FB1FC', strength: {{d[0]}} } },
+  	
+  	{% endfor %}
+
+
+  	]
+
+  },
+  
+  style: cytoscape.stylesheet()
+  .selector('node')
+  .css({
+  	'shape': 'data(faveShape)',
+  	'width': 'mapData(weight, 80, 120, 80, 120)',
+  	'content': 'data(label)',
+  	'text-valign': 'center',
+  	'text-outline-width': 2,
+  	'text-outline-color': 'data(faveColor)',
+  	'background-color': 'data(faveColor)',
+  	'color': '#fff'
+  })
+  .selector(':selected')
+  .css({
+  	'border-width': 2,
+  	'border-color': '#eee'
+  }),
+
+  layout: {
+  	name: 'cose',
+  	padding: 5
+  },
+
+  ready: function(){
+  	window.cy = this;
+  },
+
+
+ // style: 'node { content: data(label); }'
+});
+
+//Keep a collection of nodes that have been clicked:
+
+var collection = cy.collection();
+cy.nodes().on("click", function(){
+  collection = collection.add(this);
+  console.log("collection "+collection);
+});
+
+cy.getElementById("ville").on("click", function(){
+	cy.$('#Paris').move({
+	  parent: null
+	})
+	console.log("ville clicked");
+
+});
+
+var dec = cy.$("#decision");
+cy.center(dec);
+cy.fit(dec);
+/*
+// you can use qtip's regular options
+// see http://qtip2.com/
+cy.$('#n').qtip({
+  content: 'Hello!',
+  position: {
+    my: 'top center',
+    at: 'bottom center'
+  },
+  style: {
+    classes: 'qtip-bootstrap',
+    tip: {
+      width: 16,
+      height: 8
+    }
+  }
+});
+*/
+}); // on dom ready
+
+</script>
+
+{% endblock %}

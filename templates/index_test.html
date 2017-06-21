@@ -1,0 +1,952 @@
+{% extends "layout.html" %}
+{% block content %}
+<br>
+<div class="panel-group">  
+	<div class="panel panel-info">
+		<div class="panel-heading">
+			<h3 class="panel-title">
+				<a data-toggle="collapse" id="showFiltres" href="#filtres"><span class="glyphicon glyphicon-filter" aria-hidden="true"></span> Filtres</a>
+
+			</h3>
+		</div>
+		<div id="filtres" class="panel-collapse collapse">
+
+			<div class="panel-body">
+
+				<ul class="nav nav-tabs">
+					<li class="active"><a data-toggle="tab" id="motCle" href="#tabMotCle">Mot-clé</a></li>
+					<li><a data-toggle="tab" id="jur" href="#tabJur">Juridiction</a></li>
+					<li><a data-toggle="tab" id="villes" href="#tabVilles">Villes</a></li>
+					<li><a data-toggle="tab" id="date" href="#tabDate">Date</a></li>
+					<!-- optionel -->
+					<li><a data-toggle="tab" id="categories" href="#tabCategories">Catégories</a></li>
+					
+					<li><a data-toggle="tab" id="quantumDemande" href="#tabQuantumDemande">Quantum demandé</a></li>
+					<li><a data-toggle="tab" id="quantumResultat" href="#tabQuantumResultat">Quantum resultat</a></li>
+					<li><a data-toggle="tab" id="resultats" href="#tabResultats">Resultats</a></li>
+
+				</ul>
+
+				<div class="tab-content">
+					<div id="tabCategories" class="tab-pane fade ">
+						<div class="btn-group selection">
+							<button id="selectAll" type="button" class="btn btn-sm btn-info">Tout sélectionner</button>
+							<button  id="deselectAll" type="button" class="btn btn-sm btn-info">Tout désélectionner</button>
+						</div>
+						<div class="categories">
+							{% for c in categories %}
+							<div class="categories checkbox">
+								<label><input type="checkbox" value="{{c[0]}}">{{c[0]}}</label>
+							</div>
+							{% endfor %}
+
+						</div>
+						<button type="button" id="searchByCategory" class="btn btn-primary search"><span class="glyphicon glyphicon-search" aria-hidden="true"></span> <span class="glyphicon glyphicon-search" aria-hidden="true"></span> Rechercher</button>	
+					</div>
+					<div id="tabVilles" class="tab-pane fade">
+						<div class="btn-group selection">
+							<button id="selectAllV" type="button" class="btn btn-sm btn-info">Tout sélectionner</button>
+							<button  id="deselectAllV" type="button" class="btn btn-sm btn-info">Tout désélectionner</button>
+						</div>
+						<div class="villes">
+							{% for v in villes %}
+							<div class="villes checkbox">
+								<label><input type="checkbox" name="ville" value="{{v[1]}}">{{v[1]}} ({{v[0]}})</label>
+							</div>
+							{% endfor %}
+
+						</div>
+						<button id="searchByCity" type="button" class="btn btn-primary search"><span class="glyphicon glyphicon-search" aria-hidden="true"></span> Rechercher</button>
+
+					</div>
+					<div id="tabQuantumDemande" class="tab-pane fade">
+						<br>
+						<form class="form-inline">
+							<div class="form-group">
+								<label class="sr-only"></label>
+								<p class="form-control-static"><b>Quantum demandé:</b> entre </p>
+							</div>
+							<div class="form-group">
+								<div class="input-group">
+									<input type="text" class="form-control input-sm" id="quantumD">
+									<div class="input-group-addon">€</div>
+								</div>
+								<p class="form-control-static"> et </p>
+
+								<div class="input-group">
+									<input type="text" class="form-control input-sm" id="quantumD">
+									<div class="input-group-addon">€</div>
+								</div>
+							</div>
+							<br><br>
+							<button type="submit" class="btn btn-primary search"><span class="glyphicon glyphicon-search" aria-hidden="true"></span> Rechercher</button>
+						</form>
+
+					</div>
+
+					<div id="tabQuantumResultat" class="tab-pane fade">
+						<br>
+						<form class="form-inline">
+							<div class="form-group">
+								<label class="sr-only"></label>
+								<p class="form-control-static"><b>Quantum resultat:</b> entre </p>
+							</div>
+							<div class="form-group">
+								<div class="input-group">
+									<input type="text" class="form-control input-sm" id="quantumR">
+									<div class="input-group-addon">€</div>
+								</div>
+								<p class="form-control-static"> et </p>
+
+								<div class="input-group">
+									<input type="text" class="form-control input-sm" id="quantumR">
+									<div class="input-group-addon">€</div>
+								</div>
+							</div>
+							<br><br>
+							<button type="submit" class="btn btn-primary search"><span class="glyphicon glyphicon-search" aria-hidden="true"></span> Rechercher</button>
+						</form>
+					</div>	
+					<div id="tabResultats" class="tab-pane fade">
+						<br>
+						<div class="resultats">
+							<div class="resultats checkbox">
+								<label><input type="checkbox" value="accepte">accepté</label>
+							</div>
+							<div class="resultats checkbox">
+								<label><input type="checkbox" value="rejette">rejetté</label>
+							</div>
+						</div>
+						<br>
+						<button id="searchByResultat" type="button" class="btn btn-primary search"><span class="glyphicon glyphicon-search" aria-hidden="true"></span> Rechercher</button>
+					</div>
+
+					<div id="tabMotCle" class="tab-pane fade in active">
+						<br>
+						<div class="motCle">
+							<input type="text" class="form-control input" id="searchByKW">
+						</div>
+						<br>
+						
+						<button id="searchByKeyWord" type="button" class="btn btn-primary search"><span class="glyphicon glyphicon-search" aria-hidden="true"></span> Rechercher</button>
+					</div>
+
+					<div id="tabDate" class="tab-pane fade">
+						<br>
+						<div class="date">
+								<input type="text" class="form-control input" id="searchByDt">
+						<br>
+
+						</div>
+						<button id="searchByDate" type="button" class="btn btn-primary search"><span class="glyphicon glyphicon-search" aria-hidden="true"></span> Rechercher</button>
+					</div>
+
+					<div id="tabJur" class="tab-pane fade">
+						<br>
+						<div class="jur">
+								<input type="text" class="form-control input" id="searchByJr">
+						<br>
+
+						</div>
+						<button id="searchByJur" type="button" class="btn btn-primary search"><span class="glyphicon glyphicon-search" aria-hidden="true"></span> Rechercher</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<div class="btn-group" id="fltrCategories" style="display:none;">
+	
+	<button id="showCategories" class="btn btn-primary" >Categories</button> <!-- style="display:none;" -->
+	<button id="editCategories"  title="Modifier" class="btn btn-info"> <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span> </button> 
+	<button id="removeCategories" title="Supprimer" class="btn  btn-info"> <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> </button>
+	
+</div>
+<div class="btn-group" id="fltrVilles" style="display:none;">
+	
+	<button id="showVilles" class="btn btn-primary" >Villes</button> <!-- style="display:none;" -->
+	<button id="editVilles"  title="Modifier" class="btn btn-info"> <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span> </button> 
+	<button id="removeVilles" title="Supprimer" class="btn  btn-info"> <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> </button>
+	
+</div>
+<div class="btn-group" id="fltrQuantumD" style="display:none;">
+	
+	<button id="showQuantumD" class="btn btn-primary" >Quantum demandé</button> <!-- style="display:none;" -->
+	<button id="editQuantumD" title="Modifier" class="btn btn-info"> <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span> </button> 
+	<button id="removeQuantumD" title="Supprimer" class="btn  btn-info"> <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> </button>
+	
+</div>
+
+<div class="btn-group" id="filtrQuantumR" style="display:none;">						
+	<button id="showQuantumR" class="btn btn-primary">Quantum resultat</button> <!-- style="display:none;" -->
+	<button id="editQuantumR"  title="Modifier" class="btn btn-info"> <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span> </button> 
+	<button id="removeQuantumR" title="Supprimer" class="btn  btn-info"> <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> </button>
+	
+</div>
+
+<div class="btn-group" id="fltrResultats" style="display:none;">
+	<button id="showResultats" class="btn btn-primary" >Resultats</button> <!-- style="display:none;" -->
+	<button id="editResultats"  title="Modifier" class="btn btn-info"> <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span> </button> 
+	<button id="removeResultats" title="Supprimer" class="btn  btn-info"> <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> </button>
+	
+</div>
+
+<button id="clearAll" class="btn btn-primary" style="display:none;">Tout effacer</button> <!-- style="display:none;" -->
+
+<br><br>
+
+<div class="alert alert-info" id="resultat" style="display: none;" role="alert"></div>
+
+<div id="tree_map">
+</div>
+<div id="popup"></div>
+
+<br>
+
+
+<script type="text/javascript">
+	queue()
+	.defer(d3.json, "/all_decisions/")
+	.await(makeGraphs);
+
+	function makeGraphs(error,recordsJson) {
+		if(error) console.log(error);
+
+		console.log(recordsJson);
+
+
+	document.getElementById("deselectAll").onclick = function() {deselectAll("categories")};
+	document.getElementById("selectAll").onclick = function() {selectAll("categories")};
+	document.getElementById("deselectAllV").onclick = function() {deselectAll("villes")};
+	document.getElementById("selectAllV").onclick = function() {selectAll("villes")};
+
+	document.getElementById("removeCategories").onclick = function() {
+		deselectAll("categories");
+		document.getElementById("searchByCategory").click();
+
+	};
+
+	document.getElementById("editCategories").onclick = function() {
+		editFilters("categories");
+	};
+
+	document.getElementById("removeVilles").onclick = function() {
+		deselectAll("villes");
+		document.getElementById("searchByCity").click();
+
+	};
+
+	document.getElementById("editVilles").onclick = function() {
+		editFilters("villes");	
+	};
+
+	document.getElementById("removeResultats").onclick = function() {
+		deselectAll("resultats");
+		document.getElementById("searchByResultat").click();
+
+	};
+
+	document.getElementById("editResultats").onclick = function() {
+		editFilters("resultats");
+		
+	};
+
+	function editFilters(type){
+		var isExpanded = $("#filtres").attr("aria-expanded");
+		
+		if(isExpanded == 'false')
+		{
+			document.getElementById("showFiltres").click();
+		}
+		document.getElementById(type).click();
+
+	}
+
+	function deselectAll(type) {
+		$('input:checkbox', "."+type).prop('checked', false);
+	}
+
+
+	function selectAll(type) {
+		$('input:checkbox', "."+type).prop('checked', true);
+	}
+
+	categories = [];
+	villes = [];
+	quantumD = [];
+	quantumR = [];
+	resultats = [];
+	
+	$('#searchByResultat').click(function(){
+		resultats = [];
+		$("input[type=checkbox]:checked", ".resultats").each ( function() {
+			console.log($(this).val());
+			resultats.push($(this).val());
+
+		});
+
+		if(resultats.length == 0){
+			document.getElementById("fltrResultats").style = "display:none";
+		}else{
+			document.getElementById("fltrResultats").style = "display:";
+			
+		}
+		search();
+
+	});
+
+	$("#searchByCategory").click(function() {
+		categories=[];
+		
+		$("input[type=checkbox]:checked", ".categories").each ( function() {
+			console.log($(this).val());
+			categories.push($(this).val());
+
+		});
+		console.log("categories.length "+categories.length);
+
+		if(categories.length == 0){
+			document.getElementById("fltrCategories").style = "display:none";
+		}else{
+			document.getElementById("fltrCategories").style = "display:";
+			
+		}
+
+		search();
+
+	});
+
+	function search(){
+		$.getJSON($SCRIPT_ROOT + '/search/', {
+			categories: JSON.stringify(categories),
+			villes: JSON.stringify(villes),
+			quantumD: JSON.stringify(quantumD),
+			quantumR: JSON.stringify(quantumR),
+			resultat: JSON.stringify(resultats)
+		}, function(data){
+			var showRes = document.getElementById("resultat");
+			
+			if(data.result.length == 0){
+				showRes.style="display: ;"
+				showRes.innerHTML = "Désolé, aucun résultat ne correspond pas à votre recherche."
+			}else{
+				showRes.style="display: ;"
+				showRes.innerHTML = "Voici <strong>"+ data.result.length+ "</strong> résultat(s) correspondant à votre recherche. "
+				
+			}
+			//updateTabel(data.result);
+			console.log(data.result);
+		        // $( "table" ).text(data.result);
+		    });
+
+	}
+
+	$("#searchByCity").click(function() {
+		villes=[];
+
+		$("input[type=checkbox]:checked", ".villes").each ( function() {
+			console.log($(this).val());
+			villes.push($(this).val());
+
+		});
+
+		if(villes.length == 0){
+			document.getElementById("fltrVilles").style = "display:none";
+		}else{
+			document.getElementById("fltrVilles").style = "display:";
+			
+		}
+		search();
+/*
+		$.getJSON($SCRIPT_ROOT + '/searchByCity/', {
+		        villes: JSON.stringify(villes)
+		    }, function(data){
+		    	updateTabel(data.result);
+		        // $( "table" ).text(data.result);
+		    });
+
+		    */
+
+		});
+/*
+	function updateTabel(data){
+		var tbody = $('#tbody');
+		tbody.empty();
+		console.log("updateTabel");
+		data.forEach(function(decision) {
+			var tr = $('<tr/>').appendTo(tbody);
+			tr.append('<td>' + decision[1] + '</td>');
+			tr.append('<td>' + decision[2] + '</td>');
+			tr.append('<td>' + decision[3] + '</td>');
+			tr.append('<td>' + decision[4] + '</td>');
+			tr.append('<td>' + decision[6] + '</td>');
+			tr.append('<td>' + decision[7] + '</td>');
+			tr.append('<td>' + decision[8] + '</td>');
+			tr.append('<td>' + decision[9] + '</td>');
+			
+		})
+	};
+*/
+/* Tree map */	
+		var margin = {top: 20, right: 120, bottom: 20, left: 120},
+		width = 960 - margin.right - margin.left,
+		height = 800 - margin.top - margin.bottom;
+
+		var i = 0,
+		duration = 750,
+		root;
+
+		var tree = d3.layout.tree()
+		.size([height, width]);
+
+		var diagonal = d3.svg.diagonal()
+		.projection(function(d) { return [d.y, d.x]; });
+
+		var svg = d3.select("#tree_map").append("svg")
+		//.attr("width", width + margin.right + margin.left)
+		//.attr("height", height + margin.top + margin.bottom)
+		.attr("width", "100%")
+		.attr("height", "800px")
+		.call(d3.behavior.zoom().on("zoom", function () {
+		  svg.attr("transform", "translate(" + d3.event.translate + ")" + " scale(" + d3.event.scale + ")")
+		}))
+		.append("g")
+		.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+		//d3.select("#tree_map").on('mousedown.drag', null);
+
+		var test = {
+ "name": "decisions",
+ "children": [
+  {
+   "name": "analytics",
+   "children": [
+    {
+     "name": "cluster",
+     "children": [
+      {"name": "AgglomerativeCluster", "size": 3938},
+      {"name": "CommunityStructure", "size": 3812},
+      {"name": "HierarchicalCluster", "size": 6714},
+      {"name": "MergeEdge", "size": 743}
+     ]
+    },
+    {
+     "name": "graph",
+     "children": [
+      {"name": "BetweennessCentrality", "size": 3534},
+      {"name": "LinkDistance", "size": 5731},
+      {"name": "MaxFlowMinCut", "size": 7840},
+      {"name": "ShortestPaths", "size": 5914},
+      {"name": "SpanningTree", "size": 3416}
+     ]
+    },
+    {
+     "name": "optimization",
+     "children": [
+      {"name": "AspectRatioBanker", "size": 7074}
+     ]
+    }
+   ]
+  },
+  {
+   "name": "animate",
+   "children": [
+    {"name": "Easing", "size": 17010},
+    {"name": "FunctionSequence", "size": 5842},
+    {
+     "name": "interpolate",
+     "children": [
+      {"name": "ArrayInterpolator", "size": 1983},
+      {"name": "ColorInterpolator", "size": 2047},
+      {"name": "DateInterpolator", "size": 1375},
+      {"name": "Interpolator", "size": 8746},
+      {"name": "MatrixInterpolator", "size": 2202},
+      {"name": "NumberInterpolator", "size": 1382},
+      {"name": "ObjectInterpolator", "size": 1629},
+      {"name": "PointInterpolator", "size": 1675},
+      {"name": "RectangleInterpolator", "size": 2042}
+     ]
+    },
+    {"name": "ISchedulable", "size": 1041},
+    {"name": "Parallel", "size": 5176},
+    {"name": "Pause", "size": 449},
+    {"name": "Scheduler", "size": 5593},
+    {"name": "Sequence", "size": 5534},
+    {"name": "Transition", "size": 9201},
+    {"name": "Transitioner", "size": 19975},
+    {"name": "TransitionEvent", "size": 1116},
+    {"name": "Tween", "size": 6006}
+   ]
+  },
+  {
+   "name": "data",
+   "children": [
+    {
+     "name": "converters",
+     "children": [
+      {"name": "Converters", "size": 721},
+      {"name": "DelimitedTextConverter", "size": 4294},
+      {"name": "GraphMLConverter", "size": 9800},
+      {"name": "IDataConverter", "size": 1314},
+      {"name": "JSONConverter", "size": 2220}
+     ]
+    },
+    {"name": "DataField", "size": 1759},
+    {"name": "DataSchema", "size": 2165},
+    {"name": "DataSet", "size": 586},
+    {"name": "DataSource", "size": 3331},
+    {"name": "DataTable", "size": 772},
+    {"name": "DataUtil", "size": 3322}
+   ]
+  },
+  {
+   "name": "display",
+   "children": [
+    {"name": "DirtySprite", "size": 8833},
+    {"name": "LineSprite", "size": 1732},
+    {"name": "RectSprite", "size": 3623},
+    {"name": "TextSprite", "size": 10066}
+   ]
+  },
+  {
+   "name": "flex",
+   "children": [
+    {"name": "FlareVis", "size": 4116}
+   ]
+  },
+  {
+   "name": "physics",
+   "children": [
+    {"name": "DragForce", "size": 1082},
+    {"name": "GravityForce", "size": 1336},
+    {"name": "IForce", "size": 319},
+    {"name": "NBodyForce", "size": 10498},
+    {"name": "Particle", "size": 2822},
+    {"name": "Simulation", "size": 9983},
+    {"name": "Spring", "size": 2213},
+    {"name": "SpringForce", "size": 1681}
+   ]
+  },
+  {
+   "name": "query",
+   "children": [
+    {"name": "AggregateExpression", "size": 1616},
+    {"name": "And", "size": 1027},
+    {"name": "Arithmetic", "size": 3891},
+    {"name": "Average", "size": 891},
+    {"name": "BinaryExpression", "size": 2893},
+    {"name": "Comparison", "size": 5103},
+    {"name": "CompositeExpression", "size": 3677},
+    {"name": "Count", "size": 781},
+    {"name": "DateUtil", "size": 4141},
+    {"name": "Distinct", "size": 933},
+    {"name": "Expression", "size": 5130},
+    {"name": "ExpressionIterator", "size": 3617},
+    {"name": "Fn", "size": 3240},
+    {"name": "If", "size": 2732},
+    {"name": "IsA", "size": 2039},
+    {"name": "Literal", "size": 1214},
+    {"name": "Match", "size": 3748},
+    {"name": "Maximum", "size": 843},
+    {
+     "name": "methods",
+     "children": [
+      {"name": "add", "size": 593},
+      {"name": "and", "size": 330},
+      {"name": "average", "size": 287},
+      {"name": "count", "size": 277},
+      {"name": "distinct", "size": 292},
+      {"name": "div", "size": 595},
+      {"name": "eq", "size": 594},
+      {"name": "fn", "size": 460},
+      {"name": "gt", "size": 603},
+      {"name": "gte", "size": 625},
+      {"name": "iff", "size": 748},
+      {"name": "isa", "size": 461},
+      {"name": "lt", "size": 597},
+      {"name": "lte", "size": 619},
+      {"name": "max", "size": 283},
+      {"name": "min", "size": 283},
+      {"name": "mod", "size": 591},
+      {"name": "mul", "size": 603},
+      {"name": "neq", "size": 599},
+      {"name": "not", "size": 386},
+      {"name": "or", "size": 323},
+      {"name": "orderby", "size": 307},
+      {"name": "range", "size": 772},
+      {"name": "select", "size": 296},
+      {"name": "stddev", "size": 363},
+      {"name": "sub", "size": 600},
+      {"name": "sum", "size": 280},
+      {"name": "update", "size": 307},
+      {"name": "variance", "size": 335},
+      {"name": "where", "size": 299},
+      {"name": "xor", "size": 354},
+      {"name": "_", "size": 264}
+     ]
+    },
+    {"name": "Minimum", "size": 843},
+    {"name": "Not", "size": 1554},
+    {"name": "Or", "size": 970},
+    {"name": "Query", "size": 13896},
+    {"name": "Range", "size": 1594},
+    {"name": "StringUtil", "size": 4130},
+    {"name": "Sum", "size": 791},
+    {"name": "Variable", "size": 1124},
+    {"name": "Variance", "size": 1876},
+    {"name": "Xor", "size": 1101}
+   ]
+  },
+  {
+   "name": "scale",
+   "children": [
+    {"name": "IScaleMap", "size": 2105},
+    {"name": "LinearScale", "size": 1316},
+    {"name": "LogScale", "size": 3151},
+    {"name": "OrdinalScale", "size": 3770},
+    {"name": "QuantileScale", "size": 2435},
+    {"name": "QuantitativeScale", "size": 4839},
+    {"name": "RootScale", "size": 1756},
+    {"name": "Scale", "size": 4268},
+    {"name": "ScaleType", "size": 1821},
+    {"name": "TimeScale", "size": 5833}
+   ]
+  },
+  {
+   "name": "util",
+   "children": [
+    {"name": "Arrays", "size": 8258},
+    {"name": "Colors", "size": 10001},
+    {"name": "Dates", "size": 8217},
+    {"name": "Displays", "size": 12555},
+    {"name": "Filter", "size": 2324},
+    {"name": "Geometry", "size": 10993},
+    {
+     "name": "heap",
+     "children": [
+      {"name": "FibonacciHeap", "size": 9354},
+      {"name": "HeapNode", "size": 1233}
+     ]
+    },
+    {"name": "IEvaluable", "size": 335},
+    {"name": "IPredicate", "size": 383},
+    {"name": "IValueProxy", "size": 874},
+    {
+     "name": "math",
+     "children": [
+      {"name": "DenseMatrix", "size": 3165},
+      {"name": "IMatrix", "size": 2815},
+      {"name": "SparseMatrix", "size": 3366}
+     ]
+    },
+    {"name": "Maths", "size": 17705},
+    {"name": "Orientation", "size": 1486},
+    {
+     "name": "palette",
+     "children": [
+      {"name": "ColorPalette", "size": 6367},
+      {"name": "Palette", "size": 1229},
+      {"name": "ShapePalette", "size": 2059},
+      {"name": "SizePalette", "size": 2291}
+     ]
+    },
+    {"name": "Property", "size": 5559},
+    {"name": "Shapes", "size": 19118},
+    {"name": "Sort", "size": 6887},
+    {"name": "Stats", "size": 6557},
+    {"name": "Strings", "size": 22026}
+   ]
+  },
+  {
+   "name": "vis",
+   "children": [
+    {
+     "name": "axis",
+     "children": [
+      {"name": "Axes", "size": 1302},
+      {"name": "Axis", "size": 24593},
+      {"name": "AxisGridLine", "size": 652},
+      {"name": "AxisLabel", "size": 636},
+      {"name": "CartesianAxes", "size": 6703}
+     ]
+    },
+    {
+     "name": "controls",
+     "children": [
+      {"name": "AnchorControl", "size": 2138},
+      {"name": "ClickControl", "size": 3824},
+      {"name": "Control", "size": 1353},
+      {"name": "ControlList", "size": 4665},
+      {"name": "DragControl", "size": 2649},
+      {"name": "ExpandControl", "size": 2832},
+      {"name": "HoverControl", "size": 4896},
+      {"name": "IControl", "size": 763},
+      {"name": "PanZoomControl", "size": 5222},
+      {"name": "SelectionControl", "size": 7862},
+      {"name": "TooltipControl", "size": 8435}
+     ]
+    },
+    {
+     "name": "data",
+     "children": [
+      {"name": "Data", "size": 20544},
+      {"name": "DataList", "size": 19788},
+      {"name": "DataSprite", "size": 10349},
+      {"name": "EdgeSprite", "size": 3301},
+      {"name": "NodeSprite", "size": 19382},
+      {
+       "name": "render",
+       "children": [
+        {"name": "ArrowType", "size": 698},
+        {"name": "EdgeRenderer", "size": 5569},
+        {"name": "IRenderer", "size": 353},
+        {"name": "ShapeRenderer", "size": 2247}
+       ]
+      },
+      {"name": "ScaleBinding", "size": 11275},
+      {"name": "Tree", "size": 7147},
+      {"name": "TreeBuilder", "size": 9930}
+     ]
+    },
+    {
+     "name": "events",
+     "children": [
+      {"name": "DataEvent", "size": 2313},
+      {"name": "SelectionEvent", "size": 1880},
+      {"name": "TooltipEvent", "size": 1701},
+      {"name": "VisualizationEvent", "size": 1117}
+     ]
+    },
+    {
+     "name": "legend",
+     "children": [
+      {"name": "Legend", "size": 20859},
+      {"name": "LegendItem", "size": 4614},
+      {"name": "LegendRange", "size": 10530}
+     ]
+    },
+    {
+     "name": "operator",
+     "children": [
+      {
+       "name": "distortion",
+       "children": [
+        {"name": "BifocalDistortion", "size": 4461},
+        {"name": "Distortion", "size": 6314},
+        {"name": "FisheyeDistortion", "size": 3444}
+       ]
+      },
+      {
+       "name": "encoder",
+       "children": [
+        {"name": "ColorEncoder", "size": 3179},
+        {"name": "Encoder", "size": 4060},
+        {"name": "PropertyEncoder", "size": 4138},
+        {"name": "ShapeEncoder", "size": 1690},
+        {"name": "SizeEncoder", "size": 1830}
+       ]
+      },
+      {
+       "name": "filter",
+       "children": [
+        {"name": "FisheyeTreeFilter", "size": 5219},
+        {"name": "GraphDistanceFilter", "size": 3165},
+        {"name": "VisibilityFilter", "size": 3509}
+       ]
+      },
+      {"name": "IOperator", "size": 1286},
+      {
+       "name": "label",
+       "children": [
+        {"name": "Labeler", "size": 9956},
+        {"name": "RadialLabeler", "size": 3899},
+        {"name": "StackedAreaLabeler", "size": 3202}
+       ]
+      },
+      {
+       "name": "layout",
+       "children": [
+        {"name": "AxisLayout", "size": 6725},
+        {"name": "BundledEdgeRouter", "size": 3727},
+        {"name": "CircleLayout", "size": 9317},
+        {"name": "CirclePackingLayout", "size": 12003},
+        {"name": "DendrogramLayout", "size": 4853},
+        {"name": "ForceDirectedLayout", "size": 8411},
+        {"name": "IcicleTreeLayout", "size": 4864},
+        {"name": "IndentedTreeLayout", "size": 3174},
+        {"name": "Layout", "size": 7881},
+        {"name": "NodeLinkTreeLayout", "size": 12870},
+        {"name": "PieLayout", "size": 2728},
+        {"name": "RadialTreeLayout", "size": 12348},
+        {"name": "RandomLayout", "size": 870},
+        {"name": "StackedAreaLayout", "size": 9121},
+        {"name": "TreeMapLayout", "size": 9191}
+       ]
+      },
+      {"name": "Operator", "size": 2490},
+      {"name": "OperatorList", "size": 5248},
+      {"name": "OperatorSequence", "size": 4190},
+      {"name": "OperatorSwitch", "size": 2581},
+      {"name": "SortOperator", "size": 2023}
+     ]
+    },
+    {"name": "Visualization", "size": 16540}
+   ]
+  }
+ ]
+};
+			root = test;
+			root.x0 = height / 2;
+			root.y0 = 200;
+
+			function collapse(d) {
+				if (d.children) {
+					d._children = d.children;
+					d._children.forEach(collapse);
+					d.children = null;
+				}
+			}
+
+			root.children.forEach(collapse);
+			update(root);
+
+		var div = d3.select("body").append("div")	
+		    .attr("class", "tooltip")				
+		    .style("opacity", 0);
+
+	
+		d3.select(self.frameElement).style("height", "800px");
+
+		function update(source) {
+
+	  // Compute the new tree layout.
+	  var nodes = tree.nodes(root).reverse(),
+	  links = tree.links(nodes);
+
+	  // Normalize for fixed-depth.
+	  nodes.forEach(function(d) { d.y = d.depth * 180; });
+
+	  // Update the nodes…
+	  var node = svg.selectAll("g.node")
+	  .data(nodes, function(d) { return d.id || (d.id = ++i); });
+
+	  // Enter any new nodes at the parent's previous position.
+	  var nodeEnter = node.enter().append("g")
+	  .attr("class", "node")
+	  .attr("transform", function(d) { return "translate(" + source.y0 + "," + source.x0 + ")"; })
+	  .on("click", click)
+	  .on("mouseover", function(d) {		
+            div.transition()		
+                .duration(200)		
+                .style("opacity", .9);		
+            div	.html(d.name + "<br/>")	
+                .style("left", (d3.event.pageX) + "px")		
+                .style("top", (d3.event.pageY - 28) + "px");	
+            })
+      .on("mouseout", function(d) {		
+                  div.transition()		
+                      .duration(500)		
+                      .style("opacity", 0) });
+
+	  function colores(n) {
+	    var colores_g = ["#3366cc", "#dc3912", "#ff9900", "#109618", "#990099", "#0099c6", "#dd4477", "#66aa00", "#b82e2e", "#316395", "#994499", "#22aa99", "#aaaa11", "#6633cc", "#e67300", "#8b0707", "#651067", "#329262", "#5574a6", "#3b3eac"];
+	    return colores_g[Math.round(Math.random() * (colores_g.length-1))];
+	  }
+
+	  nodeEnter.append("circle")
+	  .attr("r", 1e-6)
+	  //.attr("cx", d3.scale.linear().domain([-1, 20]).range([0, 400]) )
+	  .style("fill", function(d) { return d._children ? colores() : "#fff"; });
+
+	  nodeEnter.append("text")
+	  .attr("x", function(d) { return d.children || d._children ? -10 : 10; })
+	  .attr("dy", ".30em")
+	  .attr("text-anchor", function(d) { return d.children || d._children ? "end" : "start"; })
+	  .text(function(d) { return d.name; })
+	  .style("fill-opacity", 1e-6);
+
+	  // Transition nodes to their new position.
+	  var nodeUpdate = node.transition()
+	  .duration(duration)
+	  .attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; });
+
+	  nodeUpdate.select("circle")
+	  .attr("r", 8)
+	  .style("fill", function(d) { return d._children ? colores() : "#fff"; });
+
+	  nodeUpdate.select("text")
+	  .style("fill-opacity", 1);
+
+	  // Transition exiting nodes to the parent's new position.
+	  var nodeExit = node.exit().transition()
+	  .duration(duration)
+	  .attr("transform", function(d) { return "translate(" + source.y + "," + source.x + ")"; })
+	  .remove();
+
+	  nodeExit.select("circle")
+	  .attr("r", 1e-6);
+
+	  nodeExit.select("text")
+	  .style("fill-opacity", 1e-6);
+
+	  // Update the links…
+	  var link = svg.selectAll("path.link")
+	  .data(links, function(d) { return d.target.id; });
+
+	  // Enter any new links at the parent's previous position.
+	  link.enter().insert("path", "g")
+	  .attr("class", "link")
+	  .attr("d", function(d) {
+	  	var o = {x: source.x0, y: source.y0};
+	  	return diagonal({source: o, target: o});
+	  });
+
+	  /*
+	  //stroke links
+	  var stroke = 1;
+	  link.style('stroke-width', function(d) {
+	           stroke+=0.1;
+	           return stroke+"px";
+	    });
+	    */
+	 //link.style('stroke-width', "2.2px");  
+	  
+	  // Transition links to their new position.
+	  link.transition()
+	  .duration(duration)
+	  .attr("d", diagonal);
+
+	  // Transition exiting nodes to the parent's new position.
+	  link.exit().transition()
+	  .duration(duration)
+	  .attr("d", function(d) {
+	  	var o = {x: source.x, y: source.y};
+	  	return diagonal({source: o, target: o});
+	  })
+	  .remove();
+
+	  // Stash the old positions for transition.
+	  nodes.forEach(function(d) {
+	  	d.x0 = d.x;
+	  	d.y0 = d.y;
+	  });
+	}
+
+	// When the user clicks on div, open the popup
+
+	// Toggle children on click.
+	function click(d) {
+		if (d.children) {
+			d._children = d.children;
+			d.children = null;
+		} else {
+			d.children = d._children;
+			d._children = null;
+		}
+		update(d);
+	}
+};
+</script>
+
+{% endblock %}
