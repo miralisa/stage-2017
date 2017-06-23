@@ -149,14 +149,46 @@ def all_decisions():
 	cur.execute('''SELECT count(*), categorie from demande group by categorie''')
 	data = cur.fetchall()
 	
-	json_results = []
-	#d1 = { "name": "decisions"}
-	#json_results.append(d1)
+	cur.execute('''SELECT count(*), ville from decision group by ville''')
+	data_villes = cur.fetchall()
+
+	cur.execute('''SELECT count(*), resultat from demande group by resultat''')
+	data_resultat = cur.fetchall()
+	
+	categories = []
+	children = []
 	for result in data:
 		#print result[2] 
 		d = {'name': result[1], 'nb': result[0]}
-		json_results.append(d)
-	return jsonify(children=json_results)
+		categories.append(d)
+	ch = {'name':'Categorie', 'children':categories, 'nb':len(categories)}
+	children.append(ch)
+		
+	villes = []
+	for result in data_villes:
+		#print result[2] 
+		d = {'name': result[1], 'nb': result[0]}
+		villes.append(d)
+	v = {'name':'Ville','children':villes, 'nb':len(villes)}
+	children.append(v)
+		
+
+	juridiction = []
+	j = {'name':'Juridiction','children':juridiction, 'nb':len(juridiction)}
+	children.append(j)
+	
+	resultats = []
+	for result in data_resultat:
+		d = {'name': result[1], 'nb': result[0]}
+		resultats.append(d)
+
+	r = {'name':'Resultat','children':resultats, 'nb':len(resultats)}
+	children.append(r)
+	
+	
+		
+
+	return jsonify(name='Decisions', children=children)
 	
 if __name__ == '__main__':
 	app.run(debug=True)
