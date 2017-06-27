@@ -116,6 +116,9 @@
 							<div class="resultats checkbox">
 								<label><input type="checkbox" value="rejette">rejetté</label>
 							</div>
+							<div class="resultats checkbox">
+								<label><input type="checkbox" value="sursis à statuer">sursis à statuer</label>
+							</div>						
 						</div>
 						<br>
 						<button id="searchByResultat" type="button" class="btn btn-primary search"><span class="glyphicon glyphicon-search" aria-hidden="true"></span> Rechercher</button>
@@ -135,7 +138,7 @@
 						<br>
 						<div class="date">
 							<form class="form-inline" id="form_date">
-							<label class="mr-sm-2" for="sel_cond_date">Condition</label>
+								<label class="mr-sm-2" for="sel_cond_date">Condition</label>
 								<select class="form-control mb-2 mr-sm-2 mb-sm-0" id="sel_cond_date">
 									<option value="a">à</option>
 									<option value="entre">entre</option>
@@ -143,7 +146,7 @@
 									<option value="apres">après</option>
 								</select>
 
-									<input type="date" class="form-control input-sm" id="date1">
+								<input type="date" class="form-control input-sm" placeholder="aaaa-mm-jj" id="date1">
 								
 							</form>
 
@@ -156,7 +159,7 @@
 					<div id="tabJur" class="tab-pane fade">
 						<br>
 						<div class="jur">
-							<input type="text" class="form-control input" id="searchByJr">
+							<!--<input type="text" class="form-control input" id="searchByJr">-->
 							<br>
 
 						</div>
@@ -215,15 +218,9 @@
 
 <button id="clearAll" class="btn btn-primary" style="display:none;">Tout effacer</button> <!-- style="display:none;" -->
 
+<!--<br><br>-->
 <br><br>
-
 <div class="alert alert-info" id="resultat" style="display: none;" role="alert"></div>
-
-<div id="tree_map">
-</div>
-<div id="popup"></div>
-
-<br>
 
 <div class="panel-group">  
 	<div class="panel panel-info">
@@ -273,6 +270,13 @@
 	</div>
 </div>
 
+<div id="tree_map">
+</div>
+<div id="popup"></div>
+
+<br>
+
+
 
 
 <script type="text/javascript">
@@ -284,7 +288,7 @@
 		if(error) console.log(error);
 
 		console.log(recordsJson);
-
+		build_tree(recordsJson);
 
 		document.getElementById("deselectAll").onclick = function() {deselectAll("categories")};
 		document.getElementById("selectAll").onclick = function() {selectAll("categories")};
@@ -347,17 +351,18 @@
 			if(this.value=="entre"){
 				inputDate.className = "form-control input-sm";
 				inputDate.type = "date";
-				inputDate.id = "date2"
+				inputDate.id = "date2";
+				inputDate.placeholder = "aaaa-mm-jj";
 				parentNode.appendChild(inputDate);
 			} else{
 				var child = document.getElementById("entre_date");
 				
 				if(child!=null){
 					console.log("remove "+child);
-				
-				parentNode.removeChild(child);
+
+					parentNode.removeChild(child);
+				}
 			}
-		}
 		};
 
 
@@ -400,7 +405,7 @@
 				var res2 = document.getElementById("date2").value;
 				date.push(res2);
 			}
-				date.push(res1);
+			date.push(res1);
 			console.log(date.length);
 
 			if(res1 == ""){
@@ -410,9 +415,9 @@
 
 			}
 			if(res1!=""){
-			search();
-	
-		}
+				search();
+
+			}
 			
 		});
 
@@ -479,6 +484,8 @@
 				categories: JSON.stringify(categories),
 				villes: JSON.stringify(villes),
 				date: JSON.stringify(date),
+				texte: JSON.stringify([]),
+				juridiction: JSON.stringify([]),
 				quantumD: JSON.stringify(quantumD),
 				quantumR: JSON.stringify(quantumR),
 				resultat: JSON.stringify(resultats)
@@ -493,9 +500,19 @@
 					showRes.innerHTML = "Voici <strong>"+ data.result.length+ "</strong> résultat(s) correspondant à votre recherche. "
 
 				}
-				console.log(data.result);
+				console.log(data);
 				updateTabel(data.result);
 
+				var div_tree = document.getElementById("tree_map");
+				console.log(div_tree);
+				div_tree.remove();//(div_tree.childNodes[0]);
+			
+				var div_tree_n = document.createElement("div");
+				var parentNode = document.getElementById("popup");
+				div_tree_n.id = "tree_map"
+				parentNode.appendChild(div_tree_n);
+			
+				build_tree(data);
 		        // $( "table" ).text(data.result);
 		    });
 
@@ -551,21 +568,22 @@
 	};
 	*/
 	/* Tree map */	
-	var margin = {top: 20, right: 120, bottom: 20, left: 120},
-	width = 960 - margin.right - margin.left,
-	height = 800 - margin.top - margin.bottom;
+	function build_tree(recordsJson){
+		var margin = {top: 20, right: 120, bottom: 20, left: 120},
+		width = 960 - margin.right - margin.left,
+		height = 800 - margin.top - margin.bottom;
 
-	var i = 0,
-	duration = 750,
-	root;
+		var i = 0,
+		duration = 750,
+		root;
 
-	var tree = d3.layout.tree()
-	.size([height, width]);
+		var tree = d3.layout.tree()
+		.size([height, width]);
 
-	var diagonal = d3.svg.diagonal()
-	.projection(function(d) { return [d.y, d.x]; });
+		var diagonal = d3.svg.diagonal()
+		.projection(function(d) { return [d.y, d.x]; });
 
-	var svg = d3.select("#tree_map").append("svg")
+		var svg = d3.select("#tree_map").append("svg")
 		//.attr("width", width + margin.right + margin.left)
 		//.attr("height", height + margin.top + margin.bottom)
 		.attr("width", "100%")
@@ -677,11 +695,17 @@
 	  //var stroke = 1;
 	  link.style('stroke-width', function(d) {
 	  	var tostroke = d.target.nb;
-	  	if( tostroke!='undefined' && tostroke > 20){
-	  		var stroke = tostroke/22;
-	  		return stroke+"px";
+	  	var stroke = '';
+	  	if( tostroke!='undefined' && tostroke > 200){
+	  		stroke = tostroke/22;
+	  	} else  if(tostroke < 100 && tostroke > 10){
+	  		stroke = tostroke/5;
+	  	}else  if(tostroke < 200 && tostroke > 100){
+	  		stroke = tostroke/10;
 	  	}
+	  	return stroke+"px";
 	  });
+
 	  link.style('stroke', function(d) { return colores(); });
 	  
 	  link.on("mouseover", function(d) {
@@ -727,6 +751,7 @@
 	  });
 	}
 
+
 	// When the user clicks on div, open the popup
 
 	// Toggle children on click.
@@ -740,6 +765,8 @@
 		}
 		update(d);
 	}
+
+}
 };
 </script>
 

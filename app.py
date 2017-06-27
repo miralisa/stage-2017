@@ -74,8 +74,12 @@ def get_results():
 	quantumD = json.loads(request.args.get('quantumD'))
 	quantumR = json.loads(request.args.get('quantumR'))
 	resultat = json.loads(request.args.get('resultat'))
-	search = {'villes':len(villes),'date':len(date), 'categories':len(categories),  'quantumD':len(quantumD), 'quantumR':len(quantumR), 'resultat':len(resultat)}
+	juridiction =  json.loads(request.args.get('juridiction'))
+	texte =  json.loads(request.args.get('texte'))
+	search = {'date':len(date), 'juridiction':len(juridiction), 'texte':len(texte), 'villes':len(villes), 'categories':len(categories),  'quantumD':len(quantumD), 'quantumR':len(quantumR), 'resultat':len(resultat)}
 	filters = []
+	# search = {'quantumD': 0, 'resultat': 0, 'quantumR': 0, 'texte': 0, 'date': 2, 'juridiction': 0, 'villes': 1, 'categories': 0}
+
 	for key, value in search.iteritems():
 		if value>0:
 			filters.append(key)
@@ -90,7 +94,7 @@ def get_results():
 			query2+="("
 			for v in villes[:-1]:
 				query2+= "ville='"+v+ "' OR "
-			if 	len(filters) == 1:
+			if filters[-1] == 'villes':
 				query2+="ville='"+villes[-1]+"')"
 			else:
 				query2+="ville='"+villes[-1]+"') AND "	
@@ -101,16 +105,25 @@ def get_results():
 				query2+="("
 				for d in date[1:-1]:
 					query2+= "date_decision='"+d+ "' OR "
-				if 	len(filters) == 1:
+				if 	filters[-1] == 'date':
 					query2+="date_decision='"+date[-1]+"')"
 				else:
 					query2+="date_decision='"+date[-1]+"') AND "
 			elif cond == "entre":
-				if 	len(filters) == 1:
+				if 	filters[-1] == 'date':
 					query2+="( date_decision BETWEEN '"+date[2]+"' AND '"+ date[1] +"' )"
 				else:
-					query2+="( date_decision BETWEEN '"+date[2]+"' AND '"+ date[1] +"' ) AND"
-				
+					query2+="( date_decision BETWEEN '"+date[2]+"' AND '"+ date[1] +"' ) AND "
+			elif cond == "avant":
+				if 	filters[-1] == 'date':
+					query2+="( date_decision < '"+date[1] +"' )"
+				else:
+					query2+="( date_decision < '"+date[1] +"' ) AND "
+			elif cond == "apres":
+				if 	filters[-1] == 'date':
+					query2+="( date_decision > '"+date[1] +"' )"
+				else:
+					query2+="( date_decision > '"+date[1] +"' ) AND "
 				
 						
 
@@ -119,7 +132,7 @@ def get_results():
 			query2+="("
 			for c in categories[:-1]:
 				query2+= "categorie=\""+c+ "\" OR "
-			if ('quantumD' or 'quantumR') in filters:
+			if filters[-1] != 'categories':
 				query2+= "categorie=\""+categories[-1]+ "\" AND "
 			else:
 				query2+="categorie=\""+categories[-1]+"\")"
@@ -128,7 +141,7 @@ def get_results():
 			query2+="("
 			for r in resultat[:-1]:
 				query2+= "resultat=\""+r+ "\" OR "
-			if ('categories') in filters:
+			if filters[-1] != 'resultat':
 				query2+= "resultat=\""+resultat[-1]+ "\") AND "
 			else:
 				query2+="resultat=\""+resultat[-1]+"\")"
@@ -140,17 +153,63 @@ def get_results():
 			#else:
 	query = '''SELECT * FROM decision JOIN demande ON decision.id_decision = demande.id_decision WHERE '''+query2+''
 	query0 = '''SELECT * FROM decision JOIN demande ON decision.id_decision = demande.id_decision'''
+
+	queryVilles = '''SELECT  count(*), ville FROM decision JOIN demande ON decision.id_decision = demande.id_decision WHERE '''+query2+ '''group by ville'''
+	queryCategorie = '''SELECT  count(*), categorie FROM decision JOIN demande ON decision.id_decision = demande.id_decision WHERE '''+query2+ '''group by categorie'''
+
+
 	print filters
 	print query2
+
+	data_categories = []
+
 	if len(filters) == 0:
 		cur.execute(query0)
-	else:	
+	else:
+		cur.execute(queryCategorie)
+		data_categories = cur.fetchall()
+	
 		cur.execute(query)
 	data = cur.fetchall()
 	query2=''
-	print data
-	return jsonify(result=data)
 
+	print data_categories
+
+	categories = []
+	children = []
+	for res in data_categories:
+		#print result[2] 
+		d = {'name': res[1], 'nb': res[0]}
+		categories.append(d)
+
+		queryResultat = '''SELECT  count(*), resultat FROM decision JOIN demande ON decision.id_decision = demande.id_decision WHERE '''+query2+ '''AND categorie='''+res[1]+''' group by resultat'''
+		data_resultats = cur.fetchall()
+		print data_resultats
+	ch = {'name':'Catégories', 'children':categories, 'nb':len(categories)}
+	children.append(ch)
+
+	#build_tree(data)
+	if len(data_categories) != 0:
+		return jsonify(result=data, name='Filtres', children=children)
+	else:
+		return jsonify(result=data)
+
+def build_tree(data):
+	print 'coucou'
+"""	
+	categories = []
+	children = []
+	for result in data:
+		#print result[2] 
+		d = {'name': result[1], 'nb': result[0]}
+		categories.append(d)
+	ch = {'name':'Catégories', 'children':categories, 'nb':len(categories)}
+	children.append(ch)
+
+	for d in data:
+		jd = {'name': d[2], 'nb': result[0]} 
+"""
+		
 	
 @app.route('/dashboard/')
 def dashboard():
@@ -182,7 +241,7 @@ def all_decisions():
 		#print result[2] 
 		d = {'name': result[1], 'nb': result[0]}
 		categories.append(d)
-	ch = {'name':'Categories', 'children':categories, 'nb':len(categories)}
+	ch = {'name':'Catégories', 'children':categories, 'nb':len(categories)}
 	children.append(ch)
 		
 	villes = []
@@ -209,7 +268,7 @@ def all_decisions():
 	
 		
 
-	return jsonify(name='Decisions', children=children)
+	return jsonify(name='Décisions', children=children)
 	
 if __name__ == '__main__':
 	app.run(debug=True)
