@@ -7,19 +7,21 @@ create table decision (
 	id_decision INT(10) NOT NULL AUTO_INCREMENT,
 	rg VARCHAR(10),
 	ville VARCHAR(15),
+	date_decision DATE,
 	juridiction VARCHAR(20),
 	description VARCHAR(2000), 
 	primary key (id_decision)
 ) ;
 
 create table demande ( 
-	id_decision INT(10) NOT NULL, 
+	id_demande INT(10) NOT NULL AUTO_INCREMENT, 
 	quantum_demande VARCHAR(20),
 	quantum_resultat VARCHAR(20),
 	categorie  VARCHAR(100),
-	resultat ENUM('accepte','rejette'),#, 'irrecevable', 'sursis à statuer'
-	primary key (id_decision),
-	constraint fk_decision foreign key (id_decision) references decision(id_decision)
+	resultat ENUM('accepte','rejette', 'sursis à statuer'),#, 'irrecevable'
+	id_decision INT(10),
+	primary key (id_demande),
+	constraint fk_demande_decision foreign key (id_decision) references decision(id_decision)
 
 );
 

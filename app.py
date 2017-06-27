@@ -25,7 +25,7 @@ def index():
 	cur.execute('''SELECT * FROM decision JOIN demande ON decision.id_decision = demande.id_decision''')
 	data = cur.fetchall()
 
-	cur.execute('''SELECT distinct categorie from demande''')
+	cur.execute('''SELECT count(*), categorie from demande group by categorie''')
 	categories = cur.fetchall()
 
 	#cur.execute('''SELECT distinct ville from decision''')
@@ -33,7 +33,7 @@ def index():
 
 	villes = cur.fetchall()
 
-	return render_template('index_test.html', data=data,categories=categories, villes=villes )
+	return render_template('index_test.html', data=data, categories=categories, villes=villes )
 
 @app.route('/index')
 def mindex():
@@ -69,11 +69,12 @@ def get_villes():
 @app.route('/search/')
 def get_results():
 	villes = json.loads(request.args.get('villes'))
+	date = json.loads(request.args.get('date'))
 	categories = json.loads(request.args.get('categories'))
 	quantumD = json.loads(request.args.get('quantumD'))
 	quantumR = json.loads(request.args.get('quantumR'))
 	resultat = json.loads(request.args.get('resultat'))
-	search = {'villes':len(villes), 'categories':len(categories),  'quantumD':len(quantumD), 'quantumR':len(quantumR), 'resultat':len(resultat)}
+	search = {'villes':len(villes),'date':len(date), 'categories':len(categories),  'quantumD':len(quantumD), 'quantumR':len(quantumR), 'resultat':len(resultat)}
 	filters = []
 	for key, value in search.iteritems():
 		if value>0:
@@ -93,7 +94,27 @@ def get_results():
 				query2+="ville='"+villes[-1]+"')"
 			else:
 				query2+="ville='"+villes[-1]+"') AND "	
-			
+		
+		if f == 'date':
+			cond = str(date[0])
+			if cond =="a":
+				query2+="("
+				for d in date[1:-1]:
+					query2+= "date_decision='"+d+ "' OR "
+				if 	len(filters) == 1:
+					query2+="date_decision='"+date[-1]+"')"
+				else:
+					query2+="date_decision='"+date[-1]+"') AND "
+			elif cond == "entre":
+				if 	len(filters) == 1:
+					query2+="( date_decision BETWEEN '"+date[2]+"' AND '"+ date[1] +"' )"
+				else:
+					query2+="( date_decision BETWEEN '"+date[2]+"' AND '"+ date[1] +"' ) AND"
+				
+				
+						
+
+	
 		if f == 'categories':
 			query2+="("
 			for c in categories[:-1]:
@@ -127,7 +148,7 @@ def get_results():
 		cur.execute(query)
 	data = cur.fetchall()
 	query2=''
-	
+	print data
 	return jsonify(result=data)
 
 	
@@ -161,7 +182,7 @@ def all_decisions():
 		#print result[2] 
 		d = {'name': result[1], 'nb': result[0]}
 		categories.append(d)
-	ch = {'name':'Categorie', 'children':categories, 'nb':len(categories)}
+	ch = {'name':'Categories', 'children':categories, 'nb':len(categories)}
 	children.append(ch)
 		
 	villes = []
@@ -169,12 +190,12 @@ def all_decisions():
 		#print result[2] 
 		d = {'name': result[1], 'nb': result[0]}
 		villes.append(d)
-	v = {'name':'Ville','children':villes, 'nb':len(villes)}
+	v = {'name':'Villes','children':villes, 'nb':len(villes)}
 	children.append(v)
 		
 
 	juridiction = []
-	j = {'name':'Juridiction','children':juridiction, 'nb':len(juridiction)}
+	j = {'name':'Juridictions','children':juridiction, 'nb':len(juridiction)}
 	children.append(j)
 	
 	resultats = []
@@ -182,7 +203,7 @@ def all_decisions():
 		d = {'name': result[1], 'nb': result[0]}
 		resultats.append(d)
 
-	r = {'name':'Resultat','children':resultats, 'nb':len(resultats)}
+	r = {'name':'Resultats','children':resultats, 'nb':len(resultats)}
 	children.append(r)
 	
 	
