@@ -171,23 +171,36 @@ def get_results():
 	
 		cur.execute(query)
 	data = cur.fetchall()
-	query2=''
+	#query2=''
 
 	print data_categories
 
 	categories = []
 	children = []
+
 	for res in data_categories:
 		#print result[2] 
-		d = {'name': res[1], 'nb': res[0]}
+		
+		query3 = query2+ " AND categorie=\""+res[1]+"\" group by resultat "
+		queryResultat = '''SELECT  count(*), resultat FROM decision JOIN demande ON decision.id_decision = demande.id_decision WHERE '''+query3+''
+		print queryResultat
+
+		cur.execute(queryResultat)
+		data_resultats = cur.fetchall()
+		
+		resultats = []
+		for results in data_resultats:
+			r = {'name': results[1], 'nb': results[0]}
+			resultats.append(r)
+			print r
+
+		d = {'name': res[1], 'nb': res[0], 'children':resultats}
 		categories.append(d)
 
-		queryResultat = '''SELECT  count(*), resultat FROM decision JOIN demande ON decision.id_decision = demande.id_decision WHERE '''+query2+ '''AND categorie='''+res[1]+''' group by resultat'''
-		data_resultats = cur.fetchall()
-		print data_resultats
 	ch = {'name':'Catégories', 'children':categories, 'nb':len(categories)}
 	children.append(ch)
-
+	query2=''
+	
 	#build_tree(data)
 	if len(data_categories) != 0:
 		return jsonify(result=data, name='Filtres', children=children)

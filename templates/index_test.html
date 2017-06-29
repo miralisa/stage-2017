@@ -506,15 +506,23 @@
 				var div_tree = document.getElementById("tree_map");
 				console.log(div_tree);
 				div_tree.remove();//(div_tree.childNodes[0]);
-			
+				
 				var div_tree_n = document.createElement("div");
 				var parentNode = document.getElementById("popup");
 				div_tree_n.id = "tree_map"
 				parentNode.appendChild(div_tree_n);
-			
-				build_tree(data);
+				
+				if(data.children !=null){	
+					build_tree(data);
+				} else{
+					console.log(recordsJson);
+					
+					build_tree(recordsJson);
+
+				}
 		        // $( "table" ).text(data.result);
-		    });
+			//}
+		});
 
 		}
 
@@ -617,6 +625,11 @@
 
 		d3.select(self.frameElement).style("height", "800px");
 
+		function colores(n) {
+			var colores_g = ["#3366cc", "#dc3912", "#ff9900", "#109618", "#990099", "#0099c6", "#dd4477", "#66aa00", "#b82e2e", "#316395", "#994499", "#22aa99", "#aaaa11", "#6633cc", "#e67300", "#8b0707", "#651067", "#329262", "#5574a6", "#3b3eac"];
+			return colores_g[Math.round(Math.random() * (colores_g.length-1))];
+		}
+
 		function update(source) {
 
 	  // Compute the new tree layout.
@@ -636,10 +649,7 @@
 	  .attr("transform", function(d) { return "translate(" + source.y0 + "," + source.x0 + ")"; })
 	  .on("click", click);
 	  
-	  function colores(n) {
-	  	var colores_g = ["#3366cc", "#dc3912", "#ff9900", "#109618", "#990099", "#0099c6", "#dd4477", "#66aa00", "#b82e2e", "#316395", "#994499", "#22aa99", "#aaaa11", "#6633cc", "#e67300", "#8b0707", "#651067", "#329262", "#5574a6", "#3b3eac"];
-	  	return colores_g[Math.round(Math.random() * (colores_g.length-1))];
-	  }
+	  
 
 	  nodeEnter.append("circle")
 	  .attr("r", 1e-6)
@@ -648,8 +658,8 @@
 	  //.style('stroke', function(d) { return colores(); });
 
 	  nodeEnter.append("text")
-	  .attr("x", function(d) { return d.children || d._children ? -20 : 20; })
-	  .attr("dy", ".30em")
+	  .attr("x", function(d) { return d.children || d._children ? -15 : 15; })
+	  .attr("dy", ".10em")
 	  .attr("text-anchor", function(d) { return d.children || d._children ? "end" : "start"; })
 	  .text(function(d) { return d.name; })
 	  .style("fill-opacity", 1e-6);

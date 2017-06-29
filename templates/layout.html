@@ -7,17 +7,15 @@
 	<meta name="viewport" content="user-scalable=no, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, minimal-ui">
 
   <!--  <meta name="viewport" content="width=device-width, initial-scale=1"> -->
-	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-	<link rel="stylesheet" type="text/css" href="http://dc-js.github.io/dc.js/css/dc.css"/>
+	<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+	<link rel="stylesheet" type="text/css" href="../static/lib/css/dc.css"/>
  
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+	<script src="../static/lib/js/jquery.min.js"></script>
+	<script src="../static/lib/js/bootstrap.min.js"></script>
 
 	<script type=text/javascript>
 	  var $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
 	</script>
-  
-   <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.1.1/cytoscape.js"></script>
   
   <!-- Dashboard -->
    <script src="../static/lib/js/crossfilter.js"></script>
@@ -25,16 +23,17 @@
    <script src="../static/lib/js/dc.min.js"></script> 
    <script src="../static/lib/js/queue.js"></script>
 
-   <!-- index_test -->
+   <!-- index_test
    <script src="//d3js.org/d3.v3.min.js"></script>
+
+  -->
 
  
 
-   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css" integrity="sha512-07I2e+7D8p6he1SIM+1twR5TIrhUQn9+I6yjqD53JQjFiMf8EtC93ty0/5vJTZGF8aAocvHYNEDJajGdNx1IsQ==" crossorigin=""/>
+   <!-- 
+     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css" integrity="sha512-07I2e+7D8p6he1SIM+1twR5TIrhUQn9+I6yjqD53JQjFiMf8EtC93ty0/5vJTZGF8aAocvHYNEDJajGdNx1IsQ==" crossorigin=""/>
 	<script src="https://unpkg.com/leaflet@1.0.3/dist/leaflet.js" integrity="sha512-A7vV8IFfih/D732iSSKi20u/ooOfj/AGehOKq0f4vLT1Zr2Y+RX7C+w8A1gaSasGtRUZpF/NZgzSAu4/Gc41Lg==" crossorigin=""></script>
 
-
-   <!-- 
    <script src="http://dc-js.github.io/dc.js/js/crossfilter.js"></script>
    <script src="http://dc-js.github.io/dc.js/js/d3.js"></script>   
    <script src="http://dc-js.github.io/dc.js/js/dc.js"></script>
@@ -99,7 +98,7 @@ div.tooltip {
     height: 28px;					
     padding: 2px;				
     font: 12px sans-serif;		
-    background: lightsteelblue;	
+    background: #d9edf7;	
     border: 0px;		
     border-radius: 8px;			
     pointer-events: none;			
