@@ -125,7 +125,13 @@ def get_results():
 				else:
 					query2+="( date_decision > '"+date[1] +"' ) AND "
 				
-						
+		if f == 'texte':
+			#SELECT description FROM decision WHERE MATCH(description) AGAINST('Agen');
+			if filters[-1] == 'texte':
+				query2+="( MATCH(description) AGAINST(\""+texte+"\" IN BOOLEAN MODE))"
+			else:
+				query2+="( MATCH(description) AGAINST(\""+texte+"\" IN BOOLEAN MODE)) AND "	
+		
 
 	
 		if f == 'categories':
@@ -154,8 +160,8 @@ def get_results():
 	query = '''SELECT * FROM decision JOIN demande ON decision.id_decision = demande.id_decision WHERE '''+query2+''
 	query0 = '''SELECT * FROM decision JOIN demande ON decision.id_decision = demande.id_decision'''
 
-	queryVilles = '''SELECT  count(*), ville FROM decision JOIN demande ON decision.id_decision = demande.id_decision WHERE '''+query2+ '''group by ville'''
-	queryCategorie = '''SELECT  count(*), categorie FROM decision JOIN demande ON decision.id_decision = demande.id_decision WHERE '''+query2+ '''group by categorie'''
+	#queryVilles = '''SELECT  count(*), ville FROM decision JOIN demande ON decision.id_decision = demande.id_decision WHERE '''+query2+ '''group by ville'''
+	queryCategorie = '''SELECT  count(*) as nb_categorie, categorie FROM decision JOIN demande ON decision.id_decision = demande.id_decision WHERE '''+query2+ ''' group by categorie order by nb_categorie desc'''
 
 
 	print filters
@@ -181,8 +187,8 @@ def get_results():
 	for res in data_categories:
 		#print result[2] 
 		
-		query3 = query2+ " AND categorie=\""+res[1]+"\" group by resultat "
-		queryResultat = '''SELECT  count(*), resultat FROM decision JOIN demande ON decision.id_decision = demande.id_decision WHERE '''+query3+''
+		query3 = query2+ " AND categorie=\""+res[1]+"\" group by resultat order by nb_res desc"
+		queryResultat = '''SELECT  count(*) as nb_res, resultat FROM decision JOIN demande ON decision.id_decision = demande.id_decision WHERE '''+query3+''
 		print queryResultat
 
 		cur.execute(queryResultat)
@@ -239,13 +245,13 @@ def testd3():
 def all_decisions():
 	cur = conn.cursor()
 	#cur.execute('''SELECT * FROM decision JOIN demande ON decision.id_decision = demande.id_decision''')
-	cur.execute('''SELECT count(*), categorie from demande group by categorie''')
+	cur.execute('''SELECT count(*) as nb_categorie, categorie from demande group by categorie order by nb_categorie desc''')
 	data = cur.fetchall()
 	
-	cur.execute('''SELECT count(*), ville from decision group by ville''')
+	cur.execute('''SELECT count(*) as nb_ville, ville from decision group by ville order by nb_ville desc''')
 	data_villes = cur.fetchall()
 
-	cur.execute('''SELECT count(*), resultat from demande group by resultat''')
+	cur.execute('''SELECT count(*) as nb_res, resultat from demande group by resultat order by nb_res desc''')
 	data_resultat = cur.fetchall()
 	
 	categories = []

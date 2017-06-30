@@ -171,6 +171,12 @@
 	</div>
 </div>
 
+<div class="btn-group" id="fltrMotCle" style="display:none;">
+	
+	<button id="showFullTexte" class="btn btn-primary" >Mot-clé</button> <!-- style="display:none;" -->
+	<button id="editFullTexte"  title="Modifier" class="btn btn-info"> <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span> </button> 
+	<button id="removeFullTexte" title="Supprimer" class="btn  btn-info"> <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> </button>	
+</div>
 
 <div class="btn-group" id="fltrCategories" style="display:none;">
 	
@@ -241,11 +247,11 @@
 						<td>Ville</td>
 						<td>Date</td>
 						<td>Juridiction</td>
-						<td>Description</td>
 						<td>Quantum demandé</td>
 						<td>Quantum resultat</td>
 						<td>Catégorie</td>
 						<td>Resultat</td>
+						<td>Description</td>
 
 					</thead>
 					<tbody id="tbody">
@@ -254,12 +260,14 @@
 							<td>{{d[1]}}</td>
 							<td>{{d[2]}}</td>
 							<td>{{d[3]}}</td>
-							<td>{{d[4]}}</td>
-							<td>{{d[5]}}</td>
+							<td>{{d[4]}}</td>							
 							<td>{{d[7]}}</td>
 							<td>{{d[8]}}</td>
 							<td>{{d[9]}}</td>
 							<td>{{d[10]}}</td>
+							<td> <a href="#" title="{{d[5]}}">+</a> </td>
+							<!--<td>{{d[5]}}</td> -->
+						
 						</tr>
 						{% endfor %}
 					</tbody>
@@ -287,6 +295,8 @@
 	function makeGraphs(error,recordsJson) {
 		if(error) console.log(error);
 
+		$("td").tooltip({tooltipClass: "custom-tooltip"});
+
 		console.log(recordsJson);
 		build_tree(recordsJson);
 
@@ -294,6 +304,19 @@
 		document.getElementById("selectAll").onclick = function() {selectAll("categories")};
 		document.getElementById("deselectAllV").onclick = function() {deselectAll("villes")};
 		document.getElementById("selectAllV").onclick = function() {selectAll("villes")};
+
+		document.getElementById("removeFullTexte").onclick = function() {
+			document.getElementById("searchByKW").value = "";
+			full_texte ="";
+			document.getElementById("fltrMotCle").style = "display:none";
+			search();
+
+
+		};
+
+		document.getElementById("editFullTexte").onclick = function() {
+			editFilters("motCle");	
+		};
 
 		document.getElementById("removeCategories").onclick = function() {
 			deselectAll("categories");
@@ -386,12 +409,13 @@
 			$('input:checkbox', "."+type).prop('checked', true);
 		}
 
-		categories = [];
-		villes = [];
-		quantumD = [];
-		quantumR = [];
-		resultats = [];
-		date = [];
+		var categories = [],
+		villes = [],
+		quantumD = [],
+		quantumR = [],
+		resultats = [],
+		date = [],
+		full_texte ="";
 
 		$('#searchByDate').click(function(){
 			date = [];
@@ -419,6 +443,21 @@
 
 			}
 			
+		});
+		
+		$('#searchByKeyWord').click(function(){
+			full_texte = "";
+			var inputFullTexte = document.getElementById("searchByKW").value;
+			console.log("click " + inputFullTexte);
+			full_texte = inputFullTexte;
+			if(full_texte.length == 0){
+				document.getElementById("fltrMotCle").style = "display:none";
+			}else{
+				document.getElementById("fltrMotCle").style = "display:";
+				search();
+			}
+			
+
 		});
 
 		$('#searchByResultat').click(function(){
@@ -470,11 +509,12 @@
 				tr.append('<td>' + decision[2] + '</td>');
 				tr.append('<td>' + decision[3] + '</td>');
 				tr.append('<td>' + decision[4] + '</td>');
-				tr.append('<td>' + decision[5] + '</td>');
+				//tr.append('<td>' + decision[5] + '</td>');
 				tr.append('<td>' + decision[7] + '</td>');
 				tr.append('<td>' + decision[8] + '</td>');
 				tr.append('<td>' + decision[9] + '</td>');
 				tr.append('<td>' + decision[10] + '</td>');
+				tr.append("<td>  <a href='#' title=\""+ decision[5] + "\">+</a> </td>");
 
 			})
 		};
@@ -484,7 +524,7 @@
 				categories: JSON.stringify(categories),
 				villes: JSON.stringify(villes),
 				date: JSON.stringify(date),
-				texte: JSON.stringify([]),
+				texte: JSON.stringify(full_texte),
 				juridiction: JSON.stringify([]),
 				quantumD: JSON.stringify(quantumD),
 				quantumR: JSON.stringify(quantumR),
@@ -497,7 +537,7 @@
 					showRes.innerHTML = "Désolé, aucun résultat ne correspond pas à votre recherche."
 				}else{
 					showRes.style="display: ;"
-					showRes.innerHTML = "Voici <strong>"+ data.result.length+ "</strong> résultat(s) correspondant à votre recherche. "
+					showRes.innerHTML = "Voici <strong>"+ data.result.length+ "</strong> demande(s) correspondant à votre recherche. "
 
 				}
 				console.log(data);

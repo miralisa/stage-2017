@@ -9,9 +9,11 @@ create table decision (
 	ville VARCHAR(15),
 	date_decision DATE,
 	juridiction VARCHAR(20),
-	description VARCHAR(2000), 
+	description text, 
 	primary key (id_decision)
 ) ;
+
+ALTER TABLE decision ADD FULLTEXT(description);
 
 create table demande ( 
 	id_demande INT(10) NOT NULL AUTO_INCREMENT, 
