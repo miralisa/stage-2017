@@ -3,6 +3,7 @@
 
 from flask import Flask, render_template, jsonify, Response, request, json
 from flaskext.mysql import MySQL
+import random
 
 app = Flask(__name__)
 mysql = MySQL()
@@ -254,40 +255,86 @@ def all_decisions():
 	cur.execute('''SELECT count(*) as nb_res, resultat from demande group by resultat order by nb_res desc''')
 	data_resultat = cur.fetchall()
 	
+
 	categories = []
 	children = []
+	tree2_children = []
+	chJuridiction = []
+	chCategories = []
+
+	juridiction = []
+	j = {'name':'Juridictions','children':juridiction, 'color':colors()}#, 'nb':len(juridiction)}
+	children.append(j)
+
+	children.append({'name':'Date', 'children':[], 'color':colors()})
+	
 	for result in data:
 		#print result[2] 
-		d = {'name': result[1], 'nb': result[0]}
-		categories.append(d)
-	ch = {'name':'Catégories', 'children':categories, 'nb':len(categories)}
-	children.append(ch)
+		query3 = "categorie=\""+result[1]+"\" group by resultat order by nb_res desc"
+		queryResultat = '''SELECT  count(*) as nb_res, resultat FROM decision JOIN demande ON decision.id_decision = demande.id_decision WHERE '''+query3+''
+	
+		cur.execute(queryResultat)
+		data_resultats = cur.fetchall()
 		
+		resultats = []
+		for results in data_resultats:
+			if results[1] == 'accepte':	
+				color = 'green'
+			elif  results[1] == 'rejette': 
+				color = 'red'
+			else:
+				color ='yellow'
+			r = {'name': results[1], 'nb': results[0], 'color':color}
+			resultats.append(r)	
+
+		d = {'name': result[1], 'nb': result[0], 'color':colors(), 'children':resultats}
+		categories.append(d)
+	
+	ch = {'name':'Catégories', 'children':categories, 'color':colors()} #, 'nb':len(categories)}
+	tree2_children.append(ch)
+	
+	
 	villes = []
 	for result in data_villes:
 		#print result[2] 
-		d = {'name': result[1], 'nb': result[0]}
+		d = {'name': result[1], 'nb': result[0],  'color':colors()}
 		villes.append(d)
-	v = {'name':'Villes','children':villes, 'nb':len(villes)}
+		#query2 +=  "ville = \"" + result[1] + "\""
+		#queryCategorie = '''SELECT  count(*) as nb_categorie, categorie FROM decision JOIN demande ON decision.id_decision = demande.id_decision WHERE '''+query2+ ''' group by categorie order by nb_categorie desc'''
+		#cur.execute(queryCategorie)
+
+	
+	v = {'name':'Villes','children':villes, 'color':colors()}#, 'nb':len(villes)}
 	children.append(v)
 		
-
-	juridiction = []
-	j = {'name':'Juridictions','children':juridiction, 'nb':len(juridiction)}
-	children.append(j)
+	#juridiction.append({'name':'Villes', 'children':villes})
+	
 	
 	resultats = []
 	for result in data_resultat:
-		d = {'name': result[1], 'nb': result[0]}
+		if result[1] == 'accepte':	
+			color = 'green'
+		elif  result[1] == 'rejette': 
+			color = 'red'
+		else:
+			color ='yellow'		
+		d = {'name': result[1], 'nb': result[0], 'color':color}
 		resultats.append(d)
 
-	r = {'name':'Resultats','children':resultats, 'nb':len(resultats)}
+	r = {'name':'Resultats','children':resultats,'parent':'Filtres', 'color':colors()}#, 'nb':len(resultats)}
 	children.append(r)
 	
+	terms = {'name':'Terms','children':[],'parent':'Filtres', 'color':colors()}#, 'nb':len(resultats)}
+	children.append(terms)
 	
-		
+	tree_root2 = {'name':'Filtres','children':children, 'color':colors(), "parent": "null"}	
+	tree_root = {'name':'Filtres','children':tree2_children, 'color':colors(), "parent": "null"}	
 
-	return jsonify(name='Décisions', children=children)
+	return jsonify(tree=tree_root, tree2=tree_root2)
+
+def colors():
+	colores_g = ["#3366cc", "#dc3912", "#ff9900", "#109618", "#990099", "#0099c6", "#dd4477", "#66aa00", "#b82e2e", "#316395", "#994499", "#22aa99", "#aaaa11", "#6633cc", "#e67300", "#8b0707", "#651067", "#329262", "#5574a6", "#3b3eac"]
+	return colores_g[random.randint(0,len(colores_g)-1)]
 	
 if __name__ == '__main__':
 	app.run(debug=True)

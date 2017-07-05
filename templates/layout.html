@@ -81,6 +81,23 @@
 	border-radius: 5px;
 }
 
+      circle {
+          fill: #fff;
+          stroke: #666;
+          stroke-width: 1px;
+      }
+      .nodeA text, .nodeD text {
+          font: 12px sans-serif;
+      }
+      .nodeA, .nodeD {
+                cursor: pointer;
+            }
+      .linkA, .linkD {
+             fill: none;
+             stroke: #ccc;
+             stroke-width: 2px;
+         }
+
 .node {
   cursor: pointer;
 }
@@ -95,7 +112,7 @@
   font: 12px sans-serif;
 }
 
-.link {
+.linkA, .linkD {
   fill: none;
   stroke: #ccc;
   stroke-width: 1.5px;
