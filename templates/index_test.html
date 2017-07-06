@@ -1,6 +1,7 @@
 {% extends "layout.html" %}
 {% block content %}
 <br>
+<!--
 <div class="panel-group">  
 	<div class="panel panel-info">
 		<div class="panel-heading">
@@ -18,7 +19,6 @@
 					<li><a data-toggle="tab" id="jur" href="#tabJur">Juridiction</a></li>
 					<li><a data-toggle="tab" id="villes" href="#tabVilles">Villes</a></li>
 					<li><a data-toggle="tab" id="date" href="#tabDate">Date</a></li>
-					<!-- optionel -->
 					<li><a data-toggle="tab" id="categories" href="#tabCategories">Catégories</a></li>
 					
 					<li><a data-toggle="tab" id="quantumDemande" href="#tabQuantumDemande">Quantum demandé</a></li>
@@ -159,7 +159,6 @@
 					<div id="tabJur" class="tab-pane fade">
 						<br>
 						<div class="jur">
-							<!--<input type="text" class="form-control input" id="searchByJr">-->
 							<br>
 
 						</div>
@@ -170,7 +169,7 @@
 		</div>
 	</div>
 </div>
-
+-->
 <div class="btn-group" id="fltrMotCle" style="display:none;">
 	
 	<button id="showFullTexte" class="btn btn-primary" >Mot-clé</button> <!-- style="display:none;" -->
@@ -224,9 +223,14 @@
 
 <button id="clearAll" class="btn btn-primary" style="display:none;">Tout effacer</button> <!-- style="display:none;" -->
 
-<!--<br><br>-->
-<br><br>
+<!--<br><br>
+<br><br>-->
 <div class="alert alert-info" id="resultat" style="display: none;" role="alert"></div>
+
+<div id="tree_map">
+</div>
+<div id="popup"></div>
+ <br>
 
 <div class="panel-group">  
 	<div class="panel panel-info">
@@ -278,12 +282,75 @@
 	</div>
 </div>
 
-<div id="tree_map">
+
+
+<div id="dialog-filtres" style="display:none;">
+
+<div class="panel-group">  
+	<div class="panel panel-info">
+		<div class="panel-heading">
+			<h3 class="panel-title">
+				<a data-toggle="collapse" id="showFiltres" href="#filtresFullText">Recherche par mot-clé </a>
+
+			</h3>
+		</div>
+		<div id="filtresFullText" class="panel-collapse collapse">
+			<div class="panel-body">
+				<div class="motCle">
+					<input type="text" class="form-control input" id="searchByKW">
+				</div>					
+			</div>
+		</div>
+	</div>
 </div>
-<div id="popup"></div>
- <div id="viz" class="dd"></div>
- <div id="tree-container"class="full"></div>
-<br>
+
+	<div class="panel-group">  
+		<div class="panel panel-info">
+			<div class="panel-heading">
+				<h3 class="panel-title">
+					<a data-toggle="collapse" id="showFiltres" href="#filtresDate">Recherche par date </a>
+
+				</h3>
+			</div>
+			<div id="filtresDate" class="panel-collapse collapse">
+				<div class="panel-body">
+					<div class="date">
+						<form class="form-inline" id="form_date">
+							<label class="mr-sm-2" for="sel_cond_date">Condition</label> <br>
+							<select class="form-control mb-2 mr-sm-2 mb-sm-0" id="sel_cond_date">
+								<option value="a">à</option>
+								<option value="entre">entre</option>
+								<option value="avant">avant</option>
+								<option value="apres">après</option>
+							</select>
+
+							<input type="date" class="form-control input-sm" placeholder="aaaa-mm-jj" id="date1">
+
+						</form>
+					</div>
+					
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+
+		<div class="panel-group">  
+		<div class="panel panel-info">
+			<div class="panel-heading">
+				<h3 class="panel-title">
+					<a data-toggle="collapse" id="showFiltres" href="#filtresJur">Recherche par juridiction </a>
+				</h3>
+			</div>
+			<div id="filtresJur" class="panel-collapse collapse">
+				<div class="panel-body">
+								
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
 
 
 

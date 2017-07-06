@@ -78,6 +78,34 @@
 
 		};
 
+		$("#dialog-filtres").dialog(
+			{
+			title: "Filtres",
+			resizable: false,
+			height: "auto",
+			width: 400,
+			modal: true,
+			buttons: {
+				"Valider":{
+				id: "filtreValide",
+				text: "Valider",
+				class: "btn btn-info",
+				click: function(){
+							//search();
+				            $( this ).dialog( "close" );
+				         }  
+				},
+				"Annulrer":{ 
+					text: "Annulrer",
+					class: "btn btn-info",
+					click: function() {
+					$( this ).dialog( "close" );
+				}
+			}
+			}
+
+		});
+
 		document.getElementById("sel_cond_date").onchange = function() {
 			var inputDate = document.createElement("input");
 			var parentNode = document.getElementById("form_date");
@@ -188,6 +216,12 @@
 
 		});
 
+
+		$("#filtreValide").click(function() {
+			console.log("coucou");
+			alert("kdsk");
+		});
+
 		$("#searchByCategory").click(function() {
 			categories=[];
 
@@ -253,7 +287,7 @@
 				console.log(data);
 				updateTabel(data.result);
 
-				var div_tree = document.getElementById("tree-container");
+				var div_tree = document.getElementById("tree_map");
 				console.log(div_tree);
 				div_tree.remove();//(div_tree.childNodes[0]);
 				
@@ -355,7 +389,7 @@
 		    //.attr("width", width + margin.right + margin.left)
 		    //.attr("height", height + margin.top + margin.bottom)
 		    .attr("width", "100%")
-		    .attr("height", "800px")
+		    .attr("height", "600px")
 		    .call(d3.behavior.zoom()
 		        .scaleExtent([0.7, 50])
 		        .on("zoom", function () {
@@ -598,6 +632,42 @@
 
 		// Toggle children on click.
 		function click(d) {
+
+			if (d.name == "Filtres"){
+				console.log(d.name);
+
+				$("#dialog-filtres").dialog(
+					{
+					title: "Filtres",
+					resizable: false,
+					height: "auto",
+					width: 400,
+					modal: true,
+					buttons: {
+						"Valider":{
+						id: "filtreValide",
+						text: "Valider",
+						class: "btn btn-info",
+						click: function(){
+									//search();
+						            $( this ).dialog( "close" );
+						         }  
+						},
+						"Annulrer":{ 
+							text: "Annulrer",
+							class: "btn btn-info",
+							click: function() {
+							$( this ).dialog( "close" );
+						}
+					}
+					}
+
+				}).dialog("open");
+
+
+			} else{
+
+
 		    if (d.children) {
 		        d._children = d.children;
 		        d.children = null;
@@ -606,9 +676,8 @@
 		        d._children = null;
 		    }
 		    update(root);
-		    //centerNode(root);
-		    //centerNode(root2);
 		} 
+	}
 
 	}
 
