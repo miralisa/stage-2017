@@ -249,7 +249,7 @@ def all_decisions():
 	cur.execute('''SELECT count(*) as nb_categorie, categorie from demande group by categorie order by nb_categorie desc''')
 	data = cur.fetchall()
 	
-	cur.execute('''SELECT count(*) as nb_ville, ville from decision group by ville order by nb_ville desc''')
+	cur.execute('''SELECT count(*) as nb_ville, ville from decision JOIN demande ON decision.id_decision = demande.id_decision group by ville order by nb_ville desc''')
 	data_villes = cur.fetchall()
 
 	cur.execute('''SELECT count(*) as nb_res, resultat from demande group by resultat order by nb_res desc''')
@@ -291,21 +291,51 @@ def all_decisions():
 		categories.append(d)
 	
 	ch = {'name':'Catégories', 'children':categories, 'color':colors()} #, 'nb':len(categories)}
-	tree2_children.append(ch)
+	
+	children.append(ch)
 	
 	
 	villes = []
 	for result in data_villes:
 		#print result[2] 
-		d = {'name': result[1], 'nb': result[0],  'color':colors()}
+		query =  "ville = \"" + result[1] + "\""
+		queryCategorie = '''SELECT  count(*) as nb_categorie, categorie FROM decision JOIN demande ON decision.id_decision = demande.id_decision WHERE '''+query+ ''' group by categorie order by nb_categorie desc'''
+		cur.execute(queryCategorie)
+		categorieParVille = cur.fetchall()
+		resultats = []
+
+		for c in categorieParVille:
+			query3 = "ville = \"" + result[1] + "\" AND categorie=\""+c[1]+"\" group by resultat order by nb_res desc"
+			queryResultat = '''SELECT  count(*) as nb_res, resultat FROM decision JOIN demande ON decision.id_decision = demande.id_decision WHERE '''+query3+''
+			cur.execute(queryResultat)
+			resParCat = cur.fetchall()
+			
+			children = []
+			for res in resParCat:
+				if res[1] == 'accepte':	
+					color = 'green'
+				elif  res[1] == 'rejette': 
+					color = 'red'
+				else:
+					color ='yellow'
+				
+				d = {'name': res[1], 'nb': res[0],'tree':'Resultats', 'color':color}
+				children.append(d)
+
+			r = {'name': c[1], 'nb': c[0], 'children':children,'tree':'Categories', 'color':colors()}
+			resultats.append(r)
+			
+
+			
+		d = {'name': result[1], 'nb': result[0], 'tree':'Villes', 'children': resultats,  'color':colors()}
 		villes.append(d)
-		#query2 +=  "ville = \"" + result[1] + "\""
-		#queryCategorie = '''SELECT  count(*) as nb_categorie, categorie FROM decision JOIN demande ON decision.id_decision = demande.id_decision WHERE '''+query2+ ''' group by categorie order by nb_categorie desc'''
-		#cur.execute(queryCategorie)
+		
 
 	
+	
+	
 	v = {'name':'Villes','children':villes, 'color':colors()}#, 'nb':len(villes)}
-	children.append(v)
+	tree2_children.append(v)
 		
 	#juridiction.append({'name':'Villes', 'children':villes})
 	
@@ -327,10 +357,10 @@ def all_decisions():
 	terms = {'name':'Terms','children':[],'parent':'Filtres', 'color':colors()}#, 'nb':len(resultats)}
 	children.append(terms)
 	
-	tree_root2 = {'name':'Filtres','children':children, 'color':colors(), "parent": "null"}	
+	#tree_root2 = {'name':'Filtres','children':children, 'color':colors(), "parent": "null"}	
 	tree_root = {'name':'Filtres','children':tree2_children, 'color':colors(), "parent": "null"}	
 
-	return jsonify(tree=tree_root, tree2=tree_root2)
+	return jsonify(tree=tree_root)
 
 def colors():
 	colores_g = ["#3366cc", "#dc3912", "#ff9900", "#109618", "#990099", "#0099c6", "#dd4477", "#66aa00", "#b82e2e", "#316395", "#994499", "#22aa99", "#aaaa11", "#6633cc", "#e67300", "#8b0707", "#651067", "#329262", "#5574a6", "#3b3eac"]
