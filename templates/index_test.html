@@ -224,139 +224,171 @@
 <button id="clearAll" class="btn btn-primary" style="display:none;">Tout effacer</button> <!-- style="display:none;" -->
 
 <!--<br><br>
-<br><br>-->
-<div class="alert alert-info" id="resultat" style="display: none;" role="alert"></div>
+	<br><br>-->
+	<div class="alert alert-info" id="resultat" style="display: none;" role="alert"></div>
 
-<div id="tree_map">
-</div>
-<div id="popup"></div>
- <br>
-
-<div class="panel-group">  
-	<div class="panel panel-info">
-		<div class="panel-heading">
-			<h3 class="panel-title">
-				<a data-toggle="collapse" id="showFiltres" href="#resultats_recherche">Tableau de résultats </a>
-
-			</h3>
-		</div>
-		<div id="resultats_recherche" class="panel-collapse collapse">
-
-			<div class="panel-body">
-
-
-				<table class="table table-condensed text-center ">
-					<thead>
-						<td>RG</td>
-						<td>Ville</td>
-						<td>Date</td>
-						<td>Juridiction</td>
-						<td>Quantum demandé</td>
-						<td>Quantum resultat</td>
-						<td>Catégorie</td>
-						<td>Resultat</td>
-						<td>Description</td>
-
-					</thead>
-					<tbody id="tbody">
-						{% for d in data %} 
-						<tr>
-							<td>{{d[1]}}</td>
-							<td>{{d[2]}}</td>
-							<td>{{d[3]}}</td>
-							<td>{{d[4]}}</td>							
-							<td>{{d[7]}}</td>
-							<td>{{d[8]}}</td>
-							<td>{{d[9]}}</td>
-							<td>{{d[10]}}</td>
-							<td> <a href="#" title="{{d[5]}}">+</a> </td>
-							<!--<td>{{d[5]}}</td> -->
-						
-						</tr>
-						{% endfor %}
-					</tbody>
-				</table>
-
-			</div>
-		</div>
+	<div id="tree_map">
 	</div>
-</div>
-
-
-
-<div id="dialog-filtres" style="display:none;">
-
-<div class="panel-group">  
-	<div class="panel panel-info">
-		<div class="panel-heading">
-			<h3 class="panel-title">
-				<a data-toggle="collapse" id="showFiltres" href="#filtresFullText">Recherche par mot-clé </a>
-
-			</h3>
-		</div>
-		<div id="filtresFullText" class="panel-collapse collapse">
-			<div class="panel-body">
-				<div class="motCle">
-					<input type="text" class="form-control input" id="searchByKW">
-				</div>					
-			</div>
-		</div>
-	</div>
-</div>
+	<div id="popup"></div>
+	<br>
 
 	<div class="panel-group">  
 		<div class="panel panel-info">
 			<div class="panel-heading">
 				<h3 class="panel-title">
-					<a data-toggle="collapse" id="showFiltres" href="#filtresDate">Recherche par date </a>
+					<a data-toggle="collapse" id="showFiltres" href="#resultats_recherche">Tableau de résultats </a>
 
 				</h3>
 			</div>
-			<div id="filtresDate" class="panel-collapse collapse">
+			<div id="resultats_recherche" class="panel-collapse collapse">
+
 				<div class="panel-body">
-					<div class="date">
-						<form class="form-inline" id="form_date">
-							<label class="mr-sm-2" for="sel_cond_date">Condition</label> <br>
-							<select class="form-control mb-2 mr-sm-2 mb-sm-0" id="sel_cond_date">
-								<option value="a">à</option>
-								<option value="entre">entre</option>
-								<option value="avant">avant</option>
-								<option value="apres">après</option>
-							</select>
 
-							<input type="date" class="form-control input-sm" placeholder="aaaa-mm-jj" id="date1">
 
-						</form>
-					</div>
-					
+					<table class="table table-condensed text-center ">
+						<thead>
+							<td>RG</td>
+							<td>Ville</td>
+							<td>Date</td>
+							<td>Juridiction</td>
+							<td>Quantum demandé</td>
+							<td>Quantum resultat</td>
+							<td>Catégorie</td>
+							<td>Resultat</td>
+							<td>Description</td>
+
+						</thead>
+						<tbody id="tbody">
+							{% for d in data %} 
+							<tr>
+								<td>{{d[1]}}</td>
+								<td>{{d[2]}}</td>
+								<td>{{d[3]}}</td>
+								<td>{{d[4]}}</td>							
+								<td>{{d[7]}}</td>
+								<td>{{d[8]}}</td>
+								<td>{{d[9]}}</td>
+								<td>{{d[10]}}</td>
+								<td> <a href="#" title="{{d[5]}}">+</a> </td>
+								<!--<td>{{d[5]}}</td> -->
+
+							</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+
 				</div>
 			</div>
 		</div>
 	</div>
+
+
+
+	<div id="dialog-filtres" style="display:none;">
+	<button id="clearFiltres" style="position:relative; left:73%;" class="btn btn-sm btn-info">Réinitialiser tout</button>
+						
+		<div class="panel-group">  
+			<div class="panel panel-info">
+				<div class="panel-heading">
+					<h3 class="panel-title">
+						<a data-toggle="collapse" id="showFiltres" href="#filtresFullText">Recherche par mot-clé </a>
+
+					</h3>	
+				</div>
+				<div id="filtresFullText" class="panel-collapse collapse">
+					<div class="panel-body">
+						<div class="motCle">
+							<input type="text" class="form-control input" id="searchByKW">
+						</div>					
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="panel-group">  
+			<div class="panel panel-info">
+				<div class="panel-heading">
+					<h3 class="panel-title">
+						<a data-toggle="collapse" id="showFiltres" href="#filtresDate">Recherche par date </a>
+
+					</h3>
+				</div>
+				<div id="filtresDate" class="panel-collapse collapse">
+					<div class="panel-body">
+						<div class="date">
+							<form class="form-inline" id="form_date">
+								<label class="mr-sm-2" for="sel_cond_date">Condition</label> <br>
+								<select class="form-control mb-2 mr-sm-2 mb-sm-0" id="sel_cond_date">
+									<option value="a">à</option>
+									<option value="entre">entre</option>
+									<option value="avant">avant</option>
+									<option value="apres">après</option>
+								</select>
+
+								<input type="date" class="form-control input-sm" placeholder="aaaa-mm-jj" id="date1">
+
+							</form>
+						</div>
+
+					</div>
+				</div>
+			</div>
+		</div>
 
 
 
 		<div class="panel-group">  
-		<div class="panel panel-info">
-			<div class="panel-heading">
-				<h3 class="panel-title">
-					<a data-toggle="collapse" id="showFiltres" href="#filtresJur">Recherche par juridiction </a>
-				</h3>
+			<div class="panel panel-info">
+				<div class="panel-heading">
+					<h3 class="panel-title">
+						<a data-toggle="collapse" id="showFiltres" href="#filtresJur">Recherche par juridiction </a>
+					</h3>
+				</div>
+				<div id="filtresJur" class="panel-collapse collapse">
+					<div class="panel-body">
+
+					</div>
+				</div>
 			</div>
-			<div id="filtresJur" class="panel-collapse collapse">
-				<div class="panel-body">
-								
+		</div>
+
+		<div class="panel-group">  
+			<div class="panel panel-info">
+				<div class="panel-heading">
+					<h3 class="panel-title">
+						<a data-toggle="collapse" id="showFiltres" href="#filtresVille">Recherche par ville </a>
+					</h3>
+				</div>
+				<div id="filtresVille" class="panel-collapse collapse">
+					<div class="panel-body">
+						<div class="btn-group selection">
+							<button id="selectAllV" type="button" class="btn btn-sm btn-info">Tout sélectionner</button>
+							<button  id="deselectAllV" type="button" class="btn btn-sm btn-info">Tout désélectionner</button>
+						</div>
+						<div class="villes">
+							{% for v in villes %}
+							<div class="villes checkbox">
+								<label><input type="checkbox" name="ville" value="{{v[1]}}">{{v[1]}} ({{v[0]}})</label>
+							</div>
+							{% endfor %}
+
+							<!--						
+							<div id="map" style="width: 320px; height:300px;"></div> -->
+							
+
+						</div>
+
+					</div>
 				</div>
 			</div>
 		</div>
 	</div>
-</div>
 
 
 
 
-<script type="text/javascript" src="../static/js/script.js">
+	<script type="text/javascript" src="../static/js/script.js">
 
-</script>
+	</script>
 
-{% endblock %}
+	{% endblock %}
