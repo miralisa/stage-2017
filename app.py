@@ -26,7 +26,7 @@ def index():
 	cur.execute('''SELECT * FROM decision JOIN demande ON decision.id_decision = demande.id_decision''')
 	data = cur.fetchall()
 
-	cur.execute('''SELECT count(*), categorie from demande group by categorie''')
+	cur.execute('''SELECT count(*) as nb_categorie, objet from categorie JOIN demande ON categorie.id_categorie = demande.id_categorie group by objet order by nb_categorie desc''')
 	categories = cur.fetchall()
 
 	#cur.execute('''SELECT distinct ville from decision''')
@@ -42,7 +42,7 @@ def mindex():
 	cur.execute('''SELECT * FROM decision JOIN demande ON decision.id_decision = demande.id_decision''')
 	data = cur.fetchall()
 
-	cur.execute('''SELECT distinct categorie from demande''')
+	cur.execute('''SELECT * from categorie''')
 	categories = cur.fetchall()
 
 	cur.execute('''SELECT distinct ville from decision''')
@@ -233,7 +233,7 @@ def all_decisions():
 	cur.execute('''SELECT * FROM decision JOIN demande ON decision.id_decision = demande.id_decision''')
 	all_data = cur.fetchall()
 
-	cur.execute('''SELECT count(*) as nb_categorie, categorie from demande group by categorie order by nb_categorie desc''')
+	cur.execute('''SELECT count(*) as nb_categorie, objet from categorie JOIN demande ON categorie.id_categorie = demande.id_categorie group by objet order by nb_categorie desc ''')
 	data = cur.fetchall()
 	
 	cur.execute('''SELECT count(*) as nb_ville, ville from decision JOIN demande ON decision.id_decision = demande.id_decision group by ville order by nb_ville desc''')
@@ -251,9 +251,9 @@ def all_decisions():
 	juridiction = []
 	j = {'name':'Juridictions','children':juridiction, 'color':colors()}#, 'nb':len(juridiction)}
 	children.append(j)
-
 	children.append({'name':'Date', 'children':[], 'color':colors()})
-	
+
+	"""
 	for result in data:
 		#print result[2] 
 		query3 = "categorie=\""+result[1]+"\" group by resultat order by nb_res desc"
@@ -279,39 +279,50 @@ def all_decisions():
 	ch = {'name':'Catégories', 'children':categories, 'color':colors()} #, 'nb':len(categories)}
 	
 	children.append(ch)
-	
+	"""
 	
 	villes = []
 	for result in data_villes:
 		#print result[2] 
 		query =  "ville = \"" + result[1] + "\""
-		queryCategorie = '''SELECT  count(*) as nb_categorie, categorie FROM decision JOIN demande ON decision.id_decision = demande.id_decision WHERE '''+query+ ''' group by categorie order by nb_categorie desc'''
+		queryCategorie = '''SELECT count(*) as nb_categorie, objet from decision, demande, categorie WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND
+'''+query+ ''' group by objet order by nb_categorie desc'''
 		cur.execute(queryCategorie)
 		categorieParVille = cur.fetchall()
 		resultats = []
 
 		for c in categorieParVille:
-			query3 = "ville = \"" + result[1] + "\" AND categorie=\""+c[1]+"\" group by resultat order by nb_res"
-			queryResultat = '''SELECT  count(*) as nb_res, resultat FROM decision JOIN demande ON decision.id_decision = demande.id_decision WHERE '''+query3+''
+			query3 = "ville = \"" + result[1] + "\" AND objet=\""+c[1]+"\" group by norme order by nb_res desc"
+			queryResultat = '''SELECT  count(*) as nb_res, norme from decision, demande, categorie, norme WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND demande.id_norme = norme.id_norme AND '''+query3+''
 			cur.execute(queryResultat)
-			resParCat = cur.fetchall()
+			normeParCat = cur.fetchall()
 			
-			children = []
-			for res in resParCat:
-				if res[1] == 'accepte':	
-					color = 'green'
-				elif  res[1] == 'rejette': 
-					color = 'red'
-				else:
-					color ='yellow'
+			normeParCatChildren = []
+			
+			for res in normeParCat:
+				query4 = "ville = \"" + result[1] + "\" AND objet=\""+c[1]+"\" AND norme=\""+res[1]+"\" group by resultat order by nb_res desc"
+				queryResultats = '''SELECT  count(*) as nb_res, resultat from decision, demande, categorie, norme WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND demande.id_norme = norme.id_norme AND '''+query4+''
+				cur.execute(queryResultats)
+				resParNorme = cur.fetchall()
 				
-				d = {'name': res[1], 'nb': res[0],'tree':'Resultats', 'color':color}
-				children.append(d)
+				#print resParNorme
+				resParNormeChildren = []
+				for r in resParNorme:
+					if r[1] == 'accepte':	
+						color = 'green'
+					elif  r[1] == 'rejette': 
+						color = 'red'
+					else:
+						color ='yellow'
+					d = {'name': r[1], 'nb': r[0],'tree':'Resultats', 'color':color}
+					resParNormeChildren.append(d)
+		
+				d = {'name': res[1], 'nb': res[0],'children':resParNormeChildren,'tree':'Normes', 'color':colors()}
+				normeParCatChildren.append(d)
 
-			r = {'name': c[1], 'nb': c[0], 'children':children,'tree':'Categories', 'color':colors()}
+			r = {'name': c[1], 'nb': c[0], 'children':normeParCatChildren,'tree':'Categories', 'color':colors()}
 			resultats.append(r)
 			
-
 			
 		d = {'name': result[1], 'nb': result[0], 'tree':'Villes', 'children': resultats,  'color':colors()}
 		villes.append(d)
@@ -418,7 +429,7 @@ def get_resultats():
 				query2+="( MATCH(description) AGAINST(\""+texte+"\" IN BOOLEAN MODE)) AND "	
 		
 
-		
+		""" categorie = objet
 		if f == 'categories':
 			query2+="("
 			for c in categories[:-1]:
@@ -427,7 +438,7 @@ def get_resultats():
 				query2+= "categorie=\""+categories[-1]+ "\" AND "
 			else:
 				query2+="categorie=\""+categories[-1]+"\")"
-	
+		"""
 		if f == 'resultat':
 			query2+="("
 			for r in resultat[:-1]:
@@ -445,7 +456,8 @@ def get_resultats():
 	query = '''SELECT * FROM decision JOIN demande ON decision.id_decision = demande.id_decision WHERE '''+query2+''
 	query0 = '''SELECT * FROM decision JOIN demande ON decision.id_decision = demande.id_decision'''
 
-	queryCategorie = '''SELECT  count(*) as nb_categorie, categorie FROM decision JOIN demande ON decision.id_decision = demande.id_decision WHERE '''+query2+ ''' group by categorie order by nb_categorie desc'''
+	queryCategorie = '''SELECT count(*) as nb_categorie, objet from decision, demande, categorie WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND
+'''+query2+ ''' group by objet order by nb_categorie desc'''
 
 
 	print filters
@@ -463,6 +475,7 @@ def get_resultats():
 	data = cur.fetchall()
 	#query2=''
 
+	"""
 	print data_categories
 
 	categories = []
@@ -489,7 +502,8 @@ def get_resultats():
 
 	ch = {'name':'Catégories', 'children':categories, 'nb':len(categories)}
 	children.append(ch)
-	
+	"""
+
 	# NEW TREE 
 	
 
@@ -520,7 +534,7 @@ def get_resultats():
 		else:
 			query =  "ville = \"" + v + "\" "
 		queryNbDemande = '''SELECT  count(*) as nb_d FROM decision JOIN demande ON decision.id_decision = demande.id_decision WHERE '''+query+''
-		queryCategorie = '''SELECT  count(*) as nb_categorie, categorie FROM decision JOIN demande ON decision.id_decision = demande.id_decision WHERE '''+query+ ''' group by categorie order by nb_categorie desc'''
+		queryCategorie = '''SELECT count(*) as nb_categorie, objet from decision, demande, categorie WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND '''+query+ ''' group by objet order by nb_categorie desc'''
 		print queryCategorie
 		cur.execute(queryCategorie)
 		categorieParVille = cur.fetchall()
@@ -535,31 +549,38 @@ def get_resultats():
 			
 			
 			resultatsCat = []
-
-				
 			for c in categorieParVille:
-				query3 = query2CatViile+ " ville = \"" + v + "\" AND categorie=\""+c[1]+"\" group by resultat order by nb_res desc"
-				queryResultat = '''SELECT  count(*) as nb_res, resultat FROM decision JOIN demande ON decision.id_decision = demande.id_decision WHERE '''+query3+''
+				query3 = query2CatViile+" ville = \"" + v + "\" AND objet=\""+c[1]+"\" group by norme order by nb_res desc"
+				queryResultat = '''SELECT  count(*) as nb_res, norme from decision, demande, categorie, norme WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND demande.id_norme = norme.id_norme AND '''+query3+''
 				cur.execute(queryResultat)
-				resParCat = cur.fetchall()
+				normeParCat = cur.fetchall()
 				
-				childrenCat = []
-				for res in resParCat:
-					if res[1] == 'accepte':	
-						color = 'green'
-					elif  res[1] == 'rejette': 
-						color = 'red'
-					else:
-						color ='yellow'
+				normeParCatChildren = []
+				
+				for res in normeParCat:
+					query4 =  query2CatViile+" ville = \"" + v + "\" AND objet=\""+c[1]+"\" AND norme=\""+res[1]+"\" group by resultat order by nb_res desc"
+					queryResultats = '''SELECT  count(*) as nb_res, resultat from decision, demande, categorie, norme WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND demande.id_norme = norme.id_norme AND '''+query4+''
+					cur.execute(queryResultats)
+					resParNorme = cur.fetchall()
 					
-					d = {'name': res[1], 'nb': res[0],'tree':'Resultats', 'color':color}
-					childrenCat.append(d)
+					#print resParNorme
+					resParNormeChildren = []
+					for r in resParNorme:
+						if r[1] == 'accepte':	
+							color = 'green'
+						elif  r[1] == 'rejette': 
+							color = 'red'
+						else:
+							color ='yellow'
+						d = {'name': r[1], 'nb': r[0],'tree':'Resultats', 'color':color}
+						resParNormeChildren.append(d)
+			
+					d = {'name': res[1], 'nb': res[0],'children':resParNormeChildren,'tree':'Normes', 'color':colors()}
+					normeParCatChildren.append(d)
 
-				r = {'name': c[1], 'nb': c[0], 'children':childrenCat,'tree':'Categories', 'color':colors()}
+				r = {'name': c[1], 'nb': c[0], 'children':normeParCatChildren,'tree':'Categories', 'color':colors()}
 				resultatsCat.append(r)
-				
 
-			print v
 			d = {'name': v, 'nb': nb[0], 'tree':'Villes', 'children': resultatsCat,  'color':colors()}
 			villes_res.append(d)
 		 

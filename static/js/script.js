@@ -459,7 +459,7 @@
 		    // Normalize for fixed-depth.
 
 		    nodes.forEach(function (d) {
-		    	if(d.tree == "Villes" || d.tree == "Categories"){
+		    	if(d.tree == "Villes" || d.tree == "Categories"  || d.tree == "Normes"){
 		        d.y = d.depth * 200;
 		    }else{
 		    	d.y = d.depth * 170;
