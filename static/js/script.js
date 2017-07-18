@@ -214,6 +214,7 @@
 			console.log("updateTabel");
 			data.forEach(function(decision) {
 				var tr = $('<tr/>').appendTo(tbody);
+					
 				tr.append('<td>' + decision[1] + '</td>');
 				tr.append('<td>' + decision[2] + '</td>');
 				tr.append('<td>' + decision[3] + '</td>');
@@ -221,9 +222,18 @@
 				//tr.append('<td>' + decision[5] + '</td>');
 				tr.append('<td>' + decision[7] + '</td>');
 				tr.append('<td>' + decision[8] + '</td>');
+				tr.append('<td>' + decision[14] + '</td>');
+				tr.append('<td>' + decision[16] + '</td>');
 				tr.append('<td>' + decision[9] + '</td>');
-				tr.append('<td>' + decision[10] + '</td>');
-				tr.append("<td>  <a href='#' title=\""+ decision[5] + "\">+</a> </td>");
+				//console.log(decision[5].split("\"")[0]);
+				
+				var splDec = decision[5].split("\"");
+				var appendDec = '';
+				splDec.forEach(function(elem) {
+  					appendDec += elem;
+				});
+				
+				tr.append("<td>  <a href='#' title=\" "+ appendDec + " \" onclick=\"openDescription(this)\" > Voir </a> </td>");
 
 			})
 		};

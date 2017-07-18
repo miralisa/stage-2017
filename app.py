@@ -23,7 +23,7 @@ conn = mysql.connect()
 @app.route('/')
 def index():
 	cur = conn.cursor()
-	cur.execute('''SELECT * FROM decision JOIN demande ON decision.id_decision = demande.id_decision''')
+	cur.execute('''SELECT  * from decision, demande, categorie, norme WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND demande.id_norme = norme.id_norme ''')
 	data = cur.fetchall()
 
 	cur.execute('''SELECT count(*) as nb_categorie, objet from categorie JOIN demande ON categorie.id_categorie = demande.id_categorie group by objet order by nb_categorie desc''')
@@ -214,6 +214,9 @@ def get_results():
 	else:
 		return jsonify(result=data)
 		
+@app.route('/texteDecision/')
+def texteDecision():
+	return render_template('texteDecision.html')
 	
 @app.route('/dashboard/')
 def dashboard():
@@ -453,8 +456,8 @@ def get_resultats():
 			
 		
 			#else:
-	query = '''SELECT * FROM decision JOIN demande ON decision.id_decision = demande.id_decision WHERE '''+query2+''
-	query0 = '''SELECT * FROM decision JOIN demande ON decision.id_decision = demande.id_decision'''
+	query = '''SELECT * from decision, demande, categorie, norme WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND demande.id_norme = norme.id_norme AND '''+query2+''
+	query0 = '''SELECT * from decision, demande, categorie, norme WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND demande.id_norme = norme.id_norme'''
 
 	queryCategorie = '''SELECT count(*) as nb_categorie, objet from decision, demande, categorie WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND
 '''+query2+ ''' group by objet order by nb_categorie desc'''
@@ -511,22 +514,27 @@ def get_resultats():
 	villes_res = []
 	nbDemande = 0
 
-	"""
-	queryVille = '('
-	for v in villes[:-1]:
-		queryVille +=  "ville = \"" + v+"\" OR"
-	queryVille +=") AND "+ query2
+	if len(villes) < 34:
+		queryVille = '('
+		for v in villes[:-1]:
+			queryVille +=  "ville = \"" + v+"\" OR "
+		if len(filters) != 0:
+			queryVille += "ville = \""+villes[-1]+"\" ) AND "+ query2
+		else:
+			queryVille += "ville = \""+villes[-1]+"\" )"
+		#print queryVille
 
-	queryRes = '''SELECT * FROM decision JOIN demande ON decision.id_decision = demande.id_decision WHERE '''+queryVille+''
-	cur.execute(queryRes)
-	data_res = cur.fetchall()
-	"""
-	print query2
+		queryRes = '''SELECT * from decision, demande, categorie, norme WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND demande.id_norme = norme.id_norme AND'''+queryVille+''
+		#print queryRes
+		cur.execute(queryRes)
+		data = cur.fetchall()
+
+	#print len(villes)
 
 	query2CatViile = ''
 	if len(filters) != 0:
 		query2CatViile=query2+ " AND "
-	print query2CatViile
+	#print query2CatViile
 	
 	for v in villes[:]:
 		if len(filters) != 0:
@@ -535,15 +543,15 @@ def get_resultats():
 			query =  "ville = \"" + v + "\" "
 		queryNbDemande = '''SELECT  count(*) as nb_d FROM decision JOIN demande ON decision.id_decision = demande.id_decision WHERE '''+query+''
 		queryCategorie = '''SELECT count(*) as nb_categorie, objet from decision, demande, categorie WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND '''+query+ ''' group by objet order by nb_categorie desc'''
-		print queryCategorie
+		#print queryCategorie
 		cur.execute(queryCategorie)
 		categorieParVille = cur.fetchall()
 
-		print len(categorieParVille)
+		#print len(categorieParVille)
 		if len(categorieParVille)>0:
 			cur.execute(queryNbDemande)
 			nb = cur.fetchall()
-			print str(nb[0][0])
+			#print str(nb[0][0])
 			nbDemande+=int(str(nb[0][0]))	
 		
 			

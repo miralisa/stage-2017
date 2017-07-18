@@ -253,7 +253,8 @@
 							<td>Juridiction</td>
 							<td>Quantum demandé</td>
 							<td>Quantum resultat</td>
-							<td>Catégorie</td>
+							<td>Objet</td>
+							<td>Norme</td>
 							<td>Resultat</td>
 							<td>Description</td>
 
@@ -267,9 +268,10 @@
 								<td>{{d[4]}}</td>							
 								<td>{{d[7]}}</td>
 								<td>{{d[8]}}</td>
+								<td>{{d[14]}}</td>
+								<td>{{d[16]}}</td>
 								<td>{{d[9]}}</td>
-								<td>{{d[10]}}</td>
-								<td> <a href="#" title="{{d[5]}}">+</a> </td>
+								<td> <a href="#" title="{{d[5]}}" onclick="openDescription(this)">Voir</a> </td>
 								<!--<td>{{d[5]}}</td> -->
 
 							</tr>
@@ -283,6 +285,9 @@
 	</div>
 
 
+	<div id="dialog-description" style="display:none;">
+		<pre id="content"></pre>
+	</div>
 
 	<div id="dialog-filtres" style="display:none;">
 	<button id="clearFiltres" style="position:relative; left:73%;" class="btn btn-sm btn-info">Réinitialiser tout</button>
@@ -388,6 +393,34 @@
 
 
 	<script type="text/javascript" src="../static/js/script.js">
+
+	</script>
+	<script type="text/javascript">
+		function openDescription(text){
+			//console.log(text.title);
+			document.getElementById("content").innerHTML = text.title;
+			$("#dialog-description").dialog(
+				{
+				title: "Decision",
+				resizable: false,
+				width: 800,
+				height: 600,
+				//position: { my: 'top', at: 'top', of: this },
+				modal: true,
+				buttons: {
+					"Fermer":{ 
+						text: "Fermer",
+						class: "btn btn-info",
+						click: function() {
+						$( this ).dialog( "close" );
+					}
+				}
+				}
+
+			}).dialog("open");
+
+		};
+		
 
 	</script>
 

@@ -53,7 +53,4 @@ create table demande (
 
 #SELECT count(*) as nb_categorie, objet from categorie JOIN demande ON categorie.id_categorie = demande.id_categorie group by objet order by nb_categorie desc ;
 
-SELECT  count(*) as nb_res, norme from decision, demande, categorie, norme
-WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND demande.id_norme = norme.id_norme
-AND ville='Paris' and objet='ammende civile'
-group by resultat order by nb_res desc;
+
