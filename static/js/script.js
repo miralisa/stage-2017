@@ -228,11 +228,29 @@
 				//console.log(decision[5].split("\"")[0]);
 				
 				var splDec = decision[5].split("\"");
+
 				var appendDec = '';
+
 				splDec.forEach(function(elem) {
+					/*
+					if (full_texte.length > 0){
+						var searchWords = full_texte.split(" ");
+						console.log("searchWords "+ searchWords);
+						searchWords.forEach(function(w) {
+							console.log("elem "+elem); 
+							if (w == elem){
+								appendDec += " <b>"+ elem + "</b> ";
+							}else{
+								appendDec += elem;
+							}
+						});
+					}else{
+						*/
   					appendDec += elem;
+
 				});
 				
+				//dict.forEach(function(d) {
 				tr.append("<td>  <a href='#' title=\" "+ appendDec + " \" onclick=\"openDescription(this)\" > Voir </a> </td>");
 
 			})
@@ -734,9 +752,32 @@
 				}).dialog("open");
 
 
-			} else{
+			} else { /*
+			if(d.tree=="Resultats"){	
+				document.getElementById("content").innerHTML = recordsJson.dict[d.id_dec];
+				$("#dialog-description").dialog(
+					{
+					title: "Decision",
+					resizable: false,
+					width: 800,
+					height: 200,
+					//position: { my: 'top', at: 'top', of: this },
+					modal: true,
+					buttons: {
+						"Fermer":{ 
+							text: "Fermer",
+							class: "btn btn-info",
+							click: function() {
+							$( this ).dialog( "close" );
+						}
+					}
+					}
 
+				}).dialog("open");
 
+				//console.log(recordsJson.dict[d.id_dec]);
+			}	
+			*/
 		    if (d.children) {
 		        d._children = d.children;
 		        d.children = null;
