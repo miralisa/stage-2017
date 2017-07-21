@@ -302,8 +302,14 @@
 				});
 			}
 			
+			var categorie = document.getElementById("sortTreeCategorie").checked;
+			var ville = document.getElementById("sortTreeVille").checked;
+			var root_search = '/search/';
+			if (ville){
+				root_search = '/filtres/';
+			}
 
-			$.getJSON($SCRIPT_ROOT + '/filtres/', {
+			$.getJSON($SCRIPT_ROOT + root_search, {
 				categories: JSON.stringify(categories),
 				villes: JSON.stringify(villes),
 				date: JSON.stringify(date),

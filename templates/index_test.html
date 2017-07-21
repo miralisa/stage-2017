@@ -290,8 +290,14 @@
 	</div>
 
 	<div id="dialog-filtres" style="display:none;">
-	<button id="clearFiltres" style="position:relative; left:73%;" class="btn btn-sm btn-info">Réinitialiser tout</button>
-						
+	
+	<div  style="position:relative; display: inline; margin-left: 10px" >
+			Trier par
+			<input type="radio" name="sortTree" id="sortTreeCategorie" value="categories" checked />  categories  
+			<input type="radio" name="sortTree" id="sortTreeVille" value="villes" />  villes
+			
+	<button id="clearFiltres" style="position:relative; left:27%;" class="btn btn-sm btn-info">Réinitialiser tout</button>
+	</div>					
 		<div class="panel-group">  
 			<div class="panel panel-info">
 				<div class="panel-heading">
@@ -314,7 +320,7 @@
 			<div class="panel panel-info">
 				<div class="panel-heading">
 					<h3 class="panel-title">
-						<a data-toggle="collapse" id="showFiltres" href="#filtresDate">Recherche par date </a>
+						<a data-toggle="collapse" id="showFiltres" href="#filtresDate">Recherche par date</a>
 
 					</h3>
 				</div>
@@ -340,8 +346,7 @@
 			</div>
 		</div>
 
-
-
+		<!--
 		<div class="panel-group">  
 			<div class="panel panel-info">
 				<div class="panel-heading">
@@ -356,7 +361,7 @@
 				</div>
 			</div>
 		</div>
-
+		-->
 		<div class="panel-group">  
 			<div class="panel panel-info">
 				<div class="panel-heading">
@@ -387,6 +392,7 @@
 				</div>
 			</div>
 		</div>
+
 	</div>
 
 
