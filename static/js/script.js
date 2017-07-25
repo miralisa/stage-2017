@@ -325,6 +325,10 @@
 				var inputFullTexte = document.getElementById("searchByKW").value;
 				var condDate = document.getElementById("sel_cond_date").value;
 				var parametreRecherche = " <br> Recherche effectuée: ";
+				var villesChecked =" <strong>ville(s)</strong> <i>"+villes+"</i> ";
+				if(villes.length < 34){
+					parametreRecherche += villesChecked;
+				}
 				if (inputDate != ""){
 					if (condDate !="entre"){
 						parametreRecherche+="<strong>date</strong> " +condDate+" <i>"+inputDate+"</i> ";
@@ -347,7 +351,8 @@
 
 				}
 				console.log(data);
-				updateTabel(data.result);
+				
+				//updateTabel(data.result);
 
 				var div_tree = document.getElementById("tree_map");
 				console.log(div_tree);
@@ -359,7 +364,22 @@
 				parentNode.appendChild(div_tree_n);
 				
 				build_tree(data);
+				var isExpanded = $("#showFiltres").attr("aria-expanded");
+			
+				if( isExpanded == 'true'){
+					console.log("isExpandedTRUE");
+					$("#showFiltres").click();
+				}	
+				//$("#showFiltres").click();
+
 				/*
+				var isExpanded = $("#showFiltres").attr("aria-expanded");
+				console.log("isExpanded "+ isExpanded);
+				if( isExpanded == 'true'){
+					console.log("isExpandedTRUE");
+					$("#showFiltres").click();
+				}	
+				
 				if(data.children !=null){   
 					build_tree(data.tree);
 				} else{
@@ -396,6 +416,87 @@
 		$("#filtreValide").click(function() {
 			console.log("click valider");
 		});
+
+		$("#showFiltres").click(function() {
+			var isExpanded = $("#showFiltres").attr("aria-expanded");
+			var parentNode = document.getElementById("pagination");
+			
+			if(isExpanded == 'false' || isExpanded == undefined)
+			{
+				console.log("click isExpanded "+isExpanded);
+				$.getJSON($SCRIPT_ROOT + 'show_text', {
+					categories: JSON.stringify(categories),
+					villes: JSON.stringify(villes),
+					date: JSON.stringify(date),
+					texte: JSON.stringify(full_texte),
+					juridiction: JSON.stringify([]),
+					quantumD: JSON.stringify(quantumD),
+					quantumR: JSON.stringify(quantumR),
+					resultat: JSON.stringify(resultats)
+				}, function(data){
+					console.log(data.result);
+					updateTabel(data.result);
+					var nbPage = data.nbPage;
+					
+					for(var i = 0; i < nbPage; i++){
+						var li = document.createElement("li");
+						li.className = "page-item";
+						var a = document.createElement("a");
+						a.innerHTML = i+1;
+						a.className = "getPage";
+						parentNode.appendChild(li);
+						li.appendChild(a);
+					};
+
+					var allPages = document.getElementsByClassName("getPage");
+
+					
+
+					for (var i = 0; i < allPages.length; i++) {
+					    allPages[i].addEventListener('click', getPageContent, false);
+					}
+
+				});
+
+			} else{
+				parentNode.remove();
+				var apppendTo = document.getElementById("panel-show-data")
+				var ulPagination = document.createElement("ul");
+				ulPagination.id = "pagination";
+				ulPagination.className = "pagination justify-content-center"
+				apppendTo.appendChild(ulPagination);
+				
+
+			}
+		});
+
+		function getPageContent() {
+			//class="active"
+			$("li.active").each ( function() {
+				console.log(this);
+				this.className = "";
+			});
+
+			console.log(this.parentElement);
+			this.parentElement.className = "active";
+		    var numPage = this.innerHTML-1 ;
+		    console.log(numPage);
+		    $.getJSON($SCRIPT_ROOT + 'show_page', {
+		    		numPage: JSON.stringify(numPage),
+					categories: JSON.stringify(categories),
+					villes: JSON.stringify(villes),
+					date: JSON.stringify(date),
+					texte: JSON.stringify(full_texte),
+					juridiction: JSON.stringify([]),
+					quantumD: JSON.stringify(quantumD),
+					quantumR: JSON.stringify(quantumR),
+					resultat: JSON.stringify(resultats)
+				}, function(data){
+					console.log(data.result);
+					updateTabel(data.result);
+
+				});
+		};
 
 		document.getElementById("sel_cond_date").onchange = function() {
 			var inputDate = document.createElement("input");
