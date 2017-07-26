@@ -177,26 +177,22 @@ def define_filtres():
 					paramToSearch += nw + "~) "
 				else:	
 					paramToSearch += w + "~ "
-
+			print time.time()		
 			es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
 			res = es.search(index='decisions', body={"query": {"query_string" : {"query": paramToSearch, "fuzziness" : 2, "default_field": "contenu"}}, "size": 470, "highlight": { "fields" : { "contenu" : {}}}})
 			print('%d documents found' % res['hits']['total'])
+			print time.time()
 			liste_id = []
-			dict_highlights = {}
+			#dict_highlights = {}
 			for doc in res['hits']['hits']:
-				liste_id.append(doc['_id'])
-				if 'highlight' in doc:
-					content = doc['highlight']['contenu']
-					dict_highlights.update({doc['_id']: content})
+				liste_id.append(int(doc['_id']))
+			liste_ids = str(liste_id)[1:-1]
 
-			query2+=" ("
-			for el in liste_id[:-1]:
-				query2+=" decision.id_decision = "+el+" OR "
 			if filters[-1] == 'texte':
-				query2+=" decision.id_decision = "+el+" ) "
+				query2+="decision.id_decision IN ( " + liste_ids +" ) "
 			else:
-				query2+=" decision.id_decision = "+el+" ) AND "
-
+				query2+="decision.id_decision IN ( " + liste_ids +" ) AND "	
+				
 			"""
 			if filters[-1] == 'texte':
 				query2+="( MATCH(description) AGAINST(\""+texte+"\" IN BOOLEAN MODE))"
@@ -238,10 +234,10 @@ def show_text():
 	queryNB = ''
 	print len(query2)
 	if len(query2) != 0:
-		query = '''SELECT * from decision, demande, categorie, norme WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND demande.id_norme = norme.id_norme AND '''+query2+' GROUP BY rg ORDER BY ville LIMIT 0, 14 '
+		query = '''SELECT * from decision, demande, categorie, norme WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND demande.id_norme = norme.id_norme AND '''+query2+' GROUP BY rg ORDER BY ville LIMIT 0, 15 '
 		queryNB = '''SELECT count(*) from decision, demande, categorie, norme WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND demande.id_norme = norme.id_norme  AND '''+query2+' GROUP BY rg ORDER BY ville'
 	else:
-		query = '''SELECT * from decision, demande, categorie, norme WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND demande.id_norme = norme.id_norme GROUP BY rg ORDER BY ville LIMIT 0, 14'''
+		query = '''SELECT * from decision, demande, categorie, norme WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND demande.id_norme = norme.id_norme GROUP BY rg ORDER BY ville LIMIT 0, 15'''
 		queryNB = '''SELECT count(*) from decision, demande, categorie, norme WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND demande.id_norme = norme.id_norme GROUP BY rg ORDER BY ville'''
 	
 	cur = conn.cursor()
@@ -277,149 +273,22 @@ def show_page():
 
 @app.route('/search/')
 def get_results():
-	villes = json.loads(request.args.get('villes'))
-	date = json.loads(request.args.get('date'))
-	categories = json.loads(request.args.get('categories'))
-	quantumD = json.loads(request.args.get('quantumD'))
-	quantumR = json.loads(request.args.get('quantumR'))
-	resultat = json.loads(request.args.get('resultat'))
-	juridiction =  json.loads(request.args.get('juridiction'))
-	texte =  json.loads(request.args.get('texte'))
-	search = {'date':len(date), 'juridiction':len(juridiction), 'texte':len(texte), 'villes':len(villes), 'categories':len(categories),  'quantumD':len(quantumD), 'quantumR':len(quantumR), 'resultat':len(resultat)}
-	filters = []
-	# search = {'quantumD': 0, 'resultat': 0, 'quantumR': 0, 'texte': 0, 'date': 2, 'juridiction': 0, 'villes': 1, 'categories': 0}
-
-	for key, value in search.iteritems():
-		if value>0:
-			filters.append(key)
-	
+	query2 = define_filtres()
 	cur = conn.cursor()
 	
 
-	query2 = ''
-		
-	for f in filters:
-		if f == 'villes':
-			query2+="("
-			for v in villes[:-1]:
-				query2+= "ville='"+v+ "' OR "
-			if filters[-1] == 'villes':
-				query2+="ville='"+villes[-1]+"')"
-			else:
-				query2+="ville='"+villes[-1]+"') AND "	
-		
-		if f == 'date':
-			cond = str(date[0])
-			if cond =="a":
-				query2+="("
-				for d in date[1:-1]:
-					query2+= "date_decision='"+d+ "' OR "
-				if 	filters[-1] == 'date':
-					query2+="date_decision='"+date[-1]+"')"
-				else:
-					query2+="date_decision='"+date[-1]+"') AND "
-			elif cond == "entre":
-				if 	filters[-1] == 'date':
-					query2+="( date_decision BETWEEN '"+date[2]+"' AND '"+ date[1] +"' )"
-				else:
-					query2+="( date_decision BETWEEN '"+date[2]+"' AND '"+ date[1] +"' ) AND "
-			elif cond == "avant":
-				if 	filters[-1] == 'date':
-					query2+="( date_decision < '"+date[1] +"' )"
-				else:
-					query2+="( date_decision < '"+date[1] +"' ) AND "
-			elif cond == "apres":
-				if 	filters[-1] == 'date':
-					query2+="( date_decision > '"+date[1] +"' )"
-				else:
-					query2+="( date_decision > '"+date[1] +"' ) AND "
-				
-		if f == 'texte':
-			keyWords = texte.split(" ")
-			paramToSearch = ''
-			print keyWords
-			for w in keyWords:
-				if w == "AND" or w =="NOT" or w == "OR":
-					paramToSearch += w + " "
-				elif w[-1]==")":
-					nw=w[:-1]
-					paramToSearch += nw + "~) "
-				else:	
-					paramToSearch += w + "~ "
-
-			es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
-			res = es.search(index='decisions', body={"query": {"query_string" : {"query": paramToSearch, "fuzziness" : 2, "default_field": "contenu"}}, "size": 470, "highlight": { "fields" : { "contenu" : {}}}})
-			print('%d documents found' % res['hits']['total'])
-			liste_id = []
-			dict_highlights = {}
-			for doc in res['hits']['hits']:
-				liste_id.append(doc['_id'])
-				if 'highlight' in doc:
-					content = doc['highlight']['contenu']
-					dict_highlights.update({doc['_id']: content})
-
-			query2+=" ("
-			for el in liste_id[:-1]:
-				query2+=" decision.id_decision = "+el+" OR "
-			if filters[-1] == 'texte':
-				query2+=" decision.id_decision = "+el+" ) "
-			else:
-				query2+=" decision.id_decision = "+el+" ) AND "
-
-			"""
-			if filters[-1] == 'texte':
-				query2+="( MATCH(description) AGAINST(\""+texte+"\" IN BOOLEAN MODE))"
-			else:
-				query2+="( MATCH(description) AGAINST(\""+texte+"\" IN BOOLEAN MODE)) AND "	
-			"""
-
-	
-		if f == 'categories':
-			query2+="("
-			for c in categories[:-1]:
-				query2+= "categorie=\""+c+ "\" OR "
-			if filters[-1] != 'categories':
-				query2+= "categorie=\""+categories[-1]+ "\" AND "
-			else:
-				query2+="categorie=\""+categories[-1]+"\")"
-
-		if f == 'resultat':
-			query2+="("
-			for r in resultat[:-1]:
-				query2+= "resultat=\""+r+ "\" OR "
-			if filters[-1] != 'resultat':
-				query2+= "resultat=\""+resultat[-1]+ "\") AND "
-			else:
-				query2+="resultat=\""+resultat[-1]+"\")"
-			
-			#if 	len(filters) == 0:
-			#query2+="resultat=\""+resultat[-1]+"\")"
-			
-	
-			#else:
-	query = '''SELECT * from decision, demande, categorie, norme WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND demande.id_norme = norme.id_norme AND '''+query2+''
-	query0 = '''SELECT * from decision, demande, categorie, norme WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND demande.id_norme = norme.id_norme'''
-
 	queryCategorie = '''SELECT count(*) as nb_categorie, objet from decision, demande, categorie WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND
 '''+query2+ ''' group by objet order by nb_categorie desc'''
-
-
-	#print filters
-	#print query2
-
 	data_categories = []
-
-	if len(filters) == 0:
-		cur.execute(query0)
+	
+	if len(query2) == 0:
+		queryNB = '''SELECT count(*) from decision, demande, categorie, norme WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND demande.id_norme = norme.id_norme '''
 	else:
+		queryNB = '''SELECT count(*) from decision, demande, categorie, norme WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND demande.id_norme = norme.id_norme  AND '''+query2
 		cur.execute(queryCategorie)
 		data_categories = cur.fetchall()
-	
-		cur.execute(query)
+	cur.execute(queryNB)	
 	data = cur.fetchall()
-	#query2=''
-
-	#print data_categories
 
 	categories = []
 	children = []
@@ -460,17 +329,16 @@ def get_results():
 		d = {'name': res[1], 'nb': res[0],'color':colors(),'tree':'Categories', 'children':resultats}
 		categories.append(d)
 
-	ch = {'name':'Catégories', 'children':categories,'color':colors(),'tree':'Categories', 'nb':len(data)}
+	ch = {'name':'Catégories', 'children':categories,'color':colors(),'tree':'Categories', 'nb':data[0][0]}
 	children.append(ch)
 	query2=''
 	
 	#build_tree(data)
 	if len(data_categories) != 0:
-		tree_root = {'name':'Filtres','children':children, 'color':colors(), "parent": "null"}
-		return jsonify(result=data, tree=tree_root)
-	else:
-		return jsonify(result=data)
-
+		tree_root = {'name':'Filtres','children':children, 'nb':data[0][0],'color':colors(), "parent": "null"}
+		print time.time()
+		return jsonify(tree=tree_root)
+	
 
 @app.route('/filtres/')
 def get_resultats():
@@ -494,7 +362,7 @@ def get_resultats():
 	
 
 	query2 = ''
-		
+	
 	for f in filters:
 		"""
 		if f == 'villes':
@@ -534,6 +402,7 @@ def get_resultats():
 						query2+="( date_decision > '"+date[1] +"' ) AND "
 				
 		if f == 'texte':
+			
 			keyWords = texte.split(" ")
 			paramToSearch = ''
 			print keyWords
@@ -545,26 +414,35 @@ def get_resultats():
 					paramToSearch += nw + "~) "
 				else:	
 					paramToSearch += w + "~ "
-
+			print time.time()		
 			es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
 			res = es.search(index='decisions', body={"query": {"query_string" : {"query": paramToSearch, "fuzziness" : 2, "default_field": "contenu"}}, "size": 470, "highlight": { "fields" : { "contenu" : {}}}})
 			print('%d documents found' % res['hits']['total'])
+			print time.time()
 			liste_id = []
-			dict_highlights = {}
+			#dict_highlights = {}
 			for doc in res['hits']['hits']:
-				liste_id.append(doc['_id'])
+				liste_id.append(int(doc['_id']))
+				"""	
 				if 'highlight' in doc:
 					content = doc['highlight']['contenu']
 					dict_highlights.update({doc['_id']: content})
-
+				"""
+			liste_ids = str(liste_id)[1:-1]
+			"""
 			query2+=" ("
 			for el in liste_id[:-1]:
-				query2+=" decision.id_decision = "+el+" OR "
+				query2+=" decision.id_decision = "+str(el)+" OR "
 			if filters[-1] == 'texte':
-				query2+=" decision.id_decision = "+el+" ) "
+				query2+=" decision.id_decision = "+str(el)+" ) "
 			else:
-				query2+=" decision.id_decision = "+el+" ) AND "
-	
+				query2+=" decision.id_decision = "+str(el)+" ) AND "
+			"""
+			if filters[-1] == 'texte':
+				query2+="decision.id_decision IN ( " + liste_ids +" ) "
+			else:
+				query2+="decision.id_decision IN ( " + liste_ids +" ) AND "	
+						
 			"""
 			if filters[-1] == 'texte':
 				query2+="( MATCH(description) AGAINST(\""+texte+"\" IN BOOLEAN MODE))"
@@ -595,10 +473,10 @@ def get_resultats():
 			#if 	len(filters) == 0:
 			#query2+="resultat=\""+resultat[-1]+"\")"
 			
-		
 			#else:
-	query = '''SELECT * from decision, demande, categorie, norme WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND demande.id_norme = norme.id_norme AND '''+query2+''
-	query0 = '''SELECT * from decision, demande, categorie, norme WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND demande.id_norme = norme.id_norme'''
+	#print query2		
+	query = '''SELECT count(*) from decision, demande, categorie, norme WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND demande.id_norme = norme.id_norme  AND '''+query2
+	query0 = '''SELECT demande.id_demande from decision, demande, categorie, norme WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND demande.id_norme = norme.id_norme'''
 
 	queryCategorie = '''SELECT count(*) as nb_categorie, objet from decision, demande, categorie WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND
 '''+query2+ ''' group by objet order by nb_categorie desc'''
@@ -609,12 +487,9 @@ def get_resultats():
 	
 	data_categories = []
 
-	if len(filters) == 0:
+	if len(query2) == 0:
 		cur.execute(query0)
 	else:
-		cur.execute(queryCategorie)
-		data_categories = cur.fetchall()
-	
 		cur.execute(query)
 	data = cur.fetchall()
 	#query2=''
@@ -659,13 +534,13 @@ def get_resultats():
 		queryVille = '('
 		for v in villes[:-1]:
 			queryVille +=  "ville = \"" + v+"\" OR "
-		if len(filters) != 0:
+		if len(query2) != 0:
 			queryVille += "ville = \""+villes[-1]+"\" ) AND "+ query2
 		else:
 			queryVille += "ville = \""+villes[-1]+"\" )"
 		#print queryVille
 
-		queryRes = '''SELECT * from decision, demande, categorie, norme WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND demande.id_norme = norme.id_norme AND'''+queryVille+''
+		queryRes = '''SELECT demande.id_demande from decision USE INDEX (iville), demande, categorie, norme  WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND demande.id_norme = norme.id_norme AND'''+queryVille+''
 		#print queryRes
 		cur.execute(queryRes)
 		data = cur.fetchall()
@@ -673,17 +548,17 @@ def get_resultats():
 	#print len(villes)
 
 	query2CatViile = ''
-	if len(filters) != 0:
+	if len(query2) != 0:
 		query2CatViile=query2+ " AND "
 	#print query2CatViile
 	
 	for v in villes[:]:
-		if len(filters) != 0:
+		if len(query2) != 0:
 			query =  "ville = \"" + v + "\" AND "+ query2
 		else:
 			query =  "ville = \"" + v + "\" "
 		queryNbDemande = '''SELECT  count(*) as nb_d FROM decision JOIN demande ON decision.id_decision = demande.id_decision WHERE '''+query+''
-		queryCategorie = '''SELECT count(*) as nb_categorie, objet from decision, demande, categorie WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND '''+query+ ''' group by objet order by nb_categorie desc'''
+		queryCategorie = '''SELECT count(*) as nb_categorie, objet from decision, demande, categorie USE INDEX (iobjet) WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND '''+query+ ''' group by objet order by nb_categorie desc'''
 		#print queryCategorie
 		cur.execute(queryCategorie)
 		categorieParVille = cur.fetchall()
@@ -700,7 +575,7 @@ def get_resultats():
 			resultatsCat = []
 			for c in categorieParVille:
 				query3 = query2CatViile+" ville = \"" + v + "\" AND objet=\""+c[1]+"\" group by norme order by nb_res desc"
-				queryResultat = '''SELECT  count(*) as nb_res, norme from decision, demande, categorie, norme WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND demande.id_norme = norme.id_norme AND '''+query3+''
+				queryResultat = '''SELECT  count(*) as nb_res, norme from decision USE INDEX (iville), demande, categorie, norme USE INDEX (inorme) WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND demande.id_norme = norme.id_norme AND '''+query3+''
 				cur.execute(queryResultat)
 				normeParCat = cur.fetchall()
 				
@@ -708,7 +583,7 @@ def get_resultats():
 				
 				for res in normeParCat:
 					query4 =  query2CatViile+" ville = \"" + v + "\" AND objet=\""+c[1]+"\" AND norme=\""+res[1]+"\" group by resultat order by nb_res desc"
-					queryResultats = '''SELECT  count(*) as nb_res, resultat, decision.id_decision from decision, demande, categorie, norme WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND demande.id_norme = norme.id_norme AND '''+query4+''
+					queryResultats = '''SELECT  count(*) as nb_res, resultat from decision, demande, categorie, norme WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND demande.id_norme = norme.id_norme AND '''+query4+''
 					cur.execute(queryResultats)
 					resParNorme = cur.fetchall()
 					
@@ -721,7 +596,7 @@ def get_resultats():
 							color = 'red'
 						else:
 							color ='yellow'
-						d = {'name': r[1], 'nb': r[0],'tree':'Resultats', 'id_dec': r[2], 'color':color}
+						d = {'name': r[1], 'nb': r[0],'tree':'Resultats', 'color':color}
 						resParNormeChildren.append(d)
 			
 					d = {'name': res[1], 'nb': res[0],'children':resParNormeChildren,'tree':'Normes', 'color':colors()}
@@ -738,7 +613,7 @@ def get_resultats():
 	tree_children.append(v)
 
 	tree_root = {'name':'Filtres','children':tree_children, 'color':colors(), "parent": "null"}
-
+	print time.time()
 	return jsonify(result=data, tree=tree_root)
 
 

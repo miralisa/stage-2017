@@ -1,3 +1,7 @@
+DROP INDEX iville ON decision;
+DROP INDEX inorme ON norme;
+DROP INDEX iobjet ON objet;
+
 drop table demande;
 drop table decision;
 drop table categorie;
@@ -44,6 +48,10 @@ create table demande (
 
 
 );
+
+CREATE INDEX iville ON decision (ville);
+CREATE INDEX inorme ON norme (norme);
+CREATE INDEX iobjet ON categorie (objet);
 
 #insert into decision(rg, ville, juridiction, description) values ("10/03813", "Nimes", "CA","description");
 #insert into demande(id_decision, quantum_demande, quantum_resultat, categorie, resultat) values (1, "1684,32 €","1684,32 €", "dommages-intérêts","accepte");

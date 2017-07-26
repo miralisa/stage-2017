@@ -341,13 +341,13 @@
 					parametreRecherche+="<strong>mot-clé</strong> <i>"+inputFullTexte+"</i> ";
 				}
 		
-				if(data.result.length == 0){
+				if(data.tree.nb == 0){
 					showRes.style="display: ;"
 					showRes.innerHTML = "Désolé, aucun résultat ne correspond pas à votre recherche."+parametreRecherche;
 				}else{
 
 					showRes.style="display: ;"
-					showRes.innerHTML = "Voici <strong>"+ data.result.length+ "</strong> demande(s) correspondant à votre recherche."+parametreRecherche;
+					showRes.innerHTML = "Voici <strong>"+ data.tree.nb+ "</strong> demande(s) correspondant à votre recherche."+parametreRecherche;
 
 				}
 				console.log(data);
