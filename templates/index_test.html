@@ -1,335 +1,117 @@
 {% extends "layout.html" %}
 {% block content %}
 <br>
-<!--
+<div class="alert alert-info" id="resultat" style="display: none;" role="alert"></div>
+
+<div id="tree_map">
+</div>
+<div id="popup"></div>
+<br>
+
 <div class="panel-group">  
 	<div class="panel panel-info">
 		<div class="panel-heading">
 			<h3 class="panel-title">
-				<a data-toggle="collapse" id="showFiltres" href="#filtres"><span class="glyphicon glyphicon-filter" aria-hidden="true"></span> Filtres</a>
+				<a data-toggle="collapse" id="showFiltres" href="#resultats_recherche">Tableau de résultats </a>
 
 			</h3>
 		</div>
-		<div id="filtres" class="panel-collapse collapse">
+		<div id="resultats_recherche" class="panel-collapse collapse">
 
-			<div class="panel-body">
+			<div class="panel-body" id="panel-show-data">
 
-				<ul class="nav nav-tabs">
-					<li class="active"><a data-toggle="tab" id="motCle" href="#tabMotCle">Mot-clé</a></li>
-					<li><a data-toggle="tab" id="jur" href="#tabJur">Juridiction</a></li>
-					<li><a data-toggle="tab" id="villes" href="#tabVilles">Villes</a></li>
-					<li><a data-toggle="tab" id="date" href="#tabDate">Date</a></li>
-					<li><a data-toggle="tab" id="categories" href="#tabCategories">Catégories</a></li>
+
+				<table class="table table-condensed text-center ">
+					<thead>
+						<td>RG</td>
+						<td>Ville</td>
+						<td>Date</td>
+						<td>Juridiction</td>
+						<td>Quantum demandé</td>
+						<td>Quantum resultat</td>
+						<td>Objet</td>
+						<td>Norme</td>
+						<td>Resultat</td>
+						<td>Description</td>
+
+					</thead>
+					<tbody id="tbody">
+						{% for d in data %} 
+						<tr>
+							<td>{{d[1]}}</td>
+							<td>{{d[2]}}</td>
+							<td>{{d[3]}}</td>
+							<td>{{d[4]}}</td>							
+							<td>{{d[7]}}</td>
+							<td>{{d[8]}}</td>
+							<td>{{d[14]}}</td>
+							<td>{{d[16]}}</td>
+							<td>{{d[9]}}</td>
+							<td> <a href="#" title="{{d[5]}}" onclick="openDescription(this)">Voir</a> </td>
+							<!--<td>{{d[5]}}</td> -->
+
+						</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+
+				<ul class="pagination justify-content-center" id="pagination">
 					
-					<li><a data-toggle="tab" id="quantumDemande" href="#tabQuantumDemande">Quantum demandé</a></li>
-					<li><a data-toggle="tab" id="quantumResultat" href="#tabQuantumResultat">Quantum resultat</a></li>
-					<li><a data-toggle="tab" id="resultats" href="#tabResultats">Resultats</a></li>
-
 				</ul>
 
-				<div class="tab-content">
-					<div id="tabCategories" class="tab-pane fade ">
-						<div class="btn-group selection">
-							<button id="selectAll" type="button" class="btn btn-sm btn-info">Tout sélectionner</button>
-							<button  id="deselectAll" type="button" class="btn btn-sm btn-info">Tout désélectionner</button>
-						</div>
-						<div class="categories">
-							{% for c in categories %}
-							<div class="categories checkbox">
-								<label><input type="checkbox" value="{{c[1]}}">{{c[1]}} ({{c[0]}})</label>
-							</div>
-							{% endfor %}
-
-						</div>
-						<button type="button" id="searchByCategory" class="btn btn-primary search"><span class="glyphicon glyphicon-search" aria-hidden="true"></span> Rechercher</button>	
-					</div>
-					<div id="tabVilles" class="tab-pane fade">
-						<div class="btn-group selection">
-							<button id="selectAllV" type="button" class="btn btn-sm btn-info">Tout sélectionner</button>
-							<button  id="deselectAllV" type="button" class="btn btn-sm btn-info">Tout désélectionner</button>
-						</div>
-						<div class="villes">
-							{% for v in villes %}
-							<div class="villes checkbox">
-								<label><input type="checkbox" name="ville" value="{{v[1]}}">{{v[1]}} ({{v[0]}})</label>
-							</div>
-							{% endfor %}
-
-						</div>
-						<button id="searchByCity" type="button" class="btn btn-primary search"><span class="glyphicon glyphicon-search" aria-hidden="true"></span> Rechercher</button>
-
-					</div>
-					<div id="tabQuantumDemande" class="tab-pane fade">
-						<br>
-						<form class="form-inline">
-							<div class="form-group">
-								<label class="sr-only"></label>
-								<p class="form-control-static"><b>Quantum demandé:</b> entre </p>
-							</div>
-							<div class="form-group">
-								<div class="input-group">
-									<input type="text" class="form-control input-sm" id="quantumD">
-									<div class="input-group-addon">€</div>
-								</div>
-								<p class="form-control-static"> et </p>
-
-								<div class="input-group">
-									<input type="text" class="form-control input-sm" id="quantumD">
-									<div class="input-group-addon">€</div>
-								</div>
-							</div>
-							<br><br>
-							<button type="submit" class="btn btn-primary search"><span class="glyphicon glyphicon-search" aria-hidden="true"></span> Rechercher</button>
-						</form>
-
-					</div>
-
-					<div id="tabQuantumResultat" class="tab-pane fade">
-						<br>
-						<form class="form-inline">
-							<div class="form-group">
-								<label class="sr-only"></label>
-								<p class="form-control-static"><b>Quantum resultat:</b> entre </p>
-							</div>
-							<div class="form-group">
-								<div class="input-group">
-									<input type="text" class="form-control input-sm" id="quantumR">
-									<div class="input-group-addon">€</div>
-								</div>
-								<p class="form-control-static"> et </p>
-
-								<div class="input-group">
-									<input type="text" class="form-control input-sm" id="quantumR">
-									<div class="input-group-addon">€</div>
-								</div>
-							</div>
-							<br><br>
-							<button type="submit" class="btn btn-primary search"><span class="glyphicon glyphicon-search" aria-hidden="true"></span> Rechercher</button>
-						</form>
-					</div>	
-					<div id="tabResultats" class="tab-pane fade">
-						<br>
-						<div class="resultats">
-							<div class="resultats checkbox">
-								<label><input type="checkbox" value="accepte">accepté</label>
-							</div>
-							<div class="resultats checkbox">
-								<label><input type="checkbox" value="rejette">rejetté</label>
-							</div>
-							<div class="resultats checkbox">
-								<label><input type="checkbox" value="sursis à statuer">sursis à statuer</label>
-							</div>						
-						</div>
-						<br>
-						<button id="searchByResultat" type="button" class="btn btn-primary search"><span class="glyphicon glyphicon-search" aria-hidden="true"></span> Rechercher</button>
-					</div>
-
-					<div id="tabMotCle" class="tab-pane fade in active">
-						<br>
-						<div class="motCle">
-							<input type="text" class="form-control input" id="searchByKW">
-						</div>
-						<br>
-						
-						<button id="searchByKeyWord" type="button" class="btn btn-primary search"><span class="glyphicon glyphicon-search" aria-hidden="true"></span> Rechercher</button>
-					</div>
-
-					<div id="tabDate" class="tab-pane fade">
-						<br>
-						<div class="date">
-							<form class="form-inline" id="form_date">
-								<label class="mr-sm-2" for="sel_cond_date">Condition</label>
-								<select class="form-control mb-2 mr-sm-2 mb-sm-0" id="sel_cond_date">
-									<option value="a">à</option>
-									<option value="entre">entre</option>
-									<option value="avant">avant</option>
-									<option value="apres">après</option>
-								</select>
-
-								<input type="date" class="form-control input-sm" placeholder="aaaa-mm-jj" id="date1">
-								
-							</form>
-
-							<br>
-
-						</div>
-						<button id="searchByDate" type="button" class="btn btn-primary search"><span class="glyphicon glyphicon-search" aria-hidden="true"></span> Rechercher</button>
-					</div>
-
-					<div id="tabJur" class="tab-pane fade">
-						<br>
-						<div class="jur">
-							<br>
-
-						</div>
-						<button id="searchByJur" type="button" class="btn btn-primary search"><span class="glyphicon glyphicon-search" aria-hidden="true"></span> Rechercher</button>
-					</div>
-				</div>
 			</div>
 		</div>
 	</div>
 </div>
--->
-<div class="btn-group" id="fltrMotCle" style="display:none;">
-	
-	<button id="showFullTexte" class="btn btn-primary" >Mot-clé</button> <!-- style="display:none;" -->
-	<button id="editFullTexte"  title="Modifier" class="btn btn-info"> <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span> </button> 
-	<button id="removeFullTexte" title="Supprimer" class="btn  btn-info"> <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> </button>	
+
+
+<div id="dialog-description" style="display:none;">
+	<pre id="content"></pre>
 </div>
 
-<div class="btn-group" id="fltrCategories" style="display:none;">
+<div id="dialog-filtres" style="display:none;">
 	
-	<button id="showCategories" class="btn btn-primary" >Categories</button> <!-- style="display:none;" -->
-	<button id="editCategories"  title="Modifier" class="btn btn-info"> <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span> </button> 
-	<button id="removeCategories" title="Supprimer" class="btn  btn-info"> <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> </button>
-	
-</div>
-<div class="btn-group" id="fltrVilles" style="display:none;">
-	
-	<button id="showVilles" class="btn btn-primary" >Villes</button> <!-- style="display:none;" -->
-	<button id="editVilles"  title="Modifier" class="btn btn-info"> <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span> </button> 
-	<button id="removeVilles" title="Supprimer" class="btn  btn-info"> <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> </button>
-	
-</div>
-<div class="btn-group" id="fltrDate" style="display:none;">
-	
-	<button id="showDate" class="btn btn-primary">Date</button> <!-- style="display:none;" -->
-	<button id="editDate"  title="Modifier" class="btn btn-info"> <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span> </button> 
-	<button id="removeDate" title="Supprimer" class="btn  btn-info"> <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> </button>
-	
-</div>
+	<div  style="position:relative; display: inline; margin-left: 10px" >
+		Trier par
+		<input type="radio" name="sortTree" id="sortTreeCategorie" value="categories" checked />  categories  
+		<input type="radio" name="sortTree" id="sortTreeVille" value="villes" />  villes
+		
+		<button id="clearFiltres" style="position:relative; left:41%;" class="btn btn-sm btn-info">Réinitialiser tout</button>
+	</div>					
+	<div class="panel-group">  
+		<div class="panel panel-info">
+			<div class="panel-heading">
+				<h3 class="panel-title">
+					<a data-toggle="collapse" id="showFiltres" href="#filtresFullText">Recherche par mot-clé </a>
 
-<div class="btn-group" id="fltrQuantumD" style="display:none;">
-	
-	<button id="showQuantumD" class="btn btn-primary" >Quantum demandé</button> <!-- style="display:none;" -->
-	<button id="editQuantumD" title="Modifier" class="btn btn-info"> <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span> </button> 
-	<button id="removeQuantumD" title="Supprimer" class="btn  btn-info"> <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> </button>
-	
-</div>
-
-<div class="btn-group" id="filtrQuantumR" style="display:none;">						
-	<button id="showQuantumR" class="btn btn-primary">Quantum resultat</button> <!-- style="display:none;" -->
-	<button id="editQuantumR"  title="Modifier" class="btn btn-info"> <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span> </button> 
-	<button id="removeQuantumR" title="Supprimer" class="btn  btn-info"> <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> </button>
-	
-</div>
-
-<div class="btn-group" id="fltrResultats" style="display:none;">
-	<button id="showResultats" class="btn btn-primary" >Resultats</button> <!-- style="display:none;" -->
-	<button id="editResultats"  title="Modifier" class="btn btn-info"> <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span> </button> 
-	<button id="removeResultats" title="Supprimer" class="btn  btn-info"> <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> </button>
-	
-</div>
-
-<button id="clearAll" class="btn btn-primary" style="display:none;">Tout effacer</button> <!-- style="display:none;" -->
-
-<!--<br><br>
-	<br><br>-->
-	<div class="alert alert-info" id="resultat" style="display: none;" role="alert"></div>
-
-	<div id="tree_map">
+				</h3>	
+			</div>
+			<div id="filtresFullText" class="panel-collapse collapse">
+				<div class="panel-body">
+					<div class="motCle">
+						<input type="text" class="form-control input" id="searchByKW">
+					</div>					
+				</div>
+			</div>
+		</div>
 	</div>
-	<div id="popup"></div>
-	<br>
 
 	<div class="panel-group">  
 		<div class="panel panel-info">
 			<div class="panel-heading">
 				<h3 class="panel-title">
-					<a data-toggle="collapse" id="showFiltres" href="#resultats_recherche">Tableau de résultats </a>
+					<a data-toggle="collapse" id="showFiltres" href="#filtresDate">Recherche par date</a>
 
 				</h3>
 			</div>
-			<div id="resultats_recherche" class="panel-collapse collapse">
-
-				<div class="panel-body" id="panel-show-data">
-
-
-					<table class="table table-condensed text-center ">
-						<thead>
-							<td>RG</td>
-							<td>Ville</td>
-							<td>Date</td>
-							<td>Juridiction</td>
-							<td>Quantum demandé</td>
-							<td>Quantum resultat</td>
-							<td>Objet</td>
-							<td>Norme</td>
-							<td>Resultat</td>
-							<td>Description</td>
-
-						</thead>
-						<tbody id="tbody">
-							{% for d in data %} 
-							<tr>
-								<td>{{d[1]}}</td>
-								<td>{{d[2]}}</td>
-								<td>{{d[3]}}</td>
-								<td>{{d[4]}}</td>							
-								<td>{{d[7]}}</td>
-								<td>{{d[8]}}</td>
-								<td>{{d[14]}}</td>
-								<td>{{d[16]}}</td>
-								<td>{{d[9]}}</td>
-								<td> <a href="#" title="{{d[5]}}" onclick="openDescription(this)">Voir</a> </td>
-								<!--<td>{{d[5]}}</td> -->
-
-							</tr>
-							{% endfor %}
-						</tbody>
-					</table>
-
-					<ul class="pagination justify-content-center" id="pagination">
-					   
-					</ul>
-
-				</div>
-			</div>
-		</div>
-	</div>
-
-
-	<div id="dialog-description" style="display:none;">
-		<pre id="content"></pre>
-	</div>
-
-	<div id="dialog-filtres" style="display:none;">
-	
-	<div  style="position:relative; display: inline; margin-left: 10px" >
-			Trier par
-			<input type="radio" name="sortTree" id="sortTreeCategorie" value="categories" checked />  categories  
-			<input type="radio" name="sortTree" id="sortTreeVille" value="villes" />  villes
-			
-	<button id="clearFiltres" style="position:relative; left:27%;" class="btn btn-sm btn-info">Réinitialiser tout</button>
-	</div>					
-		<div class="panel-group">  
-			<div class="panel panel-info">
-				<div class="panel-heading">
-					<h3 class="panel-title">
-						<a data-toggle="collapse" id="showFiltres" href="#filtresFullText">Recherche par mot-clé </a>
-
-					</h3>	
-				</div>
-				<div id="filtresFullText" class="panel-collapse collapse">
-					<div class="panel-body">
-						<div class="motCle">
-							<input type="text" class="form-control input" id="searchByKW">
-						</div>					
-					</div>
-				</div>
-			</div>
-		</div>
-
-		<div class="panel-group">  
-			<div class="panel panel-info">
-				<div class="panel-heading">
-					<h3 class="panel-title">
-						<a data-toggle="collapse" id="showFiltres" href="#filtresDate">Recherche par date</a>
-
-					</h3>
-				</div>
-				<div id="filtresDate" class="panel-collapse collapse">
-					<div class="panel-body">
+			<div id="filtresDate" class="panel-collapse collapse">
+				<div class="panel-body">
+					<p>
+						<label for = "date">Date </label>
+						<input type = "text" id = "date" style = "border: 0">
+					</p>
+					<div id = "slider"></div>
+					<!--
 						<div class="date">
 							<form class="form-inline" id="form_date">
 								<label class="mr-sm-2" for="sel_cond_date">Condition</label> <br>
@@ -344,11 +126,11 @@
 
 							</form>
 						</div>
-
-					</div>
+					-->
 				</div>
 			</div>
 		</div>
+	</div>
 
 		<!--
 		<div class="panel-group">  
@@ -365,26 +147,26 @@
 				</div>
 			</div>
 		</div>
-		-->
-		<div class="panel-group">  
-			<div class="panel panel-info">
-				<div class="panel-heading">
-					<h3 class="panel-title">
-						<a data-toggle="collapse" id="showFiltres" href="#filtresVille">Recherche par ville </a>
-					</h3>
-				</div>
-				<div id="filtresVille" class="panel-collapse collapse">
-					<div class="panel-body">
-						<div class="btn-group selection">
-							<button id="selectAllV" type="button" class="btn btn-sm btn-info">Tout sélectionner</button>
-							<button  id="deselectAllV" type="button" class="btn btn-sm btn-info">Tout désélectionner</button>
+	-->
+	<div class="panel-group">  
+		<div class="panel panel-info">
+			<div class="panel-heading">
+				<h3 class="panel-title">
+					<a data-toggle="collapse" id="showFiltres" href="#filtresVille">Recherche par ville </a>
+				</h3>
+			</div>
+			<div id="filtresVille" class="panel-collapse collapse">
+				<div class="panel-body">
+					<div class="btn-group selection">
+						<button id="selectAllV" type="button" class="btn btn-sm btn-info">Tout sélectionner</button>
+						<button  id="deselectAllV" type="button" class="btn btn-sm btn-info">Tout désélectionner</button>
+					</div>
+					<div class="villes">
+						{% for v in villes %}
+						<div class="villes checkbox">
+							<label><input type="checkbox" name="ville" value="{{v[1]}}">{{v[1]}} ({{v[0]}})</label>
 						</div>
-						<div class="villes">
-							{% for v in villes %}
-							<div class="villes checkbox">
-								<label><input type="checkbox" name="ville" value="{{v[1]}}">{{v[1]}} ({{v[0]}})</label>
-							</div>
-							{% endfor %}
+						{% endfor %}
 
 							<!--						
 							<div id="map" style="width: 320px; height:300px;"></div> -->
@@ -410,7 +192,7 @@
 			//console.log(text.title);
 			document.getElementById("content").innerHTML = text.title;
 			$("#dialog-description").dialog(
-				{
+			{
 				title: "Decision",
 				resizable: false,
 				width: 800,
@@ -422,9 +204,9 @@
 						text: "Fermer",
 						class: "btn btn-info",
 						click: function() {
-						$( this ).dialog( "close" );
+							$( this ).dialog( "close" );
+						}
 					}
-				}
 				}
 
 			}).dialog("open");

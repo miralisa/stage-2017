@@ -6,23 +6,25 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="user-scalable=no, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, minimal-ui">
 
-  <!--  <meta name="viewport" content="width=device-width, initial-scale=1"> -->
+	<!--  <meta name="viewport" content="width=device-width, initial-scale=1"> -->
+	
 	<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
 	<link rel="stylesheet" type="text/css" href="../static/lib/css/dc.css"/>
- 
-   <link rel="stylesheet" href="../static/lib/css/jquery-ui.css">
-   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.1.0/dist/leaflet.css"
-      integrity="sha512-wcw6ts8Anuw10Mzh9Ytw4pylW8+NAD4ch3lqm9lzAsTxg0GFeJgoAtxuCLREZSC5lUXdVyo/7yfsqFjQ4S+aKw=="
-      crossorigin=""/>
-  
-  <!-- Latest compiled and minified CSS -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.3/css/bootstrap-select.min.css">
+	
+	<link rel="stylesheet" href="../static/lib/css/jquery-ui.css">
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.1.0/dist/leaflet.css"
+	integrity="sha512-wcw6ts8Anuw10Mzh9Ytw4pylW8+NAD4ch3lqm9lzAsTxg0GFeJgoAtxuCLREZSC5lUXdVyo/7yfsqFjQ4S+aKw=="
+	crossorigin=""/>
+	<link rel="stylesheet" href="../static/css/style.css">
 
-   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.3/js/i18n/defaults-*.min.js"></script>
-   <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
-   <script src="../static/lib/js/jquery-ui.js"></script>
- 
- 	<!--<script src="../static/lib/js/jquery.min.js"></script> -->
+	<!-- Latest compiled and minified CSS -->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.3/css/bootstrap-select.min.css">
+	
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.3/js/i18n/defaults-*.min.js"></script>
+	<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+	<script src="../static/lib/js/jquery-ui.js"></script>
+	
+	<!--<script src="../static/lib/js/jquery.min.js"></script> -->
 	<script src="../static/lib/js/bootstrap.min.js"></script>
 
 	<!-- Latest compiled and minified JavaScript -->
@@ -32,25 +34,25 @@
 	<script src="../static/lib/js/queue.js"></script>
 
 	<script src="https://unpkg.com/leaflet@1.1.0/dist/leaflet.js"
-	  integrity="sha512-mNqn2Wg7tSToJhvHcqfzLMU6J4mkOImSPTxVZAdo+lcPlk+GhZmYgACEe0x35K7YzW1zJ7XyJV/TT1MrdXvMcA=="
-	  crossorigin=""></script>
+	integrity="sha512-mNqn2Wg7tSToJhvHcqfzLMU6J4mkOImSPTxVZAdo+lcPlk+GhZmYgACEe0x35K7YzW1zJ7XyJV/TT1MrdXvMcA=="
+	crossorigin=""></script>
 
 	<script type=text/javascript>
-	  var $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+		var $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
 	</script>
-  
+	
   <!-- Dashboard
    <script src="../static/lib/js/crossfilter.js"></script>
    <script src="../static/lib/js/d3.min.js"></script>   
    <script src="../static/lib/js/dc.min.js"></script> 
    <script src="../static/lib/js/queue.js"></script>
-	-->
+-->
    <!-- index_test
    <script src="//d3js.org/d3.v3.min.js"></script>
 
-  -->
+-->
 
- 
+
 
    <!-- 
      <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css" integrity="sha512-07I2e+7D8p6he1SIM+1twR5TIrhUQn9+I6yjqD53JQjFiMf8EtC93ty0/5vJTZGF8aAocvHYNEDJajGdNx1IsQ==" crossorigin=""/>
@@ -59,162 +61,7 @@
    <script src="http://dc-js.github.io/dc.js/js/crossfilter.js"></script>
    <script src="http://dc-js.github.io/dc.js/js/d3.js"></script>   
    <script src="http://dc-js.github.io/dc.js/js/dc.js"></script>
-	-->
-
-
-  <style>
-	/* Home page */ 
-	.navbar {
-	  margin-bottom: 0;
-	  border-radius: 0;
-  }
-  html {
-	  position: relative;
-	  min-height: 100%;
-  }
-  body {
-	  margin-bottom: 60px;
-	  background-color: #eee;
-  }
-
-  footer {
-	  background-color: #555;
-	  position: absolute;
-	  bottom: 0;
-	  width: 100%;
-	  height: 35px;
-	  color: white;
-
-  }
-  .ui-widget-header{
-  	background-color: rgba(38, 154, 188, 0.68) !important;
-  	color: #fff;
-  }
-  .ui-dialog-titlebar-close{
-  	background-image: url("../static/img/exit.png");
-  	background-repeat: no-repeat;
-  }
-  .custom-tooltip {
-  	background: #333;
-
-    }
-
-.droplist{
-	width: 130px;
-	height: 100px;
-}
-/* tree */
-#tree_map{
-	border: 2px solid #eee;
-	border-radius: 5px;
-}
-/*      circle {
-          fill: #fff;
-          stroke: #666;
-          stroke-width: 1px;
-      }
-      .nodeA text, .nodeD text {
-          font: 12px sans-serif;
-      }
-      .nodeA, .nodeD {
-                cursor: pointer;
-            }
-      .linkA, .linkD {
-             fill: none;
-             stroke: #ccc;
-             stroke-width: 2px;
-         }
-*/
-
-.node {
-  cursor: pointer;
-}
-
-.node circle {
-  fill: #fff;
-  stroke: #666;
-  stroke-width: 1.5px;
-}
-
-.node text {
-  font: 12px sans-serif;
-  fill: #122b40;
-}
-
-.link {
-  fill: none;
-  stroke: #ccc;
-  stroke-width: 1.5px;
-  opacity: 0.5;
-}
-/* pop up */
-div.tooltip {	
-    position: absolute;			
-    text-align: center;			
-    width: 60px;					
-    height: 28px;					
-    padding: 2px;				
-    font: 12px sans-serif;		
-    background: #d9edf7;	
-    border: 0px;		
-    border-radius: 8px;			
-    pointer-events: none;			
-}
-
-/* test graph*/
-#cy {
-  width: 1100px;
-  height: 600px;
-  display: block;  
- 
-}
-
-.search{
-	position: relative;
-	left: 45%;
-}
-thead{
-	background-color: #eee;
-}
-
-.container{
-	background-color: #fff;
-
-}
-.buttons-filters{
-	display: inline;
-	
-}
-.selection{
-	}
-
-.panel{
-	position: relative;
-	top: 10px;
-}
-.categories, .villes, .resultats{
-	display: inline-block;
-	font-size: 11px;
-}
-
-
-h5{
-	text-align: center;
-}
-
- .dc-table-label{
-	display: none !important;
- }    
-
-/* On small screens, set height to 'auto' for sidenav and grid */
-@media screen and (max-width: 767px) {
-  .sidenav {
-	height: auto;
-	padding: 15px;
-}
-.row.content {height:auto;} 
-}
-</style>
+-->
 
 </head>
 <body>

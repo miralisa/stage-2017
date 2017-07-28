@@ -134,7 +134,7 @@ for row in cr:
 			count+=1
 			tab_count.append(count)
 			year = random.randint(2000,2017)
-			day = random.randint(1,31)
+			day = random.randint(1,30)
 			month = random.randint(1,12)
 
 			rgDec = str(row[2])
