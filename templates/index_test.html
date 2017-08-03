@@ -69,48 +69,65 @@
 	<pre id="content"></pre>
 </div>
 
-<div id="dialog-filtres" style="display:none;">
-	
-	<div  style="position:relative; display: inline; margin-left: 10px" >
-		Trier par
-		<input type="radio" name="sortTree" id="sortTreeCategorie" value="categories" checked />  categories  
-		<input type="radio" name="sortTree" id="sortTreeVille" value="villes" />  villes
-		
-		<button id="clearFiltres" style="position:relative; left:41%;" class="btn btn-sm btn-info">Réinitialiser tout</button>
-	</div>					
-	<div class="panel-group">  
-		<div class="panel panel-info">
-			<div class="panel-heading">
-				<h3 class="panel-title">
-					<a data-toggle="collapse" id="showFiltres" href="#filtresFullText">Recherche par mot-clé </a>
 
-				</h3>	
-			</div>
-			<div id="filtresFullText" class="panel-collapse collapse">
-				<div class="panel-body">
-					<div class="motCle">
-						<input type="text" class="form-control input" id="searchByKW">
-					</div>					
+<div id="dialog-quantum" style="display:none;">
+	<div id="histogram">
+<!--	<div id="chart-ring-result">  
+					<h5 >Resultats  <a class='réinitialiser'  href='javascript:resultRingChart.filterAll(); dc.redrawAll();'> réinitialiser <span class="glyphicon glyphicon-remove-circle" aria-hidden="true"></span></a></h5>
+
+				</div> 
+	<div id="chart-row-quantum">
+					<h5 class='filter-count'>Quantum  <a class='réinitialiser'  href='javascript:quantumRowChart.filterAll(); dc.redrawAll();'> réinitialiser <span class="glyphicon glyphicon-remove-circle" aria-hidden="true"></span></a></h5> 
 				</div>
-			</div>
+	<div id="chart-row-quantum-resultat">
+					<h5 class='filter-count'>Quantum  <a class='réinitialiser'  href='javascript:quantumRowChart.filterAll(); dc.redrawAll();'> réinitialiser <span class="glyphicon glyphicon-remove-circle" aria-hidden="true"></span></a></h5> 
+				</div>	
+			-->						
 		</div>
 	</div>
 
-	<div class="panel-group">  
-		<div class="panel panel-info">
-			<div class="panel-heading">
-				<h3 class="panel-title">
-					<a data-toggle="collapse" id="showFiltres" href="#filtresDate">Recherche par date</a>
+	<div id="dialog-filtres" style="display:none;">
+		
+		<div  style="position:relative; display: inline; margin-left: 10px" >
+			Trier par
+			<input type="radio" name="sortTree" id="sortTreeCategorie" value="categories" checked />  categories  
+			<input type="radio" name="sortTree" id="sortTreeVille" value="villes" />  villes
+			
+			<button id="clearFiltres" style="position:relative; left:41%;" class="btn btn-sm btn-info">Réinitialiser tout</button>
+		</div>					
+		<div class="panel-group">  
+			<div class="panel panel-info">
+				<div class="panel-heading">
+					<h3 class="panel-title">
+						<a data-toggle="collapse" id="showFiltres" href="#filtresFullText">Recherche par mot-clé </a>
 
-				</h3>
+					</h3>	
+				</div>
+				<div id="filtresFullText" class="panel-collapse collapse">
+					<div class="panel-body">
+						<div class="motCle">
+							<input type="text" class="form-control input" id="searchByKW">
+						</div>					
+					</div>
+				</div>
 			</div>
-			<div id="filtresDate" class="panel-collapse collapse">
-				<div class="panel-body">
-					<p>
-						<label for = "date">Date </label>
-						<input type = "text" id = "date" style = "border: 0">
-					</p>
-					<div id = "slider"></div>
+		</div>
+
+		<div class="panel-group">  
+			<div class="panel panel-info">
+				<div class="panel-heading">
+					<h3 class="panel-title">
+						<a data-toggle="collapse" id="showFiltres" href="#filtresDate">Recherche par date</a>
+
+					</h3>
+				</div>
+				<div id="filtresDate" class="panel-collapse collapse">
+					<div class="panel-body">
+						<p>
+							<label for = "date">Date </label>
+							<input type = "text" id = "date" style = "border: 0">
+						</p>
+						<div id = "slider"></div>
 					<!--
 						<div class="date">
 							<form class="form-inline" id="form_date">

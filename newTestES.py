@@ -24,30 +24,36 @@ es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
 
 def search(term):
 	#analyzer = "'french': {'tokenizer': 'standard','filter': ['french_elision','lowercase', 'french_stop', 'french_keywords', 'french_stemmer' ]"
-	res = es.search(index='decisions', body={"query": {"query_string" : {"query": term, "default_field": "contenu"}}, "size": 470, "highlight": { "fields" : { "contenu" : {}}}}) #{"query": { "fuzzy" : { "contenu" : { "value" : term, "fuzziness" : 2,}}}}) #{'query': {"fuzzy" : {'query_string' : {'default_field' : 'contenu', 'query' : term}}}})
+	res = es.search(index='index_decision', body={"query": {"query_string" : {"query": term, "fuzziness" : 1, "default_field": "contenu"}}, "size": 470, "highlight": {"fields" : {"contenu" : {}}}}) #{"query": { "fuzzy" : { "contenu" : { "value" : term, "fuzziness" : 2,}}}}) #{'query': {"fuzzy" : {'query_string' : {'default_field' : 'contenu', 'query' : term}}}})
 	print('%d documents found' % res['hits']['total'])
 	liste_id = []
 	liste_highlights = []
+	file = open("highlight.txt","w")
+
 	for doc in res['hits']['hits']:
 		liste_id.append(int(doc['_id']))
 		liste_highlights.append(doc['highlight'])
+		file.write(str(doc['highlight']) + "\n")
+
+	file.close()  
 	print liste_id
 
 #res = requests.get('http://localhost:9200')
 #print res.content
 
-"""
-Put date to ES server
+
+#Put data to ES server
 conn = mysql.connect()
 cur=conn.cursor()
 cur.execute('''SELECT * from decision''')
 allDec = cur.fetchall()
 for dec in allDec:
-	es.index(index='decisions', doc_type='texte', id=dec[0], body={'contenu':dec[5]})
-"""
+	es.index(index='index_decision', doc_type='texte', id=dec[0], body={'contenu':dec[5]}, request_timeout=50)
+
 
 #print es.search(index='decisions', body={'query':{'bool':{'must':[{'fuzzy':{'contenu':{'value':'dommage AND voisinage'}}}]}}})
-toSearch = "enterprise AND (dommage OR amende)"
+"""
+toSearch = "medecin"
 keyWords = toSearch.split(" ")
 paramToSearch = ''
 print keyWords
@@ -61,6 +67,7 @@ for w in keyWords:
 		paramToSearch += w + "~ "
 print paramToSearch				
 search(paramToSearch)
+"""
 
 """
 "query": {"query_string" : {"query": term, "default_field": "contenu"}}
@@ -68,28 +75,28 @@ search(paramToSearch)
 curl -XPOST 'http://localhost:9200/decisions/_close'
 
 curl -XPUT  'http://localhost:9200/decisions/' -d '{
-  "settings": {
-    "index": {
-      "analysis": {
-        "filter": {
-          "stemmers": {
-            "type": "stemmer",
-            "language": "french"
-                  }
-            },
-        "analyzer": {
-          "filter_stemmer": {
-            "filter": [
-              "standard",
-              "lowercase",
-              "stemmers"
-            ],
-            "tokenizer": "standard"
-                  }
-            }
-      }
-    }
-  }
+	"settings": {
+		"index": {
+			"analysis": {
+				"filter": {
+					"stemmers": {
+						"type": "stemmer",
+						"language": "french"
+									}
+						},
+				"analyzer": {
+					"filter_stemmer": {
+						"filter": [
+							"standard",
+							"lowercase",
+							"stemmers"
+						],
+						"tokenizer": "standard"
+									}
+						}
+			}
+		}
+	}
 }'
 
 curl -XPOST 'http://localhost:9200/myindex/_open'
@@ -100,29 +107,29 @@ curl -XPOST 'http://localhost:9200/myindex/_open'
 
 curl -XGET 'localhost:9200/_search?pretty' -H 'Content-Type: application/json' -d'
 {
-    "query": { "fuzzy" : { "user" : { "value" : term, "fuzziness" : 2,}}}
+		"query": { "fuzzy" : { "user" : { "value" : term, "fuzziness" : 2,}}}
 }
 '
 
 curl -XPUT 'localhost:9200/decisions?pretty' -d '
 {
-  'settings': {
-    'analysis': {
-      'filter': {
-          'french_stop': {
-          'type':       'stop',
-          'stopwords':  '_french_' 
-        },
-          'french_stemmer': {
-          'type':       'stemmer',
-          'language':   'light_french'
-        }
-      },
-      'analyzer': {
-        'french': {'tokenizer':  'standard','filter': ['french_elision','lowercase', 'french_stop', 'french_keywords', 'french_stemmer' ]
-        }
-      }
-    }
-  }
+	'settings': {
+		'analysis': {
+			'filter': {
+					'french_stop': {
+					'type':       'stop',
+					'stopwords':  '_french_' 
+				},
+					'french_stemmer': {
+					'type':       'stemmer',
+					'language':   'light_french'
+				}
+			},
+			'analyzer': {
+				'french': {'tokenizer':  'standard','filter': ['french_elision','lowercase', 'french_stop', 'french_keywords', 'french_stemmer' ]
+				}
+			}
+		}
+	}
 }
 """

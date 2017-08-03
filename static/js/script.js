@@ -205,10 +205,10 @@
 				console.log(div_tree);
 				div_tree.remove();//(div_tree.childNodes[0]);
 				
-				var div_tree_n = document.createElement("div");
+				var histogram_n = document.createElement("div");
 				var parentNode = document.getElementById("popup");
-				div_tree_n.id = "tree_map";
-				parentNode.appendChild(div_tree_n);
+				histogram_n.id = "tree_map";
+				parentNode.appendChild(histogram_n);
 				
 				build_tree(data);
 				var isExpanded = $("#showFiltres").attr("aria-expanded");
@@ -259,7 +259,7 @@
 					quantumR: JSON.stringify(quantumR),
 					resultat: JSON.stringify(resultats)
 				}, function(data){
-					console.log(data.result);
+					console.log(data);
 					updateTabel(data.result);
 					var nbPage = data.nbPage;
 					
@@ -461,8 +461,8 @@
 				div.transition()        
 				.duration(500)      
 				.style("opacity", 0) 
-			})   
-
+			})
+			.on("keydown", function () { console.log("div key", i); })   
 			.style("fill-opacity", 1e-6);
 
 			// Transition nodes to their new position.
@@ -589,6 +589,96 @@
 			});
 		}
 
+		function build_histogram(dataq){
+			
+			dataq.quantums.forEach(function (d){
+				d.quantum_demande = Math.round(Number(d.quantum_demande.replace(",",".").replace(/[^0-9\.]+/g,"")));
+				d.quantum_resultat = Math.round(Number(d.quantum_resultat.replace(",",".").replace(/[^0-9\.]+/g,"")));
+			})
+			
+			var data = dataq.quantums;//[{"date":"2012-03-20","total":3},{"date":"2012-03-21","total":8},{"date":"2012-03-22","total":2},{"date":"2012-03-23","total":10},{"date":"2012-03-24","total":5},{"date":"2012-03-25","total":20},{"date":"2012-03-26","total":12}];
+
+			//var data1 = [{"date":"2012-03-20","total":8},{"date":"2012-03-21","total":2},{"date":"2012-03-22","total":1},{"date":"2012-03-23","total":14},{"date":"2012-03-24","total":3},{"date":"2012-03-25","total":2},{"date":"2012-03-26","total":10}];
+
+			var margin = {top: 40, right: 40, bottom: 40, left:80},
+			width = 700,
+			height = 500;
+			var nbTicks = 10;
+			if(dataq.quantums.length < 10){
+				nbTicks = dataq.quantums.length;
+			} 
+			var x = d3.time.scale()
+				//console.log(new Date(data[0].date));
+				.domain([new Date(data[0].date), d3.time.day.offset(new Date(data[data.length - 1].date), 1)])
+				.rangeRound([0, width - margin.left - margin.right]);
+
+				var y = d3.scale.linear()
+				.domain([0, d3.max(data, function(d) { return d.quantum_demande; })])
+				.range([height - margin.top - margin.bottom, 0]);
+
+				var xAxis = d3.svg.axis()
+				.scale(x)
+				.orient('bottom')
+				//.ticks(d3.time.days, 1)
+				.ticks(nbTicks)
+				.tickFormat(d3.time.format('%Y'))
+				.tickSize(0)
+				.tickPadding(8);
+
+				var yAxis = d3.svg.axis()
+				.scale(y)
+				.orient('left')
+				.tickPadding(8);
+
+				var svg = d3.select('#histogram').append('svg')
+				.attr('class', 'chart')
+				.attr('width', width)
+				.attr('height', height)
+				.append('g')
+				.attr('transform', 'translate(' + margin.left + ', ' + margin.top + ')');
+
+				svg.selectAll('.chart')
+				.data(data)
+				.enter().append('rect')
+				.attr('class', 'bar')
+				.attr('x', function(d) { return x(new Date(d.date)); })
+				.attr('y', function(d) { return height - margin.top - margin.bottom - (height - margin.top - margin.bottom - y(d.quantum_demande)) })
+				.attr('width', 10)
+				.attr('height', function(d) { return height - margin.top - margin.bottom - y(d.quantum_demande) });
+				
+				svg.selectAll('.chart')
+				.data(data)
+				.enter().append('rect')
+				.attr('class', 'bar1')
+				.attr('x', function(d) { return x(new Date(d.date))+10; })
+				.attr('y', function(d) { return height - margin.top - margin.bottom - (height - margin.top - margin.bottom - y(d.quantum_resultat)) })
+				.attr('width', 10)
+				.attr('height', function(d) { return height - margin.top - margin.bottom - y(d.quantum_resultat) });
+				
+				svg.append('g')
+				.attr('class', 'x axis')
+				.attr('transform', 'translate(0, ' + (height - margin.top - margin.bottom) + ')')
+				.call(xAxis);
+
+				svg.append('g')
+				.attr('class', 'y axis')
+				.call(yAxis);
+
+			// add legend   
+			svg.append("text")
+			.attr('class', 'bar')
+			.attr("y", "-10")
+			.style('stroke', "0px")
+			.text("Quantum demandé");
+
+			svg.append("text")
+			.attr('class', 'bar1')
+			.attr("y", "-10") 
+			.attr("x", "100") 
+			.style('stroke', "0px")
+			.text("Quantum resultat");
+			
+		}
 		// Toggle children on click.
 		function click(d) {
 
@@ -625,7 +715,59 @@
 				}).dialog("open");
 
 
-			} else { 
+			} 
+			if (d.tree == "Resultats"){
+				var resultat = d.name,
+				objet = d.parent.name,
+				norme = d.parent.parent.name
+				ville = d.parent.parent.parent.name;
+
+				var div_histogram = document.getElementById("histogram");
+				div_histogram.remove();
+				var histogram_n = document.createElement("div");
+				var parentNode = document.getElementById("dialog-quantum");
+				histogram_n.id = "histogram";
+				parentNode.appendChild(histogram_n);
+				
+				if (ville!="Catégories"){
+					villes = [];
+					villes.push(ville);
+				}
+				console.log(villes);
+
+				$.getJSON($SCRIPT_ROOT + 'get_quantum', {
+					resultat: JSON.stringify(resultat),
+					norme: JSON.stringify(norme),
+					objet: JSON.stringify(objet),
+					date: JSON.stringify(date),
+					texte: JSON.stringify(full_texte),
+					villes: JSON.stringify(villes)
+				}, function(data){
+					//console.log(data);
+					build_histogram(data);
+					$("#dialog-quantum").dialog(
+					{
+						title: "Quantum demandé et quantum resultat",
+						resizable: false,
+						height: "auto",
+						width: 750,
+						position: { my: "center top", at: "center top", of: window },
+						modal: true,
+						buttons: {
+							"Fermer":{ 
+								text: "Fermer",
+								class: "btn btn-info",
+								click: function() {
+									$( this ).dialog( "close" );
+								}
+							}
+						}
+
+					}).dialog("open");
+
+				});
+			}
+			else { 
 				if (d.children) {
 					d._children = d.children;
 					d.children = null;

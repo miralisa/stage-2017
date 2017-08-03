@@ -19,7 +19,9 @@ app.config['MYSQL_CHARSET'] = 'utf-8'
 mysql.init_app(app)
 
 conn = mysql.connect()
-
+#sudo service elasticsearch start
+es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
+        
 def colors():
     colores_g = ["#3366cc", "#dc3912", "#ff9900", "#109618", "#990099", "#0099c6", "#dd4477", "#66aa00", "#b82e2e", "#316395", "#994499", "#22aa99", "#aaaa11", "#6633cc", "#e67300", "#8b0707", "#651067", "#329262", "#5574a6", "#3b3eac"]
     return colores_g[random.randint(0, len(colores_g)-1)]
@@ -111,19 +113,18 @@ def index():
     cur.execute('''SELECT min(date_decision) from decision ''')
     date_min = cur.fetchall()
     date_min = str(date_min[0][0])[:4]
-
     return render_template('index_test.html', categories=categories, villes=villes)
 
 def define_filtres():
     villes = json.loads(request.args.get('villes'))
     date = json.loads(request.args.get('date'))
-    categories = json.loads(request.args.get('categories'))
-    quantumD = json.loads(request.args.get('quantumD'))
-    quantumR = json.loads(request.args.get('quantumR'))
-    resultat = json.loads(request.args.get('resultat'))
-    juridiction = json.loads(request.args.get('juridiction'))
+    #categories = json.loads(request.args.get('categories'))
+    #quantumD = json.loads(request.args.get('quantumD'))
+    #quantumR = json.loads(request.args.get('quantumR'))
+    #resultat = json.loads(request.args.get('resultat'))
+    #juridiction = json.loads(request.args.get('juridiction'))
     texte = json.loads(request.args.get('texte'))
-    search = {'date':len(date), 'juridiction':len(juridiction), 'texte':len(texte), 'villes':len(villes), 'categories':len(categories), 'quantumD':len(quantumD), 'quantumR':len(quantumR), 'resultat':len(resultat)}
+    search = {'date':len(date), 'texte':len(texte), 'villes':len(villes)}
     filters = []
     # search = {'quantumD': 0, 'resultat': 0, 'quantumR': 0, 'texte': 0, 'date': 2, 'juridiction': 0, 'villes': 1, 'categories': 0}
 
@@ -176,8 +177,7 @@ def define_filtres():
                 else:   
                     paramToSearch += w + "~ "
             print time.time()       
-            es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
-            res = es.search(index='decisions', body={"query": {"query_string" : {"query": paramToSearch, "fuzziness" : 2, "default_field": "contenu"}}, "size": 470, "highlight": {"fields" : {"contenu" : {}}}})
+            res = es.search(index='index_decision', body={"query": {"query_string" : {"query": paramToSearch, "fuzziness" : 1, "default_field": "contenu"}}, "size": 470, "highlight": {"fields" : {"contenu" : {}}}})
             print('%d documents found' % res['hits']['total'])
             print time.time()
             liste_id = []
@@ -198,7 +198,7 @@ def define_filtres():
                 query2+="( MATCH(description) AGAINST(\""+texte+"\" IN BOOLEAN MODE)) AND " 
             """
 
-    
+        """
         if f == 'categories':
             query2 += "("
             for c in categories[:-1]:
@@ -216,7 +216,7 @@ def define_filtres():
                 query2 += "resultat=\"" + resultat[-1] + "\") AND "
             else:
                 query2 += "resultat=\"" + resultat[-1] + "\")"
-            
+        """    
             #if     len(filters) == 0:
             #query2+="resultat=\""+resultat[-1]+"\")"
             
@@ -232,16 +232,17 @@ def show_text():
     queryNB = ''
     print len(query2)
     if len(query2) != 0:
-        query = '''SELECT * from decision, demande, categorie, norme WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND demande.id_norme = norme.id_norme AND '''+query2+' GROUP BY rg ORDER BY ville LIMIT 0, 15 '
-        queryNB = '''SELECT count(*) from decision, demande, categorie, norme WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND demande.id_norme = norme.id_norme  AND '''+query2+' GROUP BY rg ORDER BY ville'
+        query = '''SELECT * from decision, demande, categorie, norme WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND demande.id_norme = norme.id_norme AND '''+query2+' LIMIT 0, 15 '
+        queryNB = '''SELECT count(*) from decision, demande, categorie, norme WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND demande.id_norme = norme.id_norme  AND '''+query2
     else:
-        query = '''SELECT * from decision, demande, categorie, norme WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND demande.id_norme = norme.id_norme GROUP BY rg ORDER BY ville LIMIT 0, 15'''
-        queryNB = '''SELECT count(*) from decision, demande, categorie, norme WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND demande.id_norme = norme.id_norme GROUP BY rg ORDER BY ville'''
+        query = '''SELECT * from decision, demande, categorie, norme WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND demande.id_norme = norme.id_norme LIMIT 0, 15'''
+        queryNB = '''SELECT count(*) from decision, demande, categorie, norme WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND demande.id_norme = norme.id_norme'''
     
     cur = conn.cursor()
     cur.execute(queryNB)
     nbDem = cur.fetchall()
-    nbPage = len(nbDem)/15
+    nbDemande = nbDem[0][0]
+    nbPage = (nbDemande/15) +1
     cur.execute(query)
     data = cur.fetchall()
     return jsonify(result=data, nbPage=nbPage)
@@ -254,10 +255,10 @@ def show_page():
     query = ''
     queryNB = ''
     if len(query2) != 0:
-        query = '''SELECT * from decision, demande, categorie, norme WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND demande.id_norme = norme.id_norme AND '''+query2+' GROUP BY rg ORDER BY ville LIMIT '''+ str(int(numPage)*15) +', 15'
+        query = '''SELECT * from decision, demande, categorie, norme WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND demande.id_norme = norme.id_norme AND '''+query2+' LIMIT '''+ str(int(numPage)*15) +', 15'
         #queryNB = '''SELECT count(*) from decision, demande, categorie, norme WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND demande.id_norme = norme.id_norme  AND '''+query2+' GROUP BY rg '''
     else:
-        query = '''SELECT * from decision, demande, categorie, norme WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND demande.id_norme = norme.id_norme GROUP BY rg ORDER BY ville LIMIT '''+ str(int(numPage)*15) +", 15"
+        query = '''SELECT * from decision, demande, categorie, norme WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND demande.id_norme = norme.id_norme LIMIT '''+ str(int(numPage)*15) +", 15"
         #queryNB = '''SELECT count(*) from decision, demande, categorie, norme WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND demande.id_norme = norme.id_norme GROUP BY rg '''
     
     cur = conn.cursor()
@@ -316,7 +317,7 @@ def get_results():
                     color = 'red'
                 else:
                     color = 'yellow'
-                d = {'name': r[1], 'nb': r[0], 'tree':'Resultats', 'color':color}
+                d = {'name': r[1], 'nb': r[0], 'tree':'Resultats', 'color':color,}
                 resParNormeChildren.append(d)
             
             r = {'name': results[1], 'color':colors(), 'children':resParNormeChildren, 'tree':'Normes', 'nb': results[0]}
@@ -340,19 +341,34 @@ def get_results():
         tree_root = {'name':'Filtres', 'nb':data[0][0], 'color':colors(), "parent": "null"}
         return jsonify(tree=tree_root)
             
-    
+@app.route('/get_quantum/')
+def get_quantum():
+    norme = json.loads(request.args.get('objet'))    
+    objet = json.loads(request.args.get('norme'))    
+    resultat = json.loads(request.args.get('resultat')) 
+    query2 = define_filtres()
+    if len(query2) > 0:
+         query2+=" AND "
+    query2 += " norme = \"" + norme + "\" AND objet = \"" + objet  + "\" AND resultat = \"" + resultat + "\" ORDER BY date_decision "
+    cur = conn.cursor()
+    query = '''SELECT quantum_demande, quantum_resultat, date_decision, resultat from decision, demande, categorie, norme WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND demande.id_norme = norme.id_norme AND '''+query2
+    cur.execute(query)
+    quantums = cur.fetchall()
+    all_quantums = []
+    for q in quantums:
+        if str(q[2])!='None':
+            d = {'quantum_demande':q[0],'quantum_resultat': q[1], 'date': q[2], 'resultat':q[3] }
+            all_quantums.append(d)
+           
+    return jsonify(quantums=all_quantums)
+     
 
 @app.route('/filtres/')
 def get_resultats():
     villes = json.loads(request.args.get('villes'))
     date = json.loads(request.args.get('date'))
-    categories = json.loads(request.args.get('categories'))
-    quantumD = json.loads(request.args.get('quantumD'))
-    quantumR = json.loads(request.args.get('quantumR'))
-    resultat = json.loads(request.args.get('resultat'))
-    juridiction = json.loads(request.args.get('juridiction'))
     texte = json.loads(request.args.get('texte'))
-    search = {'date':len(date), 'juridiction':len(juridiction), 'texte':len(texte), 'categories':len(categories), 'quantumD':len(quantumD), 'quantumR':len(quantumR), 'resultat':len(resultat)} #'villes':len(villes),
+    search = {'date':len(date), 'texte':len(texte)} #'villes':len(villes),
     filters = []
     # search = {'quantumD': 0, 'resultat': 0, 'quantumR': 0, 'texte': 0, 'date': 2, 'juridiction': 0, 'villes': 1, 'categories': 0}
 
@@ -435,8 +451,7 @@ def get_resultats():
                 else:   
                     paramToSearch += w + "~ "
             print time.time()       
-            es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
-            res = es.search(index='decisions', body={"query":{"query_string" :{"query": paramToSearch, "fuzziness" : 2, "default_field": "contenu"}}, "size": 470, "highlight":{"fields" :{"contenu" : {}}}})
+            res = es.search(index='index_decision', body={"query":{"query_string" :{"query": paramToSearch, "fuzziness" : 1, "default_field": "contenu"}}, "size": 470, "highlight":{"fields" :{"contenu" : {}}}})
             print('%d documents found' % res['hits']['total'])
             print time.time()
             liste_id = []
@@ -481,19 +496,6 @@ def get_resultats():
             else:
                 query2+="categorie=\""+categories[-1]+"\")"
         """
-        if f == 'resultat':
-            query2 += "("
-            for r in resultat[:-1]:
-                query2 += "resultat=\"" + r + "\" OR "
-            if filters[-1] != 'resultat':
-                query2 += "resultat=\"" + resultat[-1] + "\") AND "
-            else:
-                query2 += "resultat=\"" + resultat[-1] + "\")"
-            
-            #if     len(filters) == 0:
-            #query2+="resultat=\""+resultat[-1]+"\")"
-            
-            #else:
     #print query2       
     query = '''SELECT count(*) from decision, demande, categorie, norme WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND demande.id_norme = norme.id_norme  AND '''+query2
     query0 = '''SELECT demande.id_demande from decision, demande, categorie, norme WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND demande.id_norme = norme.id_norme'''
