@@ -1,5 +1,5 @@
 	queue()
-	.defer(d3.json, "/all_decisions/")
+	.defer(d3.json, "/get_decisions/")
 	.await(makeGraphs);
 
 	function makeGraphs(error,recordsJson) {
@@ -138,21 +138,21 @@
 				villes.push($(this).val());
 
 			});
-
+			/*
 			if(villes.length==0){
 				$("input[type=checkbox]", ".villes").each ( function() {
 					villes.push($(this).val());
 
 				});
 			}
-			
+			*/
 			var categorie = document.getElementById("sortTreeCategorie").checked;
 			var ville = document.getElementById("sortTreeVille").checked;
-			var root_search = '/search/';
+			var root_search = '/sortByCategorie/';
 			if (ville){
-				root_search = '/filtres/';
+				root_search = '/sortByVille/';
 			}
-
+			console.log(root_search);
 			$.getJSON($SCRIPT_ROOT + root_search, {
 				categories: JSON.stringify(categories),
 				villes: JSON.stringify(villes),
@@ -169,7 +169,7 @@
 				var inputFullTexte = document.getElementById("searchByKW").value;
 				//var condDate = document.getElementById("sel_cond_date").value;
 				var parametreRecherche = " <br> Recherche effectuée: ";
-				var villesChecked =" <strong>ville(s)</strong> <i>"+villes+"</i> ";
+				//var villesChecked =" <strong>ville(s)</strong> <i>"+villes+"</i> ";
 				
 				if(date1 >= 1990 && date2 <= 2017){
 					if (date1 == date2) {
@@ -179,11 +179,11 @@
 						parametreRecherche+="<strong>date</strong> entre <i>" +date1+"</i> et <i>"+date2+"</i> ";
 					}
 				}
-
+				/*
 				if(villes.length < 34){
 					parametreRecherche += villesChecked;
 				}
-
+				*/
 				if (inputFullTexte != ""){
 					parametreRecherche+="<strong>mot-clé</strong> <i>"+inputFullTexte+"</i> ";
 				}
@@ -194,7 +194,7 @@
 				}else{
 
 					showRes.style="display: ;"
-					showRes.innerHTML = "Voici <strong>"+ data.tree.nb+ "</strong> demande(s) correspondant à votre recherche."+parametreRecherche;
+					showRes.innerHTML = "Voici les demandes correspondant à votre recherche."+parametreRecherche;//<strong>"+ data.tree.nb+ "</strong>
 
 				}
 				console.log(data);
@@ -628,6 +628,7 @@
 				var yAxis = d3.svg.axis()
 				.scale(y)
 				.orient('left')
+				.tickFormat(function(d) { return d + "€"; })
 				.tickPadding(8);
 
 				var svg = d3.select('#histogram').append('svg')
@@ -650,7 +651,7 @@
 				.data(data)
 				.enter().append('rect')
 				.attr('class', 'bar1')
-				.attr('x', function(d) { return x(new Date(d.date))+10; })
+				.attr('x', function(d) { return x(new Date(d.date)); })
 				.attr('y', function(d) { return height - margin.top - margin.bottom - (height - margin.top - margin.bottom - y(d.quantum_resultat)) })
 				.attr('width', 10)
 				.attr('height', function(d) { return height - margin.top - margin.bottom - y(d.quantum_resultat) });
@@ -664,23 +665,55 @@
 				.attr('class', 'y axis')
 				.call(yAxis);
 
-			// add legend   
-			svg.append("text")
-			.attr('class', 'bar')
-			.attr("y", "-10")
-			.style('stroke', "0px")
-			.text("Quantum demandé");
+				// add legend   
+				svg.append("text")
+				.attr('class', 'bar')
+				.attr("y", "-10")
+				.style('stroke', "0px")
+				.text("Quantum demandé");
 
-			svg.append("text")
-			.attr('class', 'bar1')
-			.attr("y", "-10") 
-			.attr("x", "100") 
-			.style('stroke', "0px")
-			.text("Quantum resultat");
-			
-		}
+				svg.append("text")
+				.attr('class', 'bar1')
+				.attr("y", "-10") 
+				.attr("x", "100") 
+				.style('stroke', "0px")
+				.text("Quantum resultat");
+				
+			}
+		
+
 		// Toggle children on click.
 		function click(d) {
+			function addChildren(type){
+			$.getJSON($SCRIPT_ROOT + type, {
+				resultat: JSON.stringify(resultat),
+				norme: JSON.stringify(norme),
+				objet: JSON.stringify(objet),
+				date: JSON.stringify(date),
+				texte: JSON.stringify(full_texte),
+				villes: JSON.stringify(villes)
+			}, function(data){
+				data.tree.forEach(function(child){
+					if (!tree.nodes(d)[0]._children){
+						tree.nodes(d)[0]._children = [];
+					}
+					child.x = d.x0;
+					child.y = d.y0;
+					tree.nodes(d)[0]._children.push(child);
+				});
+				
+				if (d.children) {
+					d._children = d.children;
+					d.children = 0;
+				}
+				else {
+					d.children = d._children;
+					d._children = 0;
+				} 
+				update(root);
+
+			});	
+		}
 
 			if (d.name == "Filtres"){
 				//console.log(d.name);
@@ -715,25 +748,57 @@
 				}).dialog("open");
 
 
-			} 
+			}
+
+			if (d.tree == "Villes" && d._children.length == 0 ){
+				var ville = d.name;
+				villes = [];
+				villes.push(ville);
+				addChildren('get_categorie');
+			}
+
+			if (d.tree == "Categories" && d._children.length == 0 ){	
+				var objet = d.name,
+				ville = d.parent.name;
+
+				if (villes.length == 0  && ville != "Filtres"){
+					villes.push(ville);
+				}
+				addChildren('get_norme');
+			}
+
+			if (d.tree == "Normes" && d._children.length == 0 ){
+
+				var norme = d.name,
+				objet = d.parent.name,
+				ville = d.parent.parent.name;
+
+				if (villes.length == 0  && ville != "Filtres"){
+					villes.push(ville);
+				}
+				addChildren('get_resultat');
+				
+			}		
+
 			if (d.tree == "Resultats"){
 				var resultat = d.name,
 				objet = d.parent.name,
 				norme = d.parent.parent.name
 				ville = d.parent.parent.parent.name;
-
 				var div_histogram = document.getElementById("histogram");
 				div_histogram.remove();
 				var histogram_n = document.createElement("div");
 				var parentNode = document.getElementById("dialog-quantum");
 				histogram_n.id = "histogram";
 				parentNode.appendChild(histogram_n);
+				var text = document.createElement("div");
+
+				text.innerHTML ="<i>Objet:</i> " +objet+", <i>norme:</i> "+ norme + ", <i>resultat:</i> " + resultat +".";
+				histogram_n.appendChild(text);
 				
-				if (ville!="Catégories"){
-					villes = [];
+				if (villes.length == 0  && ville != "Filtres"){
 					villes.push(ville);
 				}
-				console.log(villes);
 
 				$.getJSON($SCRIPT_ROOT + 'get_quantum', {
 					resultat: JSON.stringify(resultat),
@@ -767,13 +832,13 @@
 
 				});
 			}
-			else { 
+			if (d.name != "Filtres"){ 
 				if (d.children) {
 					d._children = d.children;
-					d.children = null;
+					d.children = 0;
 				} else {
 					d.children = d._children;
-					d._children = null;
+					d._children = 0;
 				}
 				update(root);
 			} 
