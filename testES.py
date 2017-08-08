@@ -315,6 +315,34 @@ def get_results():
     tree_root = {'name':'Filtres', 'children':categories, 'color':colors(), "parent": "null"}
     return jsonify(tree=tree_root)
 
+@app.route('/groupVille/')
+def get_group():
+    groups = json.loads(request.args.get('groups'))
+    cur = conn.cursor()
+    children = []
+    for g in groups:
+        villes = g.split(",")
+        liste_villes = ""
+        for v in villes[:-1]:
+            liste_villes +=" \""+ v + "\", "
+        liste_villes += " \""+ villes[-1] + "\""
+        query2 = define_filtres()
+        query2 += " ville IN ( " + liste_villes + " ) "
+        query = '''SELECT count(*) as nb_ville from decision JOIN demande ON decision.id_decision = demande.id_decision WHERE ''' + query2 
+        cur.execute(query)
+        data_villes = cur.fetchall()
+        nb = data_villes[0][0]
+        d = {'name': villes, 'nb': nb, 'tree':'Villes', 'children': [], 'color':colors()}
+        children.append(d)
+        """       
+        for v in data_villes:
+            query = "ville = \"" + v[1] + "\""
+            d = {'name': villes, 'nb': v[0], 'tree':'Villes', 'children': [], 'color':colors()}
+            villes.append(d)  
+        """
+    tree_root = {'name':'Filtres', 'children':children, 'color':colors(), "parent": "null"}
+    return jsonify(tree=tree_root)
+
 @app.route('/get_quantum/')
 def get_quantum():
     norme = json.loads(request.args.get('objet'))    

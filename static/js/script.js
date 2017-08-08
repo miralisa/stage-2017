@@ -38,6 +38,26 @@
 
 		}
 
+		var count = 0;
+		document.getElementById("createGroupe").onclick = function() {
+			villes = [];
+
+			$("input[type=checkbox]:checked", ".villes").each ( function() {
+				villes.push($(this).val());
+
+			});
+			count++;
+			//document.getElementById("groups").innerHTML += "Groupe "+count+": "+villes +"<br>";
+
+			var p = document.createElement("p");
+				var parentNode = document.getElementById("groups");
+				p.id = count;
+				p.innerHTML = "Groupe "+count+": "+villes ;
+				parentNode.appendChild(p);
+				
+			deselectAll("villes");
+		}
+
 		//document.getElementById("deselectAll").onclick = function() {deselectAll("categories")};
 		//document.getElementById("selectAll").onclick = function() {selectAll("categories")};
 		document.getElementById("deselectAllV").onclick = function() {deselectAll("villes")};
@@ -67,7 +87,11 @@
 			$( "#slider" ).slider( "values", 0, 1990 );
 			$( "#slider" ).slider( "values", 1, 2017 );
 			$( "#date" ).val( " entre " + $( "#slider" ).slider( "values", 0 ) + " et " + $( "#slider" ).slider( "values", 1 ) + " " );
-
+			count = 0;
+			var pNode = document.getElementById("groups");
+			while (pNode.firstChild) {
+   			 pNode.removeChild(pNode.firstChild);
+			}
 			//inputDate.value = "";
 			inputFullTexte.value = "";
 			deselectAll("villes");
@@ -146,11 +170,24 @@
 				});
 			}
 			*/
+			var groups = []
+			if(document.getElementById("groups").hasChildNodes()){
+
+				for(var i = 1; i <= document.getElementById("groups").childNodes.length; i++){
+					var group = document.getElementById(i).innerHTML;
+					var pos = group.indexOf(":") + 2;
+					groups.push(group.slice(pos, group.length));
+				}
+			}
+			console.log(groups);
 			var categorie = document.getElementById("sortTreeCategorie").checked;
 			var ville = document.getElementById("sortTreeVille").checked;
 			var root_search = '/sortByCategorie/';
 			if (ville){
 				root_search = '/sortByVille/';
+			}
+			if(groups.length != 0){
+				root_search = '/groupVille/';
 			}
 			console.log(root_search);
 			$.getJSON($SCRIPT_ROOT + root_search, {
@@ -158,6 +195,7 @@
 				villes: JSON.stringify(villes),
 				date: JSON.stringify(date),
 				texte: JSON.stringify(full_texte),
+				groups: JSON.stringify(groups),
 				juridiction: JSON.stringify([]),
 				quantumD: JSON.stringify(quantumD),
 				quantumR: JSON.stringify(quantumR),
@@ -435,12 +473,13 @@
 				return d.children || d._children ? "end" : "start";
 			})
 			.text(function (d) {
-				if (d.name.length > 25){
+				if (d.name.length > 25 ){
 					var words = d.name.split(" ");
 						//console.log()
 						return words[0]+" "+ words[1]+" "+words[3]+"...";
 
-					} else{
+					} else
+					{
 						return d.name;
 					}
 				})  
@@ -753,7 +792,16 @@
 			if (d.tree == "Villes" && d._children.length == 0 ){
 				var ville = d.name;
 				villes = [];
+			
+				if (Array.isArray(d.name)) {
+					console.log("yes");
+					d.name.forEach(function (v) { 
+						villes.push(v);
+					});
+					
+				}else{
 				villes.push(ville);
+				}
 				addChildren('get_categorie');
 			}
 
