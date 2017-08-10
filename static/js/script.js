@@ -754,6 +754,20 @@
 			});	
 		}
 
+		function putVille(ville) {
+			villes = [];
+			
+				if (Array.isArray(ville)) {
+					ville.forEach(function (v) { 
+					villes.push(v);
+					});
+					
+				}else
+				if (ville != "Filtres"){
+				villes.push(ville);
+				}
+		}
+
 			if (d.name == "Filtres"){
 				//console.log(d.name);
 
@@ -791,27 +805,15 @@
 
 			if (d.tree == "Villes" && d._children.length == 0 ){
 				var ville = d.name;
-				villes = [];
-			
-				if (Array.isArray(d.name)) {
-					console.log("yes");
-					d.name.forEach(function (v) { 
-						villes.push(v);
-					});
-					
-				}else{
-				villes.push(ville);
-				}
+				putVille(ville);
 				addChildren('get_categorie');
 			}
 
 			if (d.tree == "Categories" && d._children.length == 0 ){	
 				var objet = d.name,
 				ville = d.parent.name;
-
-				if (villes.length == 0  && ville != "Filtres"){
-					villes.push(ville);
-				}
+				putVille(ville);
+				
 				addChildren('get_norme');
 			}
 
@@ -820,10 +822,9 @@
 				var norme = d.name,
 				objet = d.parent.name,
 				ville = d.parent.parent.name;
+				
+				putVille(ville);
 
-				if (villes.length == 0  && ville != "Filtres"){
-					villes.push(ville);
-				}
 				addChildren('get_resultat');
 				
 			}		
@@ -833,6 +834,7 @@
 				objet = d.parent.name,
 				norme = d.parent.parent.name
 				ville = d.parent.parent.parent.name;
+
 				var div_histogram = document.getElementById("histogram");
 				div_histogram.remove();
 				var histogram_n = document.createElement("div");
@@ -844,9 +846,7 @@
 				text.innerHTML ="<i>Objet:</i> " +objet+", <i>norme:</i> "+ norme + ", <i>resultat:</i> " + resultat +".";
 				histogram_n.appendChild(text);
 				
-				if (villes.length == 0  && ville != "Filtres"){
-					villes.push(ville);
-				}
+				putVille(ville);
 
 				$.getJSON($SCRIPT_ROOT + 'get_quantum', {
 					resultat: JSON.stringify(resultat),

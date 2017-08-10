@@ -327,8 +327,13 @@ def get_group():
             liste_villes +=" \""+ v + "\", "
         liste_villes += " \""+ villes[-1] + "\""
         query2 = define_filtres()
-        query2 += " ville IN ( " + liste_villes + " ) "
+        if len(query2) != 0:
+            query2 += " AND ville IN ( " + liste_villes + " ) "
+        else:
+            query2 += " ville IN ( " + liste_villes + " ) "
+                
         query = '''SELECT count(*) as nb_ville from decision JOIN demande ON decision.id_decision = demande.id_decision WHERE ''' + query2 
+        #print query
         cur.execute(query)
         data_villes = cur.fetchall()
         nb = data_villes[0][0]
