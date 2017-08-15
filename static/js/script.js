@@ -9,7 +9,7 @@
 
 		console.log(recordsJson);
 		build_tree(recordsJson);
-
+		map();
 		$( "#slider" ).slider({
 			range:true,
 			min: 1990,
@@ -41,11 +41,18 @@
 		var count = 0;
 		document.getElementById("createGroupe").onclick = function() {
 			villes = [];
-
+			var svg = d3.select("#map");
+		
+			var villesData = svg.selectAll('[style = "fill: rgb(78, 153, 3);"]').data();
+			villesData.forEach( function(v) {
+				villes.push(v.city);
+			 });
+			/*
 			$("input[type=checkbox]:checked", ".villes").each ( function() {
 				villes.push($(this).val());
 
 			});
+			*/
 			count++;
 			//document.getElementById("groups").innerHTML += "Groupe "+count+": "+villes +"<br>";
 
@@ -55,14 +62,23 @@
 				p.innerHTML = "Groupe "+count+": "+villes ;
 				parentNode.appendChild(p);
 				
-			deselectAll("villes");
+			//deselectAll("villes");
+			svg.selectAll("circle").style("fill", "#0582ff");
 		}
 
 		//document.getElementById("deselectAll").onclick = function() {deselectAll("categories")};
 		//document.getElementById("selectAll").onclick = function() {selectAll("categories")};
-		document.getElementById("deselectAllV").onclick = function() {deselectAll("villes")};
-		document.getElementById("selectAllV").onclick = function() {selectAll("villes")};
-
+		document.getElementById("deselectAllV").onclick = function() {
+			//deselectAll("villes")}
+			var svg = d3.select("#map");
+			svg.selectAll("circle").style("fill", "#0582ff");
+			}
+		document.getElementById("selectAllV").onclick = function() {
+			//selectAll("villes")
+			var svg = d3.select("#map");		
+			svg.selectAll("circle").style("fill", "#4e9903");
+		};
+		/*
 		function deselectAll(type) {
 			$('input:checkbox', "."+type).prop('checked', false);
 		}
@@ -71,7 +87,7 @@
 		function selectAll(type) {
 			$('input:checkbox', "."+type).prop('checked', true);
 		}
-
+		*/
 		var categories = [],
 		villes = [],
 		quantumD = [],
@@ -94,7 +110,9 @@
 			}
 			//inputDate.value = "";
 			inputFullTexte.value = "";
-			deselectAll("villes");
+			//deselectAll("villes");
+			var svg = d3.select("#map");
+			svg.selectAll("circle").style("fill", "#0582ff");
 
 		});
 		
@@ -157,12 +175,18 @@
 			
 			//par ville
 			villes=[];
-
+			var svg = d3.select("#map");
+			
+			var villesData = svg.selectAll('[style = "fill: rgb(78, 153, 3);"]').data();
+			villesData.forEach( function(v) {
+				villes.push(v.city);
+			 });
+			/*
 			$("input[type=checkbox]:checked", ".villes").each ( function() {
 				villes.push($(this).val());
 
 			});
-			/*
+	
 			if(villes.length==0){
 				$("input[type=checkbox]", ".villes").each ( function() {
 					villes.push($(this).val());
@@ -179,7 +203,7 @@
 					groups.push(group.slice(pos, group.length));
 				}
 			}
-			console.log(groups);
+			//console.log(groups);
 			var categorie = document.getElementById("sortTreeCategorie").checked;
 			var ville = document.getElementById("sortTreeVille").checked;
 			var root_search = '/sortByCategorie/';
@@ -187,6 +211,7 @@
 				root_search = '/sortByVille/';
 			}
 			if(groups.length != 0){
+				villes = [];
 				root_search = '/groupVille/';
 			}
 			console.log(root_search);
@@ -259,7 +284,7 @@
 			});
 
 		}
-
+		/*
 		$("#searchByCity").click(function() {
 			villes=[];
 
@@ -277,6 +302,7 @@
 			}
 			search();
 		});
+		*/
 
 
 		/* Pagination */ 
@@ -360,6 +386,89 @@
 
 			});
 		};
+		/* Create map of France */
+		function map() {
+			var width = 400,
+			height = 500;
+
+			var projection = d3.geo.conicConformalFrance();
+
+			var path = d3.geo.path()
+			.projection(projection);
+
+			var svg = d3.select("#map")
+			.append("svg")
+			.attr("width", width)
+			.attr("height", height);
+
+			d3.json("../static/input/france.json", function(error, regions) {
+				var land = topojson.feature(regions, regions.objects.regions);
+
+				svg.selectAll("path")
+				.data(land.features)
+				.enter()
+				.append("path")
+				.attr("d", path)
+				.attr("class", "county-boundary");
+
+				svg
+				.append("path")
+				.style("fill","none")
+				.style("stroke","rgb(189, 185, 185)")
+				.attr("d", projection.getCompositionBorders());
+
+
+			});
+			var tooltip = d3.select("body").append("div")   
+			.attr("class", "tooltip")               
+			.style("opacity", 0);
+
+			d3.csv('../static/input/villes.csv', function(data) {
+				//console.log(data);
+				svg.selectAll("circle")
+				.data(data)
+				.enter()
+				.append("circle")
+				.attr("cx", function(d) {
+					return projection([d.lng, d.lat])[0];
+				})
+				.attr("cy", function(d) {
+					return projection([d.lng, d.lat])[1];
+				})
+				.attr("r", 4)
+				.style("fill", "#0582ff")
+				.on("mouseover", function(d) {
+					
+					tooltip.transition()        
+					.duration(200)      
+					.style("opacity", .9)     
+					tooltip.html(d.city)
+					.style("width", "65px")
+					.style("height", "26px")    
+					.style("left", (d3.event.pageX) + "px")     
+					.style("top", (d3.event.pageY - 26) + "px");    
+
+
+				})
+				.on("mouseout", function(d) { 
+					tooltip.transition()        
+					.duration(500)      
+					.style("opacity", 0) 
+				})
+				.on("click", function(d) {
+							 //console.log(this.style.fill);
+							 if(this.style.fill !="rgb(5, 130, 255)"){
+
+							 	this.style = "fill:#0582ff";
+							 }else{
+							 	this.style = "fill:#4e9903";
+
+							 }
+
+							});
+			});
+
+		}
 
 		/* Tree map */
 		function build_tree(recordsJson){
@@ -501,7 +610,7 @@
 				.duration(500)      
 				.style("opacity", 0) 
 			})
-			.on("keydown", function () { console.log("div key", i); })   
+			//.on("keydown", function () { console.log("div key", i); })   
 			.style("fill-opacity", 1e-6);
 
 			// Transition nodes to their new position.
@@ -645,17 +754,21 @@
 			var nbTicks = 10;
 			if(dataq.quantums.length < 10){
 				nbTicks = dataq.quantums.length;
-			} 
+			}
+
+			var tooltip = d3.select("body").append("div")   
+				.attr("class", "tooltip")               
+				.style("opacity", 0);
+ 
 			var x = d3.time.scale()
-				//console.log(new Date(data[0].date));
 				.domain([new Date(data[0].date), d3.time.day.offset(new Date(data[data.length - 1].date), 1)])
 				.rangeRound([0, width - margin.left - margin.right]);
 
-				var y = d3.scale.linear()
+			var y = d3.scale.linear()
 				.domain([0, d3.max(data, function(d) { return d.quantum_demande; })])
 				.range([height - margin.top - margin.bottom, 0]);
 
-				var xAxis = d3.svg.axis()
+			var xAxis = d3.svg.axis()
 				.scale(x)
 				.orient('bottom')
 				//.ticks(d3.time.days, 1)
@@ -664,54 +777,90 @@
 				.tickSize(0)
 				.tickPadding(8);
 
-				var yAxis = d3.svg.axis()
+			var yAxis = d3.svg.axis()
 				.scale(y)
 				.orient('left')
 				.tickFormat(function(d) { return d + "€"; })
 				.tickPadding(8);
 
-				var svg = d3.select('#histogram').append('svg')
+			var svg = d3.select('#histogram').append('svg')
 				.attr('class', 'chart')
 				.attr('width', width)
 				.attr('height', height)
 				.append('g')
 				.attr('transform', 'translate(' + margin.left + ', ' + margin.top + ')');
 
-				svg.selectAll('.chart')
+			svg.selectAll('.chart')
 				.data(data)
 				.enter().append('rect')
 				.attr('class', 'bar')
 				.attr('x', function(d) { return x(new Date(d.date)); })
 				.attr('y', function(d) { return height - margin.top - margin.bottom - (height - margin.top - margin.bottom - y(d.quantum_demande)) })
 				.attr('width', 10)
-				.attr('height', function(d) { return height - margin.top - margin.bottom - y(d.quantum_demande) });
-				
-				svg.selectAll('.chart')
+				.attr('height', function(d) { return height - margin.top - margin.bottom - y(d.quantum_demande) })
+				.on("mouseover", function(d) {
+					tooltip.transition()        
+					.duration(200)      
+					.style("opacity", .9);      
+					tooltip.html(d.quantum_demande + " €")    
+					.style("left", (d3.event.pageX) + "px")     
+					.style("top", (d3.event.pageY - 28) + "px")
+					.style("background", "#cccce5")
+					.style("opacity", .3)
+					.style("width", "100px")
+					.style("height", "25px");
+
+				})
+				.on("mouseout", function(d) { 
+					tooltip.transition()        
+					.duration(500)      
+					.style("opacity", 0) 
+				});
+
+			svg.selectAll('.chart')
 				.data(data)
 				.enter().append('rect')
 				.attr('class', 'bar1')
 				.attr('x', function(d) { return x(new Date(d.date)); })
 				.attr('y', function(d) { return height - margin.top - margin.bottom - (height - margin.top - margin.bottom - y(d.quantum_resultat)) })
 				.attr('width', 10)
-				.attr('height', function(d) { return height - margin.top - margin.bottom - y(d.quantum_resultat) });
-				
-				svg.append('g')
+				.attr('height', function(d) { return height - margin.top - margin.bottom - y(d.quantum_resultat) })
+				.on("mouseover", function(d) {
+					tooltip.transition()        
+					.duration(200)      
+					.style("opacity", .9);      
+					tooltip.html(d.quantum_resultat + " €")    
+					.style("left", (d3.event.pageX) + "px")     
+					.style("top", (d3.event.pageY - 28) + "px")
+					.style("background", "#99cc99")
+					.style("opacity", .3)
+					.style("width", "100px")
+					.style("height", "25px");
+
+				})
+				.on("mouseout", function(d) { 
+					tooltip.transition()        
+					.duration(500)      
+					.style("opacity", 0) 
+				});
+
+			svg.append('g')
 				.attr('class', 'x axis')
 				.attr('transform', 'translate(0, ' + (height - margin.top - margin.bottom) + ')')
 				.call(xAxis);
 
-				svg.append('g')
+			svg.append('g')
 				.attr('class', 'y axis')
 				.call(yAxis);
 
-				// add legend   
-				svg.append("text")
+			// add legend   
+			svg.append("text")
 				.attr('class', 'bar')
 				.attr("y", "-10")
 				.style('stroke', "0px")
 				.text("Quantum demandé");
 
-				svg.append("text")
+			svg.append("text")
 				.attr('class', 'bar1')
 				.attr("y", "-10") 
 				.attr("x", "100") 
@@ -777,7 +926,7 @@
 					resizable: false,
 					height: "auto",
 					width: 600,
-					position: { my: "center top", at: "center top", of: window },
+					position: { my: "center top", at: "center top+55", of: window },
 					modal: true,
 					buttons: {
 						"Valider":{

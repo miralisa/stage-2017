@@ -224,18 +224,17 @@ def define_filtres():
             for doc in res['hits']['hits']:
                 liste_id.append(int(doc['_id']))
             liste_ids = str(liste_id)[1:-1]
-
-            if filters[-1] == 'texte':
-                query2 += "decision.id_decision IN ( " + liste_ids + " ) "
-            else:
-                query2 += "decision.id_decision IN ( " + liste_ids + " ) AND " 
-                
-            """
-            if filters[-1] == 'texte':
-                query2+="( MATCH(description) AGAINST(\""+texte+"\" IN BOOLEAN MODE))"
-            else:
-                query2+="( MATCH(description) AGAINST(\""+texte+"\" IN BOOLEAN MODE)) AND " 
-            """
+            if res['hits']['total'] != 0:
+                if filters[-1] == 'texte':
+                    query2 += "decision.id_decision IN ( " + liste_ids + " ) "
+                else:
+                    query2 += "decision.id_decision IN ( " + liste_ids + " ) AND " 
+            else:        
+                if filters[-1] == 'texte':
+                    query2+="( MATCH(description) AGAINST(\""+texte+"\" IN BOOLEAN MODE))"
+                else:
+                    query2+="( MATCH(description) AGAINST(\""+texte+"\" IN BOOLEAN MODE)) AND " 
+            
 
         """
         if f == 'categories':
@@ -261,6 +260,7 @@ def define_filtres():
             
     
             #else:
+
     return query2       
 
 
@@ -327,15 +327,17 @@ def get_group():
             liste_villes +=" \""+ v + "\", "
         liste_villes += " \""+ villes[-1] + "\""
         query2 = define_filtres()
+        #print query2
         if len(query2) != 0:
             query2 += " AND ville IN ( " + liste_villes + " ) "
         else:
-            query2 += " ville IN ( " + liste_villes + " ) "
+            query2 = " ville IN ( " + liste_villes + " ) "
                 
         query = '''SELECT count(*) as nb_ville from decision JOIN demande ON decision.id_decision = demande.id_decision WHERE ''' + query2 
         #print query
         cur.execute(query)
         data_villes = cur.fetchall()
+        #print data_villes
         nb = data_villes[0][0]
         d = {'name': villes, 'nb': nb, 'tree':'Villes', 'children': [], 'color':colors()}
         children.append(d)

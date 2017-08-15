@@ -123,6 +123,8 @@ thead{
 
 }
 .selection{
+  position: relative;
+  left: 51%;
 }
 
 .panel{
@@ -176,5 +178,12 @@ h5{
  stroke: #fff;
  stroke-width: 0.3px;
 
+}
+
+/* map */
+.county-boundary {
+  fill: rgb(207, 221, 207);
+  stroke: #fff;
+  stroke-width: .5px;
 }
 

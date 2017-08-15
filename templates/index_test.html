@@ -72,18 +72,65 @@
 
 <div id="dialog-quantum" style="display:none;">
 	<div id="histogram">
+	</div>
+</div>
+
+<div id="dialog-filtres" style="display:none;">
+	<div  style="position:relative; display: inline;" >
+		Trier par
+		<input type="radio" name="sortTree" id="sortTreeCategorie" value="categories" checked />  categories  
+		<input type="radio" name="sortTree" id="sortTreeVille" value="villes" />  villes
+
+		<button id="clearFiltres" style="position:relative; left:43%;" class="btn btn-sm btn-info">Réinitialiser tout</button>
+	</div>					
+	<br>
+	<ul class="nav nav-tabs">
+		<li class="active"><a data-toggle="tab" href="#tabMotCle">Mot-clé</a></li>
+		<li><a data-toggle="tab" href="#tabDate">Date</a></li>
+		<li><a data-toggle="tab" href="#tabVilles">Ville</a></li>					
+	</ul>
+
+	<div class="tab-content">
+		<div id="tabMotCle" class="tab-pane fade in active">
+			<br>
+			<input type="text" class="form-control input" id="searchByKW">
+		</div>
+
+		<div id="tabVilles" class="tab-pane fade">
+			<div class="btn-group selection">
+				<button id="selectAllV" type="button" class="btn btn-sm btn-info">Tout sélectionner</button>
+				<button  id="deselectAllV" type="button" class="btn btn-sm btn-info">Tout désélectionner</button>
+			</div>
+			<div class="villes" id="map" style="left: 12%; position: relative;">
+			</div>
+
+			<div class="panel-group">  
+				<div class="panel panel-default">
+					<div class="panel-heading">
+						<h3 class="panel-title">
+							<a data-toggle="collapse" id="showFiltres" href="#compareVilles">Comparaison des groupes de villes </a>
+						</h3>
+					</div>
+					<div id="compareVilles" class="panel-collapse collapse">
+						<div class="panel-body">
+					
+							<button id="createGroupe" type="button" class="btn btn-info">Créér un groupe</button>
+			
+							<div id="groups"></div>
+						</div>
+					</div>
+				</div>
+			</div>	
+		</div>
+		<div id="tabDate" class="tab-pane fade">
+			<p>
+				<label for = "date">Date </label>
+				<input type = "text" id = "date" style = "border: 0">
+			</p>
+			<div id = "slider"></div>
 		</div>
 	</div>
-
-	<div id="dialog-filtres" style="display:none;">
-		
-		<div  style="position:relative; display: inline; margin-left: 10px" >
-			Trier par
-			<input type="radio" name="sortTree" id="sortTreeCategorie" value="categories" checked />  categories  
-			<input type="radio" name="sortTree" id="sortTreeVille" value="villes" />  villes
-			
-			<button id="clearFiltres" style="position:relative; left:41%;" class="btn btn-sm btn-info">Réinitialiser tout</button>
-		</div>					
+		<!--
 		<div class="panel-group">  
 			<div class="panel panel-info">
 				<div class="panel-heading">
@@ -117,43 +164,13 @@
 							<input type = "text" id = "date" style = "border: 0">
 						</p>
 						<div id = "slider"></div>
-					<!--
-						<div class="date">
-							<form class="form-inline" id="form_date">
-								<label class="mr-sm-2" for="sel_cond_date">Condition</label> <br>
-								<select class="form-control mb-2 mr-sm-2 mb-sm-0" id="sel_cond_date">
-									<option value="a">à</option>
-									<option value="entre">entre</option>
-									<option value="avant">avant</option>
-									<option value="apres">après</option>
-								</select>
 
-								<input type="date" class="form-control input-sm" placeholder="aaaa-mm-jj" id="date1">
-
-							</form>
-						</div>
-					-->
 				</div>
 			</div>
 		</div>
 	</div>
 
-		<!--
-		<div class="panel-group">  
-			<div class="panel panel-info">
-				<div class="panel-heading">
-					<h3 class="panel-title">
-						<a data-toggle="collapse" id="showFiltres" href="#filtresJur">Recherche par juridiction </a>
-					</h3>
-				</div>
-				<div id="filtresJur" class="panel-collapse collapse">
-					<div class="panel-body">
 
-					</div>
-				</div>
-			</div>
-		</div>
-	-->
 	<div class="panel-group">  
 		<div class="panel panel-info">
 			<div class="panel-heading">
@@ -167,15 +184,13 @@
 						<button id="selectAllV" type="button" class="btn btn-sm btn-info">Tout sélectionner</button>
 						<button  id="deselectAllV" type="button" class="btn btn-sm btn-info">Tout désélectionner</button>
 					</div>
-					<div class="villes">
+					<div class="villes" id="map">
 						{% for v in villes %}
 						<div class="villes checkbox">
 							<label><input type="checkbox" name="ville" value="{{v[1]}}">{{v[1]}} ({{v[0]}})</label>
 						</div>
 						{% endfor %}
 
-							<!--						
-							<div id="map" style="width: 320px; height:300px;"></div> -->
 						<div class="panel-group">  
 							<div class="panel panel-default">
 								<div class="panel-heading">
@@ -185,8 +200,7 @@
 								</div>
 								<div id="compareVilles" class="panel-collapse collapse">
 									<div class="panel-body">
-										<!--<div class="alert alert-info" id="resultat" role="alert">Vous pouvez creer plusiers groupes des villes en choisinat les villes</div> -->
-
+								
 										<button id="createGroupe" type="button" class="btn btn-info">Créér un groupe</button>
 					
 										<div id="groups"></div>
@@ -201,17 +215,17 @@
 				</div>
 			</div>
 		</div>
-
-	</div>
-
-
+	-->
+</div>
 
 
-	<script type="text/javascript" src="../static/js/script.js">
 
-	</script>
-	<script type="text/javascript">
-		function openDescription(text){
+
+<script type="text/javascript" src="../static/js/script.js">
+
+</script>
+<script type="text/javascript">
+	function openDescription(text){
 			//console.log(text.title);
 			document.getElementById("content").innerHTML = text.title;
 			$("#dialog-description").dialog(
