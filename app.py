@@ -33,14 +33,16 @@ def get_decisions():
     villes = []
     
     """ Request all cities in database """
+    nb = 0
     cur.execute('''SELECT count(*) as nb_ville, ville from decision JOIN demande ON decision.id_decision = demande.id_decision group by ville order by nb_ville desc''')
     data_villes = cur.fetchall()
     for v in data_villes:
         query = "ville = \"" + v[1] + "\""
         d = {'name': v[1], 'nb': v[0], 'tree':'Villes', 'children': [], 'color':colors()}
         villes.append(d)  
+        nb += v[0]
 
-    tree_root = {'name':'Filtres', 'children':villes, 'color':colors(), "parent": "null"}  
+    tree_root = {'name':'Filtres','nb':nb, 'children':villes, 'color':colors(), "parent": "null"}  
     return jsonify(tree=tree_root)
 
 """ Return children for categorie"""
@@ -119,6 +121,7 @@ def sortByVille():
     cur = conn.cursor()
     villes = []
     query2 = define_filtres()
+    nb = 0
     """ Request all cities in database """
     if len(query2) != 0:
         query = '''SELECT count(*) as nb_ville, ville from decision JOIN demande ON decision.id_decision = demande.id_decision WHERE ''' + query2 + ' group by ville order by nb_ville desc'
@@ -130,8 +133,8 @@ def sortByVille():
         query = "ville = \"" + v[1] + "\""
         d = {'name': v[1], 'nb': v[0], 'tree':'Villes', 'children': [], 'color':colors()}
         villes.append(d)  
-
-    tree_root = {'name':'Filtres', 'children':villes, 'color':colors(), "parent": "null"}  
+        nb += v[0]
+    tree_root = {'name':'Filtres', 'nb':nb, 'children':villes, 'color':colors(), "parent": "null"}  
     return jsonify(tree=tree_root)
 
 """ Render template index.html"""
@@ -317,7 +320,10 @@ def show_page():
 @app.route('/sortByCategorie/')
 def get_results():
     categories = categories_links()
-    tree_root = {'name':'Filtres', 'children':categories, 'color':colors(), "parent": "null"}
+    nb = 0
+    for c in categories:
+    	nb += c.get('nb')
+    tree_root = {'name':'Filtres', 'nb':nb, 'children':categories, 'color':colors(), "parent": "null"}
     return jsonify(tree=tree_root)
 
 """ Return results of query grouped by cities """
@@ -326,6 +332,7 @@ def get_group():
     groups = json.loads(request.args.get('groups'))
     cur = conn.cursor()
     children = []
+    nbTotal = 0
     for g in groups:
         villes = g.split(",")
         liste_villes = ""
@@ -345,15 +352,18 @@ def get_group():
         data_villes = cur.fetchall()
         #print data_villes
         nb = data_villes[0][0]
-        d = {'name': villes, 'nb': nb, 'tree':'Villes', 'children': [], 'color':colors()}
-        children.append(d)
+        if nb != 0:
+       		d = {'name': villes, 'nb': nb, 'tree':'Villes', 'children': [], 'color':colors()}
+        	children.append(d)
+        	nbTotal += nb
         """       
         for v in data_villes:
             query = "ville = \"" + v[1] + "\""
             d = {'name': villes, 'nb': v[0], 'tree':'Villes', 'children': [], 'color':colors()}
-            villes.append(d)  
+            villes.append(d) 
         """
-    tree_root = {'name':'Filtres', 'children':children, 'color':colors(), "parent": "null"}
+
+    tree_root = {'name':'Filtres', 'nb':nbTotal, 'children':children, 'color':colors(), "parent": "null"}
     return jsonify(tree=tree_root)
 
 """ Return quantum_demande, quantum_demande, date to build an histigram """

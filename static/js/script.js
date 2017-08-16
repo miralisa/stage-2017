@@ -42,11 +42,11 @@
 		document.getElementById("createGroupe").onclick = function() {
 			villes = [];
 			var svg = d3.select("#map");
-		
+
 			var villesData = svg.selectAll('[style = "fill: rgb(78, 153, 3);"]').data();
 			villesData.forEach( function(v) {
 				villes.push(v.city);
-			 });
+			});
 			/*
 			$("input[type=checkbox]:checked", ".villes").each ( function() {
 				villes.push($(this).val());
@@ -57,11 +57,11 @@
 			//document.getElementById("groups").innerHTML += "Groupe "+count+": "+villes +"<br>";
 
 			var p = document.createElement("p");
-				var parentNode = document.getElementById("groups");
-				p.id = count;
-				p.innerHTML = "Groupe "+count+": "+villes ;
-				parentNode.appendChild(p);
-				
+			var parentNode = document.getElementById("groups");
+			p.id = count;
+			p.innerHTML = "Groupe "+count+": "+villes ;
+			parentNode.appendChild(p);
+
 			//deselectAll("villes");
 			svg.selectAll("circle").style("fill", "#0582ff");
 		}
@@ -72,7 +72,7 @@
 			//deselectAll("villes")}
 			var svg = d3.select("#map");
 			svg.selectAll("circle").style("fill", "#0582ff");
-			}
+		}
 		document.getElementById("selectAllV").onclick = function() {
 			//selectAll("villes")
 			var svg = d3.select("#map");		
@@ -106,7 +106,7 @@
 			count = 0;
 			var pNode = document.getElementById("groups");
 			while (pNode.firstChild) {
-   			 pNode.removeChild(pNode.firstChild);
+				pNode.removeChild(pNode.firstChild);
 			}
 			//inputDate.value = "";
 			inputFullTexte.value = "";
@@ -180,7 +180,7 @@
 			var villesData = svg.selectAll('[style = "fill: rgb(78, 153, 3);"]').data();
 			villesData.forEach( function(v) {
 				villes.push(v.city);
-			 });
+			});
 			/*
 			$("input[type=checkbox]:checked", ".villes").each ( function() {
 				villes.push($(this).val());
@@ -257,7 +257,7 @@
 				}else{
 
 					showRes.style="display: ;"
-					showRes.innerHTML = "Voici les demandes correspondant à votre recherche."+parametreRecherche;//<strong>"+ data.tree.nb+ "</strong>
+					showRes.innerHTML = "Voici "+ data.tree.nb+" demande(s) correspondant à votre recherche."+parametreRecherche;//<strong>"+ data.tree.nb+ "</strong>
 
 				}
 				console.log(data);
@@ -757,40 +757,40 @@
 			}
 
 			var tooltip = d3.select("body").append("div")   
-				.attr("class", "tooltip")               
-				.style("opacity", 0);
- 
+			.attr("class", "tooltip")               
+			.style("opacity", 0);
+
 			var x = d3.time.scale()
-				.domain([new Date(data[0].date), d3.time.day.offset(new Date(data[data.length - 1].date), 1)])
-				.rangeRound([0, width - margin.left - margin.right]);
+			.domain([new Date(data[0].date), d3.time.day.offset(new Date(data[data.length - 1].date), 1)])
+			.rangeRound([0, width - margin.left - margin.right]);
 
 			var y = d3.scale.linear()
-				.domain([0, d3.max(data, function(d) { return d.quantum_demande; })])
-				.range([height - margin.top - margin.bottom, 0]);
+			.domain([0, d3.max(data, function(d) { return d.quantum_demande; })])
+			.range([height - margin.top - margin.bottom, 0]);
 
 			var xAxis = d3.svg.axis()
-				.scale(x)
-				.orient('bottom')
+			.scale(x)
+			.orient('bottom')
 				//.ticks(d3.time.days, 1)
 				.ticks(nbTicks)
 				.tickFormat(d3.time.format('%Y'))
 				.tickSize(0)
 				.tickPadding(8);
 
-			var yAxis = d3.svg.axis()
+				var yAxis = d3.svg.axis()
 				.scale(y)
 				.orient('left')
 				.tickFormat(function(d) { return d + "€"; })
 				.tickPadding(8);
 
-			var svg = d3.select('#histogram').append('svg')
+				var svg = d3.select('#histogram').append('svg')
 				.attr('class', 'chart')
 				.attr('width', width)
 				.attr('height', height)
 				.append('g')
 				.attr('transform', 'translate(' + margin.left + ', ' + margin.top + ')');
 
-			svg.selectAll('.chart')
+				svg.selectAll('.chart')
 				.data(data)
 				.enter().append('rect')
 				.attr('class', 'bar')
@@ -817,7 +817,7 @@
 					.style("opacity", 0) 
 				});
 
-			svg.selectAll('.chart')
+				svg.selectAll('.chart')
 				.data(data)
 				.enter().append('rect')
 				.attr('class', 'bar1')
@@ -844,78 +844,78 @@
 					.style("opacity", 0) 
 				});
 
-			svg.append('g')
+				svg.append('g')
 				.attr('class', 'x axis')
 				.attr('transform', 'translate(0, ' + (height - margin.top - margin.bottom) + ')')
 				.call(xAxis);
 
-			svg.append('g')
+				svg.append('g')
 				.attr('class', 'y axis')
 				.call(yAxis);
 
 			// add legend   
 			svg.append("text")
-				.attr('class', 'bar')
-				.attr("y", "-10")
-				.style('stroke', "0px")
-				.text("Quantum demandé");
+			.attr('class', 'bar')
+			.attr("y", "-10")
+			.style('stroke', "0px")
+			.text("Quantum demandé");
 
 			svg.append("text")
-				.attr('class', 'bar1')
-				.attr("y", "-10") 
-				.attr("x", "100") 
-				.style('stroke', "0px")
-				.text("Quantum resultat");
-				
-			}
+			.attr('class', 'bar1')
+			.attr("y", "-10") 
+			.attr("x", "100") 
+			.style('stroke', "0px")
+			.text("Quantum resultat");
+
+		}
 		
 
 		// Toggle children on click.
 		function click(d) {
 			function addChildren(type){
-			$.getJSON($SCRIPT_ROOT + type, {
-				resultat: JSON.stringify(resultat),
-				norme: JSON.stringify(norme),
-				objet: JSON.stringify(objet),
-				date: JSON.stringify(date),
-				texte: JSON.stringify(full_texte),
-				villes: JSON.stringify(villes)
-			}, function(data){
-				data.tree.forEach(function(child){
-					if (!tree.nodes(d)[0]._children){
-						tree.nodes(d)[0]._children = [];
+				$.getJSON($SCRIPT_ROOT + type, {
+					resultat: JSON.stringify(resultat),
+					norme: JSON.stringify(norme),
+					objet: JSON.stringify(objet),
+					date: JSON.stringify(date),
+					texte: JSON.stringify(full_texte),
+					villes: JSON.stringify(villes)
+				}, function(data){
+					data.tree.forEach(function(child){
+						if (!tree.nodes(d)[0]._children){
+							tree.nodes(d)[0]._children = [];
+						}
+						child.x = d.x0;
+						child.y = d.y0;
+						tree.nodes(d)[0]._children.push(child);
+					});
+
+					if (d.children) {
+						d._children = d.children;
+						d.children = 0;
 					}
-					child.x = d.x0;
-					child.y = d.y0;
-					tree.nodes(d)[0]._children.push(child);
-				});
-				
-				if (d.children) {
-					d._children = d.children;
-					d.children = 0;
-				}
-				else {
-					d.children = d._children;
-					d._children = 0;
-				} 
-				update(root);
+					else {
+						d.children = d._children;
+						d._children = 0;
+					} 
+					update(root);
 
-			});	
-		}
+				});	
+			}
 
-		function putVille(ville) {
-			villes = [];
-			
+			function putVille(ville) {
+				villes = [];
+
 				if (Array.isArray(ville)) {
 					ville.forEach(function (v) { 
-					villes.push(v);
+						villes.push(v);
 					});
 					
 				}else
 				if (ville != "Filtres"){
-				villes.push(ville);
+					villes.push(ville);
 				}
-		}
+			}
 
 			if (d.name == "Filtres"){
 				//console.log(d.name);

@@ -58,6 +58,9 @@ h5{
 .dc-table-label{
  display: none !important;
 }
+#dialog-filtres {
+  overflow-x: hidden;
+}
 
 /* For small screens */
 @media screen and (max-width: 767px) {
