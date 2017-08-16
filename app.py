@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-from flask import Flask, render_template, jsonify, Response, request, json
+from elasticsearch import Elasticsearch
+from flask import Flask, render_template, jsonify, json, request
 from flaskext.mysql import MySQL
-import random
+import random, time
 
 app = Flask(__name__)
 mysql = MySQL()
@@ -13,594 +14,370 @@ app.config['MYSQL_DATABASE_USER'] = 'root'
 app.config['MYSQL_DATABASE_PASSWORD'] = 'password'
 app.config['MYSQL_DATABASE_DB'] = 'decisionsJustice'
 app.config['MYSQL_DATABASE_HOST'] = 'localhost'
-#app.config['MYSQL_USE_UNICODE'] = 'False'
 app.config['MYSQL_CHARSET'] = 'utf-8'
 mysql.init_app(app)
 
 conn = mysql.connect()
+#sudo service elasticsearch start
+es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
 
+""" Return random color for node/child"""               
+def colors():
+    colores_g = ["#3366cc", "#dc3912", "#ff9900", "#109618", "#990099", "#0099c6", "#dd4477", "#66aa00", "#b82e2e", "#316395", "#994499", "#22aa99", "#aaaa11", "#6633cc", "#e67300", "#8b0707", "#651067", "#329262", "#5574a6", "#3b3eac"]
+    return colores_g[random.randint(0, len(colores_g)-1)]
 
+""" Return a tree with children 'villes' """
+@app.route('/get_decisions/')
+def get_decisions():
+    cur = conn.cursor()
+    villes = []
+    
+    """ Request all cities in database """
+    cur.execute('''SELECT count(*) as nb_ville, ville from decision JOIN demande ON decision.id_decision = demande.id_decision group by ville order by nb_ville desc''')
+    data_villes = cur.fetchall()
+    for v in data_villes:
+        query = "ville = \"" + v[1] + "\""
+        d = {'name': v[1], 'nb': v[0], 'tree':'Villes', 'children': [], 'color':colors()}
+        villes.append(d)  
+
+    tree_root = {'name':'Filtres', 'children':villes, 'color':colors(), "parent": "null"}  
+    return jsonify(tree=tree_root)
+
+""" Return children for categorie"""
+def categories_links():
+    cur = conn.cursor()
+    query2 = define_filtres()
+    categories = []
+    if len(query2) != 0:
+        query = '''SELECT count(*) as nb_categorie, objet from decision, demande, categorie WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND
+'''+query2+ ''' group by objet order by nb_categorie desc'''
+    else:
+        query = '''SELECT count(*) as nb_categorie, objet from decision, demande, categorie WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie 
+ group by objet order by nb_categorie desc'''
+    cur.execute(query)
+    categorieParVille = cur.fetchall()
+    for c in categorieParVille:
+        r = {'name': c[1], 'nb': c[0], 'tree':'Categories', '_children': [], 'color':colors()}
+        categories.append(r)
+    return categories        
+
+@app.route('/get_categorie/')
+def get_categorie():
+    categories = categories_links()
+    return jsonify(tree=categories)
+
+""" Return children for normes"""            
+@app.route('/get_norme/')
+def get_norme():
+    cur = conn.cursor()
+    query2 = define_filtres()
+    normes = []
+    objet = json.loads(request.args.get('objet')) 
+    if len(query2) != 0:
+        query2 += " AND objet=\"" + objet +"\" group by norme order by nb_res desc"
+    else:
+        query2 += " objet=\"" + objet +"\" group by norme order by nb_res desc"
+        
+    query = '''SELECT count(*) as nb_res, norme from decision, demande, categorie, norme WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND demande.id_norme = norme.id_norme AND '''+query2+''
+    cur.execute(query)
+    normeParVille = cur.fetchall()
+    for n in normeParVille:
+        r = {'name': n[1], 'nb': n[0], '_children': [], 'tree':'Normes', 'color':colors()}
+        normes.append(r)
+    return jsonify(tree=normes)
+
+""" Return children for resultats"""  
+@app.route('/get_resultat/')
+def get_resultat():
+    cur = conn.cursor()
+    query2 = define_filtres()
+    objet = json.loads(request.args.get('objet'))
+    norme = json.loads(request.args.get('norme'))
+
+    if len(query2) != 0:
+        query2 += " AND objet=\"" + objet +"\" AND norme=\""+norme+"\" group by resultat order by nb_res desc"
+    else:
+        query2 += " objet=\"" + objet +"\" AND norme=\""+norme+"\" group by resultat order by nb_res desc"
+    queryResultats = '''SELECT  count(*) as nb_res, resultat from decision, demande, categorie, norme WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND demande.id_norme = norme.id_norme AND '''+query2+''
+    cur.execute(queryResultats)
+    resParNorme = cur.fetchall()
+    """ For each resultat put """
+    resParNormeChildren = []
+    for r in resParNorme:
+        if r[1] == 'accepte':   
+            color = 'green'
+        elif  r[1] == 'rejette': 
+            color = 'red'
+        else:
+            color = 'yellow'
+        d = {'name': r[1], 'nb': r[0], 'tree':'Resultats', 'color':color}
+        resParNormeChildren.append(d)
+    return jsonify(tree=resParNormeChildren)
+
+@app.route('/sortByVille/')
+def sortByVille():
+    cur = conn.cursor()
+    villes = []
+    query2 = define_filtres()
+    """ Request all cities in database """
+    if len(query2) != 0:
+        query = '''SELECT count(*) as nb_ville, ville from decision JOIN demande ON decision.id_decision = demande.id_decision WHERE ''' + query2 + ' group by ville order by nb_ville desc'
+    else:
+        query = '''SELECT count(*) as nb_ville, ville from decision JOIN demande ON decision.id_decision = demande.id_decision group by ville order by nb_ville desc'''
+    cur.execute(query)
+    data_villes = cur.fetchall()
+    for v in data_villes:
+        query = "ville = \"" + v[1] + "\""
+        d = {'name': v[1], 'nb': v[0], 'tree':'Villes', 'children': [], 'color':colors()}
+        villes.append(d)  
+
+    tree_root = {'name':'Filtres', 'children':villes, 'color':colors(), "parent": "null"}  
+    return jsonify(tree=tree_root)
+
+""" Render template index.html"""
 @app.route('/')
 def index():
-	cur = conn.cursor()
-	cur.execute('''SELECT  * from decision, demande, categorie, norme WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND demande.id_norme = norme.id_norme ''')
-	data = cur.fetchall()
+    cur = conn.cursor()
+    #cur.execute('''SELECT  * from decision, demande, categorie, norme WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND demande.id_norme = norme.id_norme ''')
+    #data = cur.fetchall()
 
-	cur.execute('''SELECT count(*) as nb_categorie, objet from categorie JOIN demande ON categorie.id_categorie = demande.id_categorie group by objet order by nb_categorie desc''')
-	categories = cur.fetchall()
+    cur.execute('''SELECT count(*) as nb_categorie, objet from categorie JOIN demande ON categorie.id_categorie = demande.id_categorie group by objet order by nb_categorie desc''')
+    categories = cur.fetchall()
 
-	#cur.execute('''SELECT distinct ville from decision''')
-	cur.execute('''SELECT count(*) as nb_ville, ville from decision group by ville''')
+    #cur.execute('''SELECT distinct ville from decision''')
+    cur.execute('''SELECT count(*) as nb_ville, ville from decision group by ville''')
+    villes = cur.fetchall()
 
-	villes = cur.fetchall()
+    """ Add min and masx dates to slider/ not used """
+    cur.execute('''SELECT max(date_decision) from decision ''')
+    date_max = cur.fetchall()
+    date_max = str(date_max[0][0])[:4]
 
-	return render_template('index_test.html', data=data, categories=categories, villes=villes )
+    cur.execute('''SELECT min(date_decision) from decision ''')
+    date_min = cur.fetchall()
+    date_min = str(date_min[0][0])[:4]
+    return render_template('index.html', categories=categories, villes=villes)
 
-@app.route('/index')
-def mindex():
-	cur = conn.cursor()
-	cur.execute('''SELECT * FROM decision JOIN demande ON decision.id_decision = demande.id_decision''')
-	data = cur.fetchall()
+""" Build a query """
+def define_filtres():
+    villes = json.loads(request.args.get('villes'))
+    date = json.loads(request.args.get('date'))
+    #categories = json.loads(request.args.get('categories'))
+    #quantumD = json.loads(request.args.get('quantumD'))
+    #quantumR = json.loads(request.args.get('quantumR'))
+    #resultat = json.loads(request.args.get('resultat'))
+    #juridiction = json.loads(request.args.get('juridiction'))
+    texte = json.loads(request.args.get('texte'))
+    search = {'date':len(date), 'texte':len(texte), 'villes':len(villes)}
+    filters = []
+    # search = {'quantumD': 0, 'resultat': 0, 'quantumR': 0, 'texte': 0, 'date': 2, 'juridiction': 0, 'villes': 1, 'categories': 0}
 
-	cur.execute('''SELECT * from categorie''')
-	categories = cur.fetchall()
+    for key, value in search.iteritems():
+        if value > 0:
+            filters.append(key)
+    
+    query2 = ''
+        
+    for f in filters:
+        if f == 'villes':
+            liste_villes = ''
+            for v in villes[:-1]:
+                liste_villes +=" \""+ v + "\", "
+            liste_villes += " \""+ villes[-1] + "\""
+            if filters[-1] == 'villes':
+                query2 += "ville IN ( " + liste_villes + " ) "
+            else:
+                query2 += "ville IN ( " + liste_villes + " ) AND " 
+        
+        if f == 'date':
+            print date
+            if len(date) == 2:
+                date1 = str(date[0]) + "-01-01"
+                date2 = str(date[1]) + "-01-01"
+           
+                if filters[-1] == 'date':
+                    query2 += "( date_decision BETWEEN '" + date1 + "' AND '" + date2 + "' )"
+                else:
+                    query2 += "( date_decision BETWEEN '" + date1 + "' AND '" + date2 + "' ) AND "
+            else:
+                date1 = str(date[0]) + "-01-01"
+                date2 = str(date[0]) + "-12-31"               
+                if filters[-1] == 'date':
+                    query2 += "( date_decision BETWEEN '" + date1 + "' AND '" + date2 + "' )"
+                else:
+                    query2 += "( date_decision BETWEEN '" + date1 + "' AND '" + date2 + "' ) AND "
 
-	cur.execute('''SELECT distinct ville from decision''')
-	villes = cur.fetchall()
+                 
+        if f == 'texte':
+            keyWords = texte.split(" ")
+            paramToSearch = ''
+            print keyWords
+            for w in keyWords:
+                if w == "AND" or w == "NOT" or w == "OR":
+                    paramToSearch += w + " "
+                elif w[-1] == ")":
+                    nw = w[:-1]
+                    paramToSearch += nw + "~) "
+                else:   
+                    paramToSearch += w + "~ "
+            print time.time()       
+            res = es.search(index='index_decision', body={"query": {"query_string" : {"query": paramToSearch, "fuzziness" : 1, "default_field": "contenu"}}, "size": 470, "highlight": {"fields" : {"contenu" : {}}}})
+            print('%d documents found' % res['hits']['total'])
+            print time.time()
+            liste_id = []
+            #dict_highlights = {}
+            for doc in res['hits']['hits']:
+                liste_id.append(int(doc['_id']))
+            liste_ids = str(liste_id)[1:-1]
+            if res['hits']['total'] != 0:
+                if filters[-1] == 'texte':
+                    query2 += "decision.id_decision IN ( " + liste_ids + " ) "
+                else:
+                    query2 += "decision.id_decision IN ( " + liste_ids + " ) AND " 
+            else:        
+                if filters[-1] == 'texte':
+                    query2+="( MATCH(description) AGAINST(\""+texte+"\" IN BOOLEAN MODE))"
+                else:
+                    query2+="( MATCH(description) AGAINST(\""+texte+"\" IN BOOLEAN MODE)) AND " 
+            
 
-	return render_template('index.html', data=data,categories=categories, villes=villes )
+        """
+        if f == 'categories':
+            query2 += "("
+            for c in categories[:-1]:
+                query2 += "categorie=\""+c+ "\" OR "
+            if filters[-1] != 'categories':
+                query2 += "categorie=\"" + categories[-1] + "\" AND "
+            else:
+                query2 += "categorie=\"" + categories[-1] + "\")"
 
-@app.route('/searchByCity/')
-def get_villes():
-	#villes = request.args.get('villes', 0, type=str)
-	villes = json.loads(request.args.get('villes'))
-	cur = conn.cursor()
-	
-	query2 = ''
+        if f == 'resultat':
+            query2 += "("
+            for r in resultat[:-1]:
+                query2 += "resultat=\"" + r + "\" OR "
+            if filters[-1] != 'resultat':
+                query2 += "resultat=\"" + resultat[-1] + "\") AND "
+            else:
+                query2 += "resultat=\"" + resultat[-1] + "\")"
+        """    
+            #if     len(filters) == 0:
+            #query2+="resultat=\""+resultat[-1]+"\")"
+            
+    
+            #else:
 
-	for v in villes[:-1]:
-		query2+= "ville='"+v+ "' OR "
-	query2+="ville='"+villes[-1]+"'"
-	query1 = '''SELECT * FROM decision JOIN demande ON decision.id_decision = demande.id_decision WHERE '''+query2+''
+    return query2       
 
-	cur.execute(query1)
-	data = cur.fetchall()
-	return jsonify(result=data)
 
-@app.route('/search/')
+@app.route('/show_text/')
+def show_text():
+    query2 = define_filtres()
+    query = ''
+    queryNB = ''
+    print len(query2)
+    if len(query2) != 0:
+        query = '''SELECT * from decision, demande, categorie, norme WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND demande.id_norme = norme.id_norme AND '''+query2+' LIMIT 0, 15 '
+        queryNB = '''SELECT count(*) from decision, demande, categorie, norme WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND demande.id_norme = norme.id_norme  AND '''+query2
+    else:
+        query = '''SELECT * from decision, demande, categorie, norme WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND demande.id_norme = norme.id_norme LIMIT 0, 15'''
+        queryNB = '''SELECT count(*) from decision, demande, categorie, norme WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND demande.id_norme = norme.id_norme'''
+    
+    cur = conn.cursor()
+    cur.execute(queryNB)
+    nbDem = cur.fetchall()
+    nbDemande = nbDem[0][0]
+    nbPage = (nbDemande/15) +1
+    cur.execute(query)
+    data = cur.fetchall()
+    return jsonify(result=data, nbPage=nbPage)
+    
+
+@app.route('/show_page/')
+def show_page():
+    numPage = json.loads(request.args.get('numPage')) 
+    query2 = define_filtres()
+    query = ''
+    queryNB = ''
+    if len(query2) != 0:
+        query = '''SELECT * from decision, demande, categorie, norme WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND demande.id_norme = norme.id_norme AND '''+query2+' LIMIT '''+ str(int(numPage)*15) +', 15'
+        #queryNB = '''SELECT count(*) from decision, demande, categorie, norme WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND demande.id_norme = norme.id_norme  AND '''+query2+' GROUP BY rg '''
+    else:
+        query = '''SELECT * from decision, demande, categorie, norme WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND demande.id_norme = norme.id_norme LIMIT '''+ str(int(numPage)*15) +", 15"
+        #queryNB = '''SELECT count(*) from decision, demande, categorie, norme WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND demande.id_norme = norme.id_norme GROUP BY rg '''
+    
+    cur = conn.cursor()
+    #cur.execute(queryNB)
+    #nbDem = cur.fetchall()
+    #nbPage = len(nbDem)/15
+    cur.execute(query)
+    data = cur.fetchall()
+    return jsonify(result=data)
+
+
+@app.route('/sortByCategorie/')
 def get_results():
-	villes = json.loads(request.args.get('villes'))
-	date = json.loads(request.args.get('date'))
-	categories = json.loads(request.args.get('categories'))
-	quantumD = json.loads(request.args.get('quantumD'))
-	quantumR = json.loads(request.args.get('quantumR'))
-	resultat = json.loads(request.args.get('resultat'))
-	juridiction =  json.loads(request.args.get('juridiction'))
-	texte =  json.loads(request.args.get('texte'))
-	search = {'date':len(date), 'juridiction':len(juridiction), 'texte':len(texte), 'villes':len(villes), 'categories':len(categories),  'quantumD':len(quantumD), 'quantumR':len(quantumR), 'resultat':len(resultat)}
-	filters = []
-	# search = {'quantumD': 0, 'resultat': 0, 'quantumR': 0, 'texte': 0, 'date': 2, 'juridiction': 0, 'villes': 1, 'categories': 0}
+    categories = categories_links()
+    tree_root = {'name':'Filtres', 'children':categories, 'color':colors(), "parent": "null"}
+    return jsonify(tree=tree_root)
 
-	for key, value in search.iteritems():
-		if value>0:
-			filters.append(key)
-	
-	cur = conn.cursor()
-	
+""" Return results of query grouped by cities """
+@app.route('/groupVille/')
+def get_group():
+    groups = json.loads(request.args.get('groups'))
+    cur = conn.cursor()
+    children = []
+    for g in groups:
+        villes = g.split(",")
+        liste_villes = ""
+        for v in villes[:-1]:
+            liste_villes +=" \""+ v + "\", "
+        liste_villes += " \""+ villes[-1] + "\""
+        query2 = define_filtres()
+        #print query2
+        if len(query2) != 0:
+            query2 += " AND ville IN ( " + liste_villes + " ) "
+        else:
+            query2 = " ville IN ( " + liste_villes + " ) "
+                
+        query = '''SELECT count(*) as nb_ville from decision JOIN demande ON decision.id_decision = demande.id_decision WHERE ''' + query2 
+        #print query
+        cur.execute(query)
+        data_villes = cur.fetchall()
+        #print data_villes
+        nb = data_villes[0][0]
+        d = {'name': villes, 'nb': nb, 'tree':'Villes', 'children': [], 'color':colors()}
+        children.append(d)
+        """       
+        for v in data_villes:
+            query = "ville = \"" + v[1] + "\""
+            d = {'name': villes, 'nb': v[0], 'tree':'Villes', 'children': [], 'color':colors()}
+            villes.append(d)  
+        """
+    tree_root = {'name':'Filtres', 'children':children, 'color':colors(), "parent": "null"}
+    return jsonify(tree=tree_root)
 
-	query2 = ''
-		
-	for f in filters:
-		if f == 'villes':
-			query2+="("
-			for v in villes[:-1]:
-				query2+= "ville='"+v+ "' OR "
-			if filters[-1] == 'villes':
-				query2+="ville='"+villes[-1]+"')"
-			else:
-				query2+="ville='"+villes[-1]+"') AND "	
-		
-		if f == 'date':
-			cond = str(date[0])
-			if cond =="a":
-				query2+="("
-				for d in date[1:-1]:
-					query2+= "date_decision='"+d+ "' OR "
-				if 	filters[-1] == 'date':
-					query2+="date_decision='"+date[-1]+"')"
-				else:
-					query2+="date_decision='"+date[-1]+"') AND "
-			elif cond == "entre":
-				if 	filters[-1] == 'date':
-					query2+="( date_decision BETWEEN '"+date[2]+"' AND '"+ date[1] +"' )"
-				else:
-					query2+="( date_decision BETWEEN '"+date[2]+"' AND '"+ date[1] +"' ) AND "
-			elif cond == "avant":
-				if 	filters[-1] == 'date':
-					query2+="( date_decision < '"+date[1] +"' )"
-				else:
-					query2+="( date_decision < '"+date[1] +"' ) AND "
-			elif cond == "apres":
-				if 	filters[-1] == 'date':
-					query2+="( date_decision > '"+date[1] +"' )"
-				else:
-					query2+="( date_decision > '"+date[1] +"' ) AND "
-				
-		if f == 'texte':
-			#SELECT description FROM decision WHERE MATCH(description) AGAINST('Agen');
-			if filters[-1] == 'texte':
-				query2+="( MATCH(description) AGAINST(\""+texte+"\" IN BOOLEAN MODE))"
-			else:
-				query2+="( MATCH(description) AGAINST(\""+texte+"\" IN BOOLEAN MODE)) AND "	
-		
-
-	
-		if f == 'categories':
-			query2+="("
-			for c in categories[:-1]:
-				query2+= "categorie=\""+c+ "\" OR "
-			if filters[-1] != 'categories':
-				query2+= "categorie=\""+categories[-1]+ "\" AND "
-			else:
-				query2+="categorie=\""+categories[-1]+"\")"
-
-		if f == 'resultat':
-			query2+="("
-			for r in resultat[:-1]:
-				query2+= "resultat=\""+r+ "\" OR "
-			if filters[-1] != 'resultat':
-				query2+= "resultat=\""+resultat[-1]+ "\") AND "
-			else:
-				query2+="resultat=\""+resultat[-1]+"\")"
-			
-			#if 	len(filters) == 0:
-			#query2+="resultat=\""+resultat[-1]+"\")"
-			
-	
-			#else:
-	query = '''SELECT * FROM decision JOIN demande ON decision.id_decision = demande.id_decision WHERE '''+query2+''
-	query0 = '''SELECT * FROM decision JOIN demande ON decision.id_decision = demande.id_decision'''
-
-	#queryVilles = '''SELECT  count(*), ville FROM decision JOIN demande ON decision.id_decision = demande.id_decision WHERE '''+query2+ '''group by ville'''
-	queryCategorie = '''SELECT  count(*) as nb_categorie, categorie FROM decision JOIN demande ON decision.id_decision = demande.id_decision WHERE '''+query2+ ''' group by categorie order by nb_categorie desc'''
+""" Return quantum_demande, quantum_demande, date to build an histigram """
+@app.route('/get_quantum/')
+def get_quantum():
+    norme = json.loads(request.args.get('objet'))    
+    objet = json.loads(request.args.get('norme'))    
+    resultat = json.loads(request.args.get('resultat')) 
+    query2 = define_filtres()
+    if len(query2) > 0:
+         query2+=" AND "
+    query2 += " norme = \"" + norme + "\" AND objet = \"" + objet  + "\" AND resultat = \"" + resultat + "\" ORDER BY date_decision "
+    cur = conn.cursor()
+    query = '''SELECT quantum_demande, quantum_resultat, date_decision, resultat from decision, demande, categorie, norme WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND demande.id_norme = norme.id_norme AND '''+query2
+    cur.execute(query)
+    quantums = cur.fetchall()
+    all_quantums = []
+    for q in quantums:
+        if str(q[2])!='None':
+            d = {'quantum_demande':q[0],'quantum_resultat': q[1], 'date': q[2], 'resultat':q[3] }
+            all_quantums.append(d)
+           
+    return jsonify(quantums=all_quantums)
 
 
-	print filters
-	print query2
-
-	data_categories = []
-
-	if len(filters) == 0:
-		cur.execute(query0)
-	else:
-		cur.execute(queryCategorie)
-		data_categories = cur.fetchall()
-	
-		cur.execute(query)
-	data = cur.fetchall()
-	#query2=''
-
-	print data_categories
-
-	categories = []
-	children = []
-
-	for res in data_categories:
-		#print result[2] 
-		
-		query3 = query2+ " AND categorie=\""+res[1]+"\" group by resultat order by nb_res desc"
-		queryResultat = '''SELECT  count(*) as nb_res, resultat FROM decision JOIN demande ON decision.id_decision = demande.id_decision WHERE '''+query3+''
-		print queryResultat
-
-		cur.execute(queryResultat)
-		data_resultats = cur.fetchall()
-		
-		resultats = []
-		for results in data_resultats:
-			r = {'name': results[1], 'nb': results[0]}
-			resultats.append(r)
-			print r
-
-		d = {'name': res[1], 'nb': res[0], 'children':resultats}
-		categories.append(d)
-
-	ch = {'name':'Catégories', 'children':categories, 'nb':len(categories)}
-	children.append(ch)
-	query2=''
-	
-	#build_tree(data)
-	if len(data_categories) != 0:
-		return jsonify(result=data, name='Filtres', children=children)
-	else:
-		return jsonify(result=data)
-		
-@app.route('/texteDecision/')
-def texteDecision():
-	return render_template('texteDecision.html')
-	
-@app.route('/dashboard/')
-def dashboard():
-	return render_template('dashboard.html')
-
-@app.route('/testd3/')
-def testd3():
-	file = open("./input/flare.json","r")
-	#print file.read()
-	return file.read()
-
-
-@app.route('/all_decisions/')
-def all_decisions():
-	cur = conn.cursor()
-
-	cur.execute('''SELECT * FROM decision JOIN demande ON decision.id_decision = demande.id_decision''')
-	all_data = cur.fetchall()
-
-	cur.execute('''SELECT count(*) as nb_categorie, objet from categorie JOIN demande ON categorie.id_categorie = demande.id_categorie group by objet order by nb_categorie desc ''')
-	data = cur.fetchall()
-	
-	cur.execute('''SELECT count(*) as nb_ville, ville from decision JOIN demande ON decision.id_decision = demande.id_decision group by ville order by nb_ville desc''')
-	data_villes = cur.fetchall()
-
-	cur.execute('''SELECT count(*) as nb_res, resultat from demande group by resultat order by nb_res desc''')
-	data_resultat = cur.fetchall()
-	
-	categories = []
-	children = []
-	tree2_children = []
-	chJuridiction = []
-	chCategories = []
-
-	juridiction = []
-	j = {'name':'Juridictions','children':juridiction, 'color':colors()}#, 'nb':len(juridiction)}
-	children.append(j)
-	children.append({'name':'Date', 'children':[], 'color':colors()})
-
-	"""
-	for result in data:
-		#print result[2] 
-		query3 = "categorie=\""+result[1]+"\" group by resultat order by nb_res desc"
-		queryResultat = '''SELECT  count(*) as nb_res, resultat FROM decision JOIN demande ON decision.id_decision = demande.id_decision WHERE '''+query3+''
-	
-		cur.execute(queryResultat)
-		data_resultats = cur.fetchall()
-		
-		resultats = []
-		for results in data_resultats:
-			if results[1] == 'accepte':	
-				color = 'green'
-			elif  results[1] == 'rejette': 
-				color = 'red'
-			else:
-				color ='yellow'
-			r = {'name': results[1], 'nb': results[0], 'color':color}
-			resultats.append(r)	
-
-		d = {'name': result[1], 'nb': result[0], 'color':colors(), 'children':resultats}
-		categories.append(d)
-	
-	ch = {'name':'Catégories', 'children':categories, 'color':colors()} #, 'nb':len(categories)}
-	
-	children.append(ch)
-	"""
-	
-	villes = []
-	for result in data_villes:
-		#print result[2] 
-		query =  "ville = \"" + result[1] + "\""
-		queryCategorie = '''SELECT count(*) as nb_categorie, objet from decision, demande, categorie WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND
-'''+query+ ''' group by objet order by nb_categorie desc'''
-		cur.execute(queryCategorie)
-		categorieParVille = cur.fetchall()
-		resultats = []
-
-		for c in categorieParVille:
-			query3 = "ville = \"" + result[1] + "\" AND objet=\""+c[1]+"\" group by norme order by nb_res desc"
-			queryResultat = '''SELECT  count(*) as nb_res, norme from decision, demande, categorie, norme WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND demande.id_norme = norme.id_norme AND '''+query3+''
-			cur.execute(queryResultat)
-			normeParCat = cur.fetchall()
-			
-			normeParCatChildren = []
-			
-			for res in normeParCat:
-				query4 = "ville = \"" + result[1] + "\" AND objet=\""+c[1]+"\" AND norme=\""+res[1]+"\" group by resultat order by nb_res desc"
-				queryResultats = '''SELECT  count(*) as nb_res, resultat from decision, demande, categorie, norme WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND demande.id_norme = norme.id_norme AND '''+query4+''
-				cur.execute(queryResultats)
-				resParNorme = cur.fetchall()
-				
-				#print resParNorme
-				resParNormeChildren = []
-				for r in resParNorme:
-					if r[1] == 'accepte':	
-						color = 'green'
-					elif  r[1] == 'rejette': 
-						color = 'red'
-					else:
-						color ='yellow'
-					d = {'name': r[1], 'nb': r[0],'tree':'Resultats', 'color':color}
-					resParNormeChildren.append(d)
-		
-				d = {'name': res[1], 'nb': res[0],'children':resParNormeChildren,'tree':'Normes', 'color':colors()}
-				normeParCatChildren.append(d)
-
-			r = {'name': c[1], 'nb': c[0], 'children':normeParCatChildren,'tree':'Categories', 'color':colors()}
-			resultats.append(r)
-			
-			
-		d = {'name': result[1], 'nb': result[0], 'tree':'Villes', 'children': resultats,  'color':colors()}
-		villes.append(d)
-		
-	
-	v = {'name':'Villes','children':villes,'nb':len(all_data), 'tree':"Filtres", 'color':colors()}#, 'nb':len(villes)}
-	tree2_children.append(v)
-		
-	#juridiction.append({'name':'Villes', 'children':villes})
-	
-	
-	resultats = []
-	for result in data_resultat:
-		if result[1] == 'accepte':	
-			color = 'green'
-		elif  result[1] == 'rejette': 
-			color = 'red'
-		else:
-			color ='yellow'		
-		d = {'name': result[1], 'nb': result[0], 'color':color}
-		resultats.append(d)
-
-	#r = {'name':'Resultats','children':resultats,'parent':'Filtres', 'color':colors()}#, 'nb':len(resultats)}
-	#children.append(r)
-	
-	#terms = {'name':'Terms','children':[],'parent':'Filtres', 'color':colors()}#, 'nb':len(resultats)}
-	#children.append(terms)
-	
-	#tree_root2 = {'name':'Filtres','children':children, 'color':colors(), "parent": "null"}	
-	tree_root = {'name':'Filtres','children':tree2_children, 'color':colors(), "parent": "null"}	
-
-	return jsonify(tree=tree_root)
-
-def colors():
-	colores_g = ["#3366cc", "#dc3912", "#ff9900", "#109618", "#990099", "#0099c6", "#dd4477", "#66aa00", "#b82e2e", "#316395", "#994499", "#22aa99", "#aaaa11", "#6633cc", "#e67300", "#8b0707", "#651067", "#329262", "#5574a6", "#3b3eac"]
-	return colores_g[random.randint(0,len(colores_g)-1)]
-
-@app.route('/filtres/')
-def get_resultats():
-	villes = json.loads(request.args.get('villes'))
-	date = json.loads(request.args.get('date'))
-	categories = json.loads(request.args.get('categories'))
-	quantumD = json.loads(request.args.get('quantumD'))
-	quantumR = json.loads(request.args.get('quantumR'))
-	resultat = json.loads(request.args.get('resultat'))
-	juridiction =  json.loads(request.args.get('juridiction'))
-	texte =  json.loads(request.args.get('texte'))
-	search = {'date':len(date), 'juridiction':len(juridiction), 'texte':len(texte), 'categories':len(categories),  'quantumD':len(quantumD), 'quantumR':len(quantumR), 'resultat':len(resultat)} #'villes':len(villes),
-	filters = []
-	# search = {'quantumD': 0, 'resultat': 0, 'quantumR': 0, 'texte': 0, 'date': 2, 'juridiction': 0, 'villes': 1, 'categories': 0}
-
-	for key, value in search.iteritems():
-		if value>0:
-			filters.append(key)
-	
-	cur = conn.cursor()
-	
-
-	query2 = ''
-		
-	for f in filters:
-		"""
-		if f == 'villes':
-			query2+="("
-			for v in villes[:-1]:
-				query2+= "ville='"+v+ "' OR "
-			if filters[-1] == 'villes':
-				query2+="ville='"+villes[-1]+"')"
-			else:
-				query2+="ville='"+villes[-1]+"') AND "	
-		"""
-		if f == 'date':
-			cond = str(date[0])
-			if date[1]!="":	
-				if cond =="a":
-					query2+="("
-					for d in date[1:-1]:
-						query2+= "date_decision='"+d+ "' OR "
-					if 	filters[-1] == 'date':
-						query2+="date_decision='"+date[-1]+"')"
-					else:
-						query2+="date_decision='"+date[-1]+"') AND "
-				elif cond == "entre":
-					if 	filters[-1] == 'date':
-						query2+="( date_decision BETWEEN '"+date[2]+"' AND '"+ date[1] +"' )"
-					else:
-						query2+="( date_decision BETWEEN '"+date[2]+"' AND '"+ date[1] +"' ) AND "
-				elif cond == "avant":
-					if 	filters[-1] == 'date':
-						query2+="( date_decision < '"+date[1] +"' )"
-					else:
-						query2+="( date_decision < '"+date[1] +"' ) AND "
-				elif cond == "apres":
-					if 	filters[-1] == 'date':
-						query2+="( date_decision > '"+date[1] +"' )"
-					else:
-						query2+="( date_decision > '"+date[1] +"' ) AND "
-				
-		if f == 'texte':
-			#SELECT description FROM decision WHERE MATCH(description) AGAINST('Agen');
-			if filters[-1] == 'texte':
-				query2+="( MATCH(description) AGAINST(\""+texte+"\" IN BOOLEAN MODE))"
-			else:
-				query2+="( MATCH(description) AGAINST(\""+texte+"\" IN BOOLEAN MODE)) AND "	
-		
-
-		""" categorie = objet
-		if f == 'categories':
-			query2+="("
-			for c in categories[:-1]:
-				query2+= "categorie=\""+c+ "\" OR "
-			if filters[-1] != 'categories':
-				query2+= "categorie=\""+categories[-1]+ "\" AND "
-			else:
-				query2+="categorie=\""+categories[-1]+"\")"
-		"""
-		if f == 'resultat':
-			query2+="("
-			for r in resultat[:-1]:
-				query2+= "resultat=\""+r+ "\" OR "
-			if filters[-1] != 'resultat':
-				query2+= "resultat=\""+resultat[-1]+ "\") AND "
-			else:
-				query2+="resultat=\""+resultat[-1]+"\")"
-			
-			#if 	len(filters) == 0:
-			#query2+="resultat=\""+resultat[-1]+"\")"
-			
-		
-			#else:
-	query = '''SELECT * from decision, demande, categorie, norme WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND demande.id_norme = norme.id_norme AND '''+query2+''
-	query0 = '''SELECT * from decision, demande, categorie, norme WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND demande.id_norme = norme.id_norme'''
-
-	queryCategorie = '''SELECT count(*) as nb_categorie, objet from decision, demande, categorie WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND
-'''+query2+ ''' group by objet order by nb_categorie desc'''
-
-
-	#print filters
-	#print query2
-	
-	data_categories = []
-
-	if len(filters) == 0:
-		cur.execute(query0)
-	else:
-		cur.execute(queryCategorie)
-		data_categories = cur.fetchall()
-	
-		cur.execute(query)
-	data = cur.fetchall()
-	#query2=''
-
-	"""
-	print data_categories
-
-	categories = []
-	children = []
-
-	for res in data_categories:
-		#print result[2] 
-		
-		query3 = query2+ " AND categorie=\""+res[1]+"\" group by resultat order by nb_res"
-		queryResultat = '''SELECT  count(*) as nb_res, resultat FROM decision JOIN demande ON decision.id_decision = demande.id_decision WHERE '''+query3+''
-		print queryResultat
-
-		cur.execute(queryResultat)
-		data_resultats = cur.fetchall()
-		
-		resultats = []
-		for results in data_resultats:
-			r = {'name': results[1], 'nb': results[0]}
-			resultats.append(r)
-			print r
-
-		d = {'name': res[1], 'nb': res[0], 'children':resultats}
-		categories.append(d)
-
-	ch = {'name':'Catégories', 'children':categories, 'nb':len(categories)}
-	children.append(ch)
-	"""
-
-	# NEW TREE 
-	
-
-	tree_children = []
-	villes_res = []
-	nbDemande = 0
-
-	if len(villes) < 34:
-		queryVille = '('
-		for v in villes[:-1]:
-			queryVille +=  "ville = \"" + v+"\" OR "
-		if len(filters) != 0:
-			queryVille += "ville = \""+villes[-1]+"\" ) AND "+ query2
-		else:
-			queryVille += "ville = \""+villes[-1]+"\" )"
-		#print queryVille
-
-		queryRes = '''SELECT * from decision, demande, categorie, norme WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND demande.id_norme = norme.id_norme AND'''+queryVille+''
-		#print queryRes
-		cur.execute(queryRes)
-		data = cur.fetchall()
-
-	#print len(villes)
-
-	query2CatViile = ''
-	if len(filters) != 0:
-		query2CatViile=query2+ " AND "
-	#print query2CatViile
-	
-	for v in villes[:]:
-		if len(filters) != 0:
-			query =  "ville = \"" + v + "\" AND "+ query2
-		else:
-			query =  "ville = \"" + v + "\" "
-		queryNbDemande = '''SELECT  count(*) as nb_d FROM decision JOIN demande ON decision.id_decision = demande.id_decision WHERE '''+query+''
-		queryCategorie = '''SELECT count(*) as nb_categorie, objet from decision, demande, categorie WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND '''+query+ ''' group by objet order by nb_categorie desc'''
-		#print queryCategorie
-		cur.execute(queryCategorie)
-		categorieParVille = cur.fetchall()
-
-		#print len(categorieParVille)
-		if len(categorieParVille)>0:
-			cur.execute(queryNbDemande)
-			nb = cur.fetchall()
-			#print str(nb[0][0])
-			nbDemande+=int(str(nb[0][0]))	
-		
-			
-			
-			resultatsCat = []
-			for c in categorieParVille:
-				query3 = query2CatViile+" ville = \"" + v + "\" AND objet=\""+c[1]+"\" group by norme order by nb_res desc"
-				queryResultat = '''SELECT  count(*) as nb_res, norme from decision, demande, categorie, norme WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND demande.id_norme = norme.id_norme AND '''+query3+''
-				cur.execute(queryResultat)
-				normeParCat = cur.fetchall()
-				
-				normeParCatChildren = []
-				
-				for res in normeParCat:
-					query4 =  query2CatViile+" ville = \"" + v + "\" AND objet=\""+c[1]+"\" AND norme=\""+res[1]+"\" group by resultat order by nb_res desc"
-					queryResultats = '''SELECT  count(*) as nb_res, resultat from decision, demande, categorie, norme WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND demande.id_norme = norme.id_norme AND '''+query4+''
-					cur.execute(queryResultats)
-					resParNorme = cur.fetchall()
-					
-					#print resParNorme
-					resParNormeChildren = []
-					for r in resParNorme:
-						if r[1] == 'accepte':	
-							color = 'green'
-						elif  r[1] == 'rejette': 
-							color = 'red'
-						else:
-							color ='yellow'
-						d = {'name': r[1], 'nb': r[0],'tree':'Resultats', 'color':color}
-						resParNormeChildren.append(d)
-			
-					d = {'name': res[1], 'nb': res[0],'children':resParNormeChildren,'tree':'Normes', 'color':colors()}
-					normeParCatChildren.append(d)
-
-				r = {'name': c[1], 'nb': c[0], 'children':normeParCatChildren,'tree':'Categories', 'color':colors()}
-				resultatsCat.append(r)
-
-			d = {'name': v, 'nb': nb[0], 'tree':'Villes', 'children': resultatsCat,  'color':colors()}
-			villes_res.append(d)
-		 
-	v = {'name':'Villes','children':villes_res, 'nb':nbDemande, 'tree':"Filtres", 'color':colors()}#, 'nb':len(villes)}
-	
-	tree_children.append(v)
-
-	tree_root = {'name':'Filtres','children':tree_children, 'color':colors(), "parent": "null"}
-
-	return jsonify(result=data, tree=tree_root)
-
-
-	
 if __name__ == '__main__':
-	app.run(debug=True, port=5555)
+    app.run(debug=True, port=5000)
