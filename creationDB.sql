@@ -1,12 +1,13 @@
+#create database decisionsJustice; 
+
 DROP INDEX iville ON decision;
 DROP INDEX inorme ON norme;
-DROP INDEX iobjet ON objet;
+DROP INDEX iobjet ON categorie;
 
 drop table demande;
 drop table decision;
 drop table categorie;
 drop table norme;
-#create database decisionsJustice; 
 
 create table norme ( 
 	id_norme INT(10) NOT NULL AUTO_INCREMENT,
@@ -32,12 +33,11 @@ create table decision (
 
 ALTER TABLE decision ADD FULLTEXT(description);
 
-
 create table demande ( 
 	id_demande INT(10) NOT NULL AUTO_INCREMENT, 
 	quantum_demande VARCHAR(20),
 	quantum_resultat VARCHAR(20),
-	resultat ENUM('accepte','rejette', 'sursis à statuer'),#, 'irrecevable'
+	resultat ENUM('accepte','rejette', 'sursis à statuer'),
 	id_decision INT(10),
 	id_categorie INT(10),
 	id_norme INT(10),
@@ -52,13 +52,3 @@ create table demande (
 CREATE INDEX iville ON decision (ville);
 CREATE INDEX inorme ON norme (norme);
 CREATE INDEX iobjet ON categorie (objet);
-
-#insert into decision(rg, ville, juridiction, description) values ("10/03813", "Nimes", "CA","description");
-#insert into demande(id_decision, quantum_demande, quantum_resultat, categorie, resultat) values (1, "1684,32 €","1684,32 €", "dommages-intérêts","accepte");
-
-#select decision.id_decision, decision.rg, decision.ville, decision.juridiction, decision.description, demande.quantum_demande, demande.categorie
-#from decision join demande on decision.id_decision = demande.id_decision;
-
-#SELECT count(*) as nb_categorie, objet from categorie JOIN demande ON categorie.id_categorie = demande.id_categorie group by objet order by nb_categorie desc ;
-
-

@@ -1,27 +1,31 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-from elasticsearch import Elasticsearch
 from flask import Flask, render_template, jsonify, json, request
 from flaskext.mysql import MySQL
-import random, time
+import random, json
+from elasticsearch import Elasticsearch
 
 app = Flask(__name__)
 mysql = MySQL()
 
+file_ids = open("database_identifiers.json","r")
+ids = json.load(file_ids)
+file_ids.close()
+
 app.config['SECRET_KEY'] = 'secret!'
-app.config['MYSQL_DATABASE_USER'] = 'root'
-app.config['MYSQL_DATABASE_PASSWORD'] = 'password'
-app.config['MYSQL_DATABASE_DB'] = 'decisionsJustice'
+app.config['MYSQL_DATABASE_USER'] = str(ids['login'])
+app.config['MYSQL_DATABASE_PASSWORD'] = str(ids['password'])
+app.config['MYSQL_DATABASE_DB'] = str(ids['database_name'])
 app.config['MYSQL_DATABASE_HOST'] = 'localhost'
 app.config['MYSQL_CHARSET'] = 'utf-8'
 mysql.init_app(app)
 
 conn = mysql.connect()
-#sudo service elasticsearch start
+
 es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
 
-""" Return random color for node/child"""               
+""" Return random color for node/child data"""               
 def colors():
     colores_g = ["#3366cc", "#dc3912", "#ff9900", "#109618", "#990099", "#0099c6", "#dd4477", "#66aa00", "#b82e2e", "#316395", "#994499", "#22aa99", "#aaaa11", "#6633cc", "#e67300", "#8b0707", "#651067", "#329262", "#5574a6", "#3b3eac"]
     return colores_g[random.randint(0, len(colores_g)-1)]
@@ -42,7 +46,7 @@ def get_decisions():
         villes.append(d)  
         nb += v[0]
 
-    tree_root = {'name':'Filtres','nb':nb, 'children':villes, 'color':colors(), "parent": "null"}  
+    tree_root = {'name':'Filtres', 'nb':nb, 'children':villes, 'color':colors(), "parent": "null"}  
     return jsonify(tree=tree_root)
 
 """ Return children for categorie"""
@@ -141,8 +145,6 @@ def sortByVille():
 @app.route('/')
 def index():
     cur = conn.cursor()
-    #cur.execute('''SELECT  * from decision, demande, categorie, norme WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND demande.id_norme = norme.id_norme ''')
-    #data = cur.fetchall()
 
     cur.execute('''SELECT count(*) as nb_categorie, objet from categorie JOIN demande ON categorie.id_categorie = demande.id_categorie group by objet order by nb_categorie desc''')
     categories = cur.fetchall()
@@ -159,7 +161,8 @@ def index():
     cur.execute('''SELECT min(date_decision) from decision ''')
     date_min = cur.fetchall()
     date_min = str(date_min[0][0])[:4]
-    return render_template('index.html', categories=categories, villes=villes)
+
+    return render_template('index.html', categories = categories, villes = villes)
 
 """ Build a query """
 def define_filtres():
@@ -173,7 +176,6 @@ def define_filtres():
     texte = json.loads(request.args.get('texte'))
     search = {'date':len(date), 'texte':len(texte), 'villes':len(villes)}
     filters = []
-    # search = {'quantumD': 0, 'resultat': 0, 'quantumR': 0, 'texte': 0, 'date': 2, 'juridiction': 0, 'villes': 1, 'categories': 0}
 
     for key, value in search.iteritems():
         if value > 0:
@@ -209,12 +211,11 @@ def define_filtres():
                     query2 += "( date_decision BETWEEN '" + date1 + "' AND '" + date2 + "' )"
                 else:
                     query2 += "( date_decision BETWEEN '" + date1 + "' AND '" + date2 + "' ) AND "
-
-                 
+                
         if f == 'texte':
             keyWords = texte.split(" ")
             paramToSearch = ''
-            print keyWords
+            #print keyWords
             for w in keyWords:
                 if w == "AND" or w == "NOT" or w == "OR":
                     paramToSearch += w + " "
@@ -223,12 +224,9 @@ def define_filtres():
                     paramToSearch += nw + "~) "
                 else:   
                     paramToSearch += w + "~ "
-            print time.time()       
-            res = es.search(index='index_decision', body={"query": {"query_string" : {"query": paramToSearch, "fuzziness" : 1, "default_field": "contenu"}}, "size": 470, "highlight": {"fields" : {"contenu" : {}}}})
-            print('%d documents found' % res['hits']['total'])
-            print time.time()
+            res = es.search(index = 'index_decision', body = {"query": {"query_string" : {"query": paramToSearch, "fuzziness" : 1, "default_field": "contenu"}}, "size": 470})
+            #print('%d documents found' % res['hits']['total'])
             liste_id = []
-            #dict_highlights = {}
             for doc in res['hits']['hits']:
                 liste_id.append(int(doc['_id']))
             liste_ids = str(liste_id)[1:-1]
@@ -263,12 +261,6 @@ def define_filtres():
             else:
                 query2 += "resultat=\"" + resultat[-1] + "\")"
         """    
-            #if     len(filters) == 0:
-            #query2+="resultat=\""+resultat[-1]+"\")"
-            
-    
-            #else:
-
     return query2       
 
 
@@ -277,7 +269,7 @@ def show_text():
     query2 = define_filtres()
     query = ''
     queryNB = ''
-    print len(query2)
+
     if len(query2) != 0:
         query = '''SELECT * from decision, demande, categorie, norme WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND demande.id_norme = norme.id_norme AND '''+query2+' LIMIT 0, 15 '
         queryNB = '''SELECT count(*) from decision, demande, categorie, norme WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND demande.id_norme = norme.id_norme  AND '''+query2
@@ -289,7 +281,7 @@ def show_text():
     cur.execute(queryNB)
     nbDem = cur.fetchall()
     nbDemande = nbDem[0][0]
-    nbPage = (nbDemande/15) +1
+    nbPage = (nbDemande/15) + 1
     cur.execute(query)
     data = cur.fetchall()
     return jsonify(result=data, nbPage=nbPage)
@@ -303,15 +295,10 @@ def show_page():
     queryNB = ''
     if len(query2) != 0:
         query = '''SELECT * from decision, demande, categorie, norme WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND demande.id_norme = norme.id_norme AND '''+query2+' LIMIT '''+ str(int(numPage)*15) +', 15'
-        #queryNB = '''SELECT count(*) from decision, demande, categorie, norme WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND demande.id_norme = norme.id_norme  AND '''+query2+' GROUP BY rg '''
     else:
         query = '''SELECT * from decision, demande, categorie, norme WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND demande.id_norme = norme.id_norme LIMIT '''+ str(int(numPage)*15) +", 15"
-        #queryNB = '''SELECT count(*) from decision, demande, categorie, norme WHERE decision.id_decision = demande.id_decision AND categorie.id_categorie = demande.id_categorie AND demande.id_norme = norme.id_norme GROUP BY rg '''
     
     cur = conn.cursor()
-    #cur.execute(queryNB)
-    #nbDem = cur.fetchall()
-    #nbPage = len(nbDem)/15
     cur.execute(query)
     data = cur.fetchall()
     return jsonify(result=data)
@@ -356,12 +343,6 @@ def get_group():
        		d = {'name': villes, 'nb': nb, 'tree':'Villes', 'children': [], 'color':colors()}
         	children.append(d)
         	nbTotal += nb
-        """       
-        for v in data_villes:
-            query = "ville = \"" + v[1] + "\""
-            d = {'name': villes, 'nb': v[0], 'tree':'Villes', 'children': [], 'color':colors()}
-            villes.append(d) 
-        """
 
     tree_root = {'name':'Filtres', 'nb':nbTotal, 'children':children, 'color':colors(), "parent": "null"}
     return jsonify(tree=tree_root)
@@ -381,6 +362,7 @@ def get_quantum():
     cur.execute(query)
     quantums = cur.fetchall()
     all_quantums = []
+   
     for q in quantums:
         if str(q[2])!='None':
             d = {'quantum_demande':q[0],'quantum_resultat': q[1], 'date': q[2], 'resultat':q[3] }
