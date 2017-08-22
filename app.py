@@ -263,7 +263,7 @@ def define_filtres():
         """    
     return query2       
 
-
+""" Request for show tabel of search results, return first 15 records and available number of pages """
 @app.route('/show_text/')
 def show_text():
     query2 = define_filtres()
@@ -286,7 +286,7 @@ def show_text():
     data = cur.fetchall()
     return jsonify(result=data, nbPage=nbPage)
     
-
+""" Return 15 records of requested page """
 @app.route('/show_page/')
 def show_page():
     numPage = json.loads(request.args.get('numPage')) 
@@ -327,7 +327,7 @@ def get_group():
             liste_villes +=" \""+ v + "\", "
         liste_villes += " \""+ villes[-1] + "\""
         query2 = define_filtres()
-        #print query2
+
         if len(query2) != 0:
             query2 += " AND ville IN ( " + liste_villes + " ) "
         else:

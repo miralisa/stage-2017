@@ -1,5 +1,5 @@
 	queue()
-	.defer(d3.json, "/get_decisions/")
+	.defer(d3.json, "/get_decisions/") //get a tree with children 'villes'
 	.await(makeGraphs);
 
 	function makeGraphs(error,recordsJson) {

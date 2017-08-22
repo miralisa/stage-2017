@@ -20,7 +20,6 @@
 
 			<div class="panel-body" id="panel-show-data">
 
-
 				<table class="table table-condensed text-center ">
 					<thead>
 						<td>RG</td>
@@ -48,8 +47,6 @@
 							<td>{{d[16]}}</td>
 							<td>{{d[9]}}</td>
 							<td> <a href="#" title="{{d[5]}}" onclick="openDescription(this)">Voir</a> </td>
-							<!--<td>{{d[5]}}</td> -->
-
 						</tr>
 						{% endfor %}
 					</tbody>
@@ -113,9 +110,9 @@
 					</div>
 					<div id="compareVilles" class="panel-collapse collapse">
 						<div class="panel-body">
-					
+							
 							<button id="createGroupe" type="button" class="btn btn-info">Créér un groupe</button>
-			
+							
 							<div id="groups"></div>
 						</div>
 					</div>
@@ -130,95 +127,7 @@
 			<div id = "slider"></div>
 		</div>
 	</div>
-		<!--
-		<div class="panel-group">  
-			<div class="panel panel-info">
-				<div class="panel-heading">
-					<h3 class="panel-title">
-						<a data-toggle="collapse" id="showFiltres" href="#filtresFullText">Recherche par mot-clé </a>
-
-					</h3>	
-				</div>
-				<div id="filtresFullText" class="panel-collapse collapse">
-					<div class="panel-body">
-						<div class="motCle">
-							<input type="text" class="form-control input" id="searchByKW">
-						</div>					
-					</div>
-				</div>
-			</div>
-		</div>
-
-		<div class="panel-group">  
-			<div class="panel panel-info">
-				<div class="panel-heading">
-					<h3 class="panel-title">
-						<a data-toggle="collapse" id="showFiltres" href="#filtresDate">Recherche par date</a>
-
-					</h3>
-				</div>
-				<div id="filtresDate" class="panel-collapse collapse">
-					<div class="panel-body">
-						<p>
-							<label for = "date">Date </label>
-							<input type = "text" id = "date" style = "border: 0">
-						</p>
-						<div id = "slider"></div>
-
-				</div>
-			</div>
-		</div>
-	</div>
-
-
-	<div class="panel-group">  
-		<div class="panel panel-info">
-			<div class="panel-heading">
-				<h3 class="panel-title">
-					<a data-toggle="collapse" id="showFiltres" href="#filtresVille">Recherche par ville </a>
-				</h3>
-			</div>
-			<div id="filtresVille" class="panel-collapse collapse">
-				<div class="panel-body">
-					<div class="btn-group selection">
-						<button id="selectAllV" type="button" class="btn btn-sm btn-info">Tout sélectionner</button>
-						<button  id="deselectAllV" type="button" class="btn btn-sm btn-info">Tout désélectionner</button>
-					</div>
-					<div class="villes" id="map">
-						{% for v in villes %}
-						<div class="villes checkbox">
-							<label><input type="checkbox" name="ville" value="{{v[1]}}">{{v[1]}} ({{v[0]}})</label>
-						</div>
-						{% endfor %}
-
-						<div class="panel-group">  
-							<div class="panel panel-default">
-								<div class="panel-heading">
-									<h3 class="panel-title">
-										<a data-toggle="collapse" id="showFiltres" href="#compareVilles">Comparaison des groupes des villes </a>
-									</h3>
-								</div>
-								<div id="compareVilles" class="panel-collapse collapse">
-									<div class="panel-body">
-								
-										<button id="createGroupe" type="button" class="btn btn-info">Créér un groupe</button>
-					
-										<div id="groups"></div>
-									</div>
-								</div>
-							</div>
-						</div>	
-
-						</div>
-
-					</div>
-				</div>
-			</div>
-		</div>
-	-->
 </div>
-
-
 
 
 <script type="text/javascript" src="../static/js/script.js">
@@ -226,31 +135,28 @@
 </script>
 <script type="text/javascript">
 	function openDescription(text){
-			//console.log(text.title);
-			document.getElementById("content").innerHTML = text.title;
-			$("#dialog-description").dialog(
-			{
-				title: "Decision",
-				resizable: false,
-				width: 800,
-				height: 600,
-				//position: { my: 'top', at: 'top', of: this },
-				modal: true,
-				buttons: {
-					"Fermer":{ 
-						text: "Fermer",
-						class: "btn btn-info",
-						click: function() {
-							$( this ).dialog( "close" );
-						}
+		document.getElementById("content").innerHTML = text.title;
+		$("#dialog-description").dialog(
+		{
+			title: "Decision",
+			resizable: false,
+			width: 800,
+			height: 600,
+			modal: true,
+			buttons: {
+				"Fermer":{ 
+					text: "Fermer",
+					class: "btn btn-info",
+					click: function() {
+						$( this ).dialog( "close" );
 					}
 				}
+			}
 
-			}).dialog("open");
+		}).dialog("open");
 
-		};
-		
+	};
+	
+</script>
 
-	</script>
-
-	{% endblock %}
+{% endblock %}
