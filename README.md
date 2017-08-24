@@ -5,7 +5,7 @@
 * Python 2.7.x
 * Python libraries: Flask, elasticsearch, Flask-mysql
 
-### Install Python libraries using pip:
+### Install Python libraries using pip
 
 	pip install flask
 	pip install flask-mysql

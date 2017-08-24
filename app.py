@@ -195,7 +195,6 @@ def define_filtres():
                 query2 += "ville IN ( " + liste_villes + " ) AND " 
         
         if f == 'date':
-            print date
             if len(date) == 2:
                 date1 = str(date[0]) + "-01-01"
                 date2 = str(date[1]) + "-01-01"
