@@ -14,6 +14,7 @@
 ### Configure and create a database
 
 Create a database with the name of your choice
+
 Specify a login, a password and a database name in database_identifiers.json
 
 ### Connect to your database
@@ -30,7 +31,7 @@ To insert data, use the commande below:
 
 ### Install and configure elasticsearch
 	
-To install elaasricserach follow step 1, 2 of this [tutorial](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-elasticsearch-on-ubuntu-14-04)
+To install elasticsearch follow step 1, 2 of this [tutorial](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-elasticsearch-on-ubuntu-14-04)
 		
 	
 To create elasticsearch index and put data to ES server, do:
